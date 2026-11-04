@@ -14,6 +14,13 @@ VideoQ本体とは独立したリポジトリとして、Moodle側の実装・�
 Moodle 5.1.8+ / Boostテーマで検証しています。LTI認証取得済みではありません。
 詳しくは [日本語の導入ガイド](docs/setup.ja.md) / [English setup guide](docs/setup.md) を参照してください。
 
+## 対応するVideoQサーバー
+
+`/api/lti/*` と `/api/lms/*`、接続コード発行・解除に対応したVideoQが必要です。
+切り出し時点の対応APIはVideoQの開発ワークツリーにあり、[移行元コミット](docs/extraction.md)だけを
+取得したビルドでは利用できません。対応APIを含むサーバーへ接続してください。
+このリポジトリにVideoQ本体のAPIを複製することはありません。
+
 ## 開発・配布ZIP
 
 Node.jsは `.nvmrc` を参照してください。プラグインのZIP作成と通常テストにはVideoQ本体のチェックアウトは不要です。

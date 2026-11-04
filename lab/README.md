@@ -70,6 +70,11 @@ finished. The original manually bound lesson is separate from the test source.
 
 ## Reproduce
 
+Use a VideoQ checkout that contains the LTI/synchronization APIs and migrations
+listed in [the setup guide](../docs/setup.md). At extraction these API changes
+were still in the source development working tree; the base commit alone is not
+a compatible VideoQ release. The Moodle repository does not duplicate those APIs.
+
 Prerequisites: Docker Compose, `npm ci` in this repository and a separate VideoQ checkout,
 the Node.js version in `.nvmrc`, Playwright Chromium, FFmpeg, a Japanese font (or
 `LTI_LAB_JAPANESE_FONT` pointing to one), Git, and about 3 GB of additional disk space. The
