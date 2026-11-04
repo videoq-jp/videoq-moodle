@@ -1,29 +1,34 @@
 # VideoQ for Moodle
 
-Moodle上で動画を見ながら、講座全体の教材についてVideoQのAIアシスタントに質問するためのプラグインです。
-VideoQ本体とは独立したリポジトリとして、Moodle側の実装・配布・検証を管理します。
+Moodle plugins that let learners watch course videos and ask the VideoQ AI assistant
+questions across the course. This repository independently maintains the Moodle
+implementation, distribution packages, documentation, and integration lab.
 
-## 導入
+## Installation
 
-1. このリポジトリのCI成果物、または下記のビルドで作成した `local_videoq.zip` と
-   `ltisource_videoq.zip` を、Moodleのプラグインインストール画面から順に導入します。
-2. 学校のVideoQアカウントで **設定 → Moodleと連携** を開き、MoodleのURLを入力して接続コードを発行します。
-3. Moodleの **サイト管理 → プラグイン → ローカルプラグイン → VideoQと接続** にコードを貼り付けます。
-4. 動画を「ファイル」教材として登録し、教材の **VideoQの質問機能** を有効にします。
+1. Download `local_videoq.zip` and `ltisource_videoq.zip` from the CI artifacts,
+   or build them using the commands below. Install them in that order through
+   Moodle's plugin installer.
+2. Sign in to the school's VideoQ account. Open **Settings → Connect Moodle**,
+   enter the Moodle URL, and generate a connection code.
+3. In Moodle, open **Site administration → Plugins → Local plugins → Connect to
+   VideoQ** and paste the code.
+4. Add a video as a **File** activity and enable **VideoQ questions** in its settings.
 
-Moodle 5.1.8+ / Boostテーマで検証しています。LTI認証取得済みではありません。
-詳しくは [日本語の導入ガイド](docs/setup.ja.md) / [English setup guide](docs/setup.md) を参照してください。
+Tested with Moodle 5.1.8+ and the Boost theme. This integration is not LTI certified.
+See the [setup guide](docs/setup.md) for detailed instructions.
 
-## 対応するVideoQサーバー
+## Compatible VideoQ server
 
-`/api/lti/*` と `/api/lms/*`、接続コード発行・解除に対応したVideoQが必要です。
-切り出し時点の対応APIはVideoQの開発ワークツリーにあり、[移行元コミット](docs/extraction.md)だけを
-取得したビルドでは利用できません。対応APIを含むサーバーへ接続してください。
-このリポジトリにVideoQ本体のAPIを複製することはありません。
+The server must provide `/api/lti/*`, `/api/lms/*`, connection-code generation,
+and connection revocation. At extraction, the corresponding APIs were in the
+VideoQ development working tree. A build of the [source base commit](docs/extraction.md)
+alone does not provide them. Connect to a deployment that includes those APIs.
 
-## 開発・配布ZIP
+## Development and plugin packages
 
-Node.jsは `.nvmrc` を参照してください。プラグインのZIP作成と通常テストにはVideoQ本体のチェックアウトは不要です。
+Use the Node.js version specified in `.nvmrc`. Building plugin ZIPs and running
+the standard tests do not require a VideoQ application checkout.
 
 ```bash
 npm ci
@@ -32,36 +37,41 @@ npm test
 npm run package:plugins
 ```
 
-`dist/local_videoq.zip` と `dist/ltisource_videoq.zip` を生成します。
-両方のZIPは、Moodleが求める `videoq/` ディレクトリから始まります。
-CIでも同じチェックとPHP 8.3の構文確認を行い、ZIPを成果物として保存します。
+This generates `dist/local_videoq.zip` and `dist/ltisource_videoq.zip`. Both archives
+start with the `videoq/` directory required by Moodle. CI runs the same checks,
+checks PHP 8.3 syntax, and uploads the ZIPs as build artifacts.
 
-## リポジトリの役割分担
+## Repository responsibilities
 
-| このリポジトリ | VideoQ本体 |
+| This repository | VideoQ application |
 |---|---|
-| `plugins/local/videoq`：同期、動画・チャット画面、接続設定 | LTI認証・セッション、接続登録・解除API |
-| `plugins/ltisource/videoq`：LTI起動時の閲覧権限証明 | 動画管理、文字起こし、検索、AI回答 |
-| `scripts/`：配布ZIP作成・チェック | 学校アカウント・利用枠・ストレージ・ワーカー |
-| `lab/`：Moodleとの結合検証環境 | API・データベースのマイグレーション |
+| `plugins/local/videoq`: synchronization, video/chat interface, connection setup | LTI authentication, sessions, connection registration and revocation APIs |
+| `plugins/ltisource/videoq`: access proofs supplied at LTI launch | Video management, transcription, retrieval, AI answers |
+| `scripts/`: package generation and source checks | School accounts, quotas, storage, workers |
+| `lab/`: Moodle integration environment and acceptance checks | API and database migrations |
 
-VideoQ本体のソースを実行時に取り込むことはありません。HTTPSのLTI・同期APIを通じて接続します。
-接続コードの発行と解除画面は、アカウントを管理するVideoQ本体にあります。
+The plugins connect through HTTPS LTI and synchronization APIs. Connection-code
+issuance and disconnection controls belong to VideoQ, which manages the account.
+The plugins do not import VideoQ application source at runtime.
 
-## 結合検証
+## Integration testing
 
-[検証環境の手順](lab/README.md)を参照してください。結合検証のみ、別途
-[VideoQ本体](https://github.com/yukiharada1228/videoq)のチェックアウトとビルドが必要です。
+Follow the [lab instructions](lab/README.md). Integration tests additionally
+require a built checkout of the [VideoQ application](https://github.com/yukiharada1228/videoq).
 
-`lab/compose.env.example` を参考に `VIDEOQ_ROOT` に本体、`MOODLE_INTEGRATION_ROOT` にこのリポジトリの
-絶対パスを指定します。Composeはこのリポジトリからプラグインを、本体からAPIとワーカーをマウントします。
-検証環境には公開のテスト用認証情報が含まれます。本番環境では使用しないでください。
-実APIキー、教材、検証結果、バックアップはこのリポジトリに含めません。
+Use `lab/compose.env.example` as a template. Set `VIDEOQ_ROOT` to the application
+checkout and `MOODLE_INTEGRATION_ROOT` to this checkout, using absolute paths.
+Compose mounts the plugins from this repository and the API and worker from VideoQ.
 
-## ライセンスと移行元
+The isolated lab contains public fixture credentials; never use them in production.
+Real API keys, uploaded media, acceptance artifacts, and backups stay outside this
+repository.
 
-Moodleプラグインは既存の **GPL-3.0-or-later** を維持します。各プラグインの `LICENSE` を参照してください。
-検証スクリプトとドキュメントは、移行元の [PolyForm Noncommercial 1.0.0](LICENSE) を維持します。
-VideoQ本体のライセンスを変更するものではありません。
+## Licensing and provenance
 
-[移行記録](docs/extraction.md)に元のリポジトリと切り出し範囲を記録しています。
+The Moodle plugins retain their existing **GPL-3.0-or-later** license; see each
+plugin's `LICENSE` file. Lab scripts and documentation retain the source project's
+[PolyForm Noncommercial 1.0.0 license](LICENSE). The VideoQ application license is
+unchanged.
+
+The [extraction record](docs/extraction.md) documents the source and repository boundary.

@@ -162,7 +162,7 @@ production needs a normally trusted HTTPS certificate.
 The companion screen places a standard Moodle video File activity next to the
 VideoQ question frame. It uses the `local_videoq` plugin under
 `plugins/local/videoq`; the ordinary course link is named
-「動画を見ながら質問する」. The standalone question activities remain available.
+“Watch videos and ask questions”. The standalone question activities remain available.
 The video is an original 24-second silent lesson. The AI provider gives a fixed
 demonstration answer, so use it to try the interface and launch flow, not to
 evaluate answer quality. With the optional `videoId` binding, playback position
@@ -272,8 +272,9 @@ file and API memory. The Moodle container mounts only the lesson video from the
 lab data directory, so it does not receive this key file.
 
 After switching, refresh the companion page to clear the previous fixed-answer
-conversation. Ask, for example, 「LMSは何を管理しますか？」 or
-「VideoQでは何ができますか？」. Answers use the actual model and retrieved slide
+conversation. The following examples are English translations of the Japanese
+prompts used in the recorded tests. Ask, for example, “What does the LMS manage?” or
+“What can VideoQ do?”. Answers use the actual model and retrieved slide
 content. With the companion bridge connected, playback context is attached automatically and source-click
 seeking is available, without extra position controls or question suggestions.
 
@@ -315,7 +316,7 @@ The default check intercepts only the question response and consumes no paid
 answers. It verifies origin/window/channel checks, invalid video/time rejection,
 automatic playback context, citation filtering and seeking with playback, stale position updates and mobile player visibility. Both decimal
 dot and SRT decimal comma timestamps are supported. The live check was verified
-on 2026-11-03: at 10 seconds, 「今の場面について教えてください。」 returned a
+on 2026-11-03: at 10 seconds, “Tell me about the current scene.” returned a
 VideoQ explanation, and clicking its cited 8-second source sought the Moodle
 player to 8 seconds while preserving its paused state.
 
@@ -414,7 +415,7 @@ cross the frame boundary.
 
 The current real-provider demo uses one school installation and one VideoQ course
 for the chapter videos and uploaded practice video. The course page contains one
-`AIアシスタント（講座全体に質問）` entry in General; chapter sections contain
+**AI assistant (questions about the whole course)** entry in General; chapter sections contain
 ordinary Moodle video File activities. The common URL is
 `/local/videoq/view.php?course=2`, independent of any particular video. It selects
 a permitted, processed source at launch, and shows an empty state if none exists.
