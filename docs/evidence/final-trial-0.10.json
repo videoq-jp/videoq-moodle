@@ -1,0 +1,105 @@
+{
+    "recordedAt": "2026-11-04T14:51:40+00:00",
+    "candidate": "v0.10.0",
+    "scope": "Current Moodle 5.1.8+ / Boost / native Chrome trial",
+    "reports": {
+        "php-final-trial": {
+            "verifiedAt": "2026-11-04T14:51:01+00:00",
+            "result": {
+                "passed": true,
+                "originalVideoAndPhysicalMediaPreserved": true,
+                "activeKeylessConnectionPreserved": true,
+                "temporaryLearners": 0,
+                "temporaryCourseRegistries": 0,
+                "pendingRestoreTasks": 0,
+                "installedLocalPluginVersion": "2026110407",
+                "activeBindings": [
+                    {
+                        "cmid": 82,
+                        "status": "completed"
+                    }
+                ]
+            }
+        },
+        "php-chat-browser": {
+            "verifiedAt": "2026-11-04T14:49:56+00:00",
+            "result": {
+                "passed": true,
+                "realProvider": false,
+                "streaming": true,
+                "nativeMoodleChat": true,
+                "feedbackGoodBadReset": true,
+                "timestampSeek": true,
+                "responsiveWidths": [
+                    390,
+                    768,
+                    1280,
+                    1440
+                ],
+                "sourceVideoIds": [
+                    27
+                ]
+            }
+        },
+        "php-materials-service-contract": {
+            "verifiedAt": "2026-11-04T14:50:00+00:00",
+            "result": {
+                "passed": true,
+                "checks": [
+                    "Legacy code cannot replace the configured materials connection",
+                    "Missing launch plugin is rejected before creating or changing a connection",
+                    "Cancel cannot remove a configured connection",
+                    "Cancel cannot remove a tool with course activities",
+                    "An unused failed materials setup can be cancelled",
+                    "Tool signing key obtains scoped service access without sync API key",
+                    "Rejects replay",
+                    "Rejects wrong audience",
+                    "Rejects ungranted scope",
+                    "Manifest includes opted-in real Moodle File",
+                    "Status acknowledgements cannot modify another tool registration",
+                    "Export cannot read or change another tool registration",
+                    "Migrated service ignores legacy manual associations",
+                    "Learner access resolves stable material identity",
+                    "Access proof rejects tampered",
+                    "Access proof rejects wrong learner",
+                    "Expired access proof is rejected",
+                    "An already issued proof cannot bypass account suspension",
+                    "An already issued proof respects updated conditional availability",
+                    "Unenrolled account denied",
+                    "Unapproved upload origin rejected",
+                    "Export queues one durable idempotent ad-hoc job",
+                    "Hidden source cannot be used by learner",
+                    "Changed visibility cancels queued transfer before network access",
+                    "Terminal export clears signed destination",
+                    "Restored configuration and cache: servicemode",
+                    "Restored configuration and cache: typeid",
+                    "Restored configuration and cache: apiurl",
+                    "Restored configuration and cache: serviceuploadtargets"
+                ],
+                "transactionRolledBack": true
+            }
+        },
+        "php-course-restore": {
+            "verifiedAt": "2026-11-04T14:50:02+00:00",
+            "result": {
+                "passed": true,
+                "actualMoodleBackupRestore": true,
+                "disabledSourceStaysOff": true,
+                "entryRewrittenToDestination": true,
+                "sourcePreserved": true,
+                "existingVideosPreserved": true
+            }
+        }
+    },
+    "additionalCommandsPassed": [
+        "php tests/packages.php",
+        "php tests/tool-keys.php",
+        "php tests/lab.php",
+        "php tests/dependencies.php",
+        "php tests/release.php",
+        "php tests/live-lock.php",
+        "PHP syntax: 87 files",
+        "Web-user PHP lab/check-materials-tls.php",
+        "PHP lab/check-privacy.php"
+    ]
+}

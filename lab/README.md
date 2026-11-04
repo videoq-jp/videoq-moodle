@@ -82,7 +82,9 @@ docker exec -u www-data videoq-lti-lab-moodle-1 php /lab/check-materials-tls.php
 ## Automatic synchronization acceptance test
 
 The migrated trial uses course 5, source 82 and installation `moodle-sync-lab`.
-Mutation commands reject other base URLs; do not run them against production.\nLive checks share mutable fixtures and must run sequentially; a PHP file lock\nrejects overlapping runs instead of producing misleading preservation failures.
+Mutation commands reject other base URLs; do not run them against production.
+Live checks share mutable fixtures and must run sequentially; a PHP file lock
+rejects overlapping runs instead of producing misleading preservation failures.
 Reports go to `$LTI_LAB_DIR/acceptance`, defaulting to
 `$HOME/.local/share/videoq-moodle-lab/acceptance`. They exclude private tokens and
 keys. Consistent database/media snapshots remain private files outside this repo.
@@ -93,7 +95,9 @@ php lab/verify-chat.php --live             # one real provider question
 php lab/check-materials.php                # disposable PHP auth/export contracts
 php lab/verify-connection.php              # disposable pairing/disconnect UI
 php lab/verify-background.php /private/spoken-lesson.mp4
-php lab/verify-load.php --count 2 --live    # two real learners/concurrent questions
+php lab/verify-course-restore.php          # actual disabled-source .mbz restore
+php lab/verify-live-restore.php            # independent copy/restore with real indexing
+php lab/verify-load.php --count 100 --live # real learners/questions and video delivery
 php lab/verify-backup.php
 php lab/verify-media-backup.php
 # Deliberate bounded outage; run only after other integration checks finish.
@@ -101,10 +105,15 @@ php lab/verify-readiness.php
 ```
 
 Real AI commands may incur provider charges. `verify-load.php` supports 1–200
-learners and measures question concurrency, not simultaneous video decoding.
+learners. It measures concurrent real questions and authenticated Moodle video
+range delivery while one native browser decodes/plays the course video. It does
+not emulate 100 physical devices or certify a production deployment. Only this
+run's tagged test questions are removed afterward; existing course logs remain,
+and real inference usage stays metered.
 The background check preserves existing videos, creates one uniquely tagged File,
 waits for normal cron/export/processing, verifies two-video citation switching
-without resetting the conversation, replaces its own File and verifies a new\nindexed video in the same course, deletes only its own source, and waits for
+without resetting the conversation, replaces its own File and verifies a new
+indexed video in the same course, deletes only its own source, and waits for
 physical S3 cleanup. PHP signs its own lab S3 requests; it does not execute code
 inside the external processing worker or require that worker's SDK.
 

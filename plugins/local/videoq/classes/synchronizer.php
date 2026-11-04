@@ -60,6 +60,10 @@ final class synchronizer {
     public static function enable(int $cmid): void {
         self::configure($cmid, false);
     }
+    /** Internal restore task preserves a teacher's explicit disable and any completed initialization. */
+    public static function restore_source(int $cmid): void {
+        self::configure($cmid, true);
+    }
     public static function disable(int $cmid): void {
         global $DB;
         require_capability('moodle/course:manageactivities', \context_module::instance($cmid));
@@ -144,6 +148,8 @@ final class synchronizer {
                 $DB->set_field('local_videoq_sync', 'enabled', 0, ['id' => $id]);
                 $row->enabled = 0;
             }
+            // Only the post-restore task may activate an unfinished course restore.
+            if ($row->enabled && $row->status === 'restoring') return null;
             if ($row->enabled && (!$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress)) {
                 // Section cleanup or deletion of an internal activity must not
                 // delete the source's processed media, transcript or embeddings.

@@ -40,7 +40,11 @@ final class Browser {
     }
     public function go(string $url): void { $this->send('POST','/url',['url'=>$url]); }
     public function refresh(): void { $this->send('POST','/refresh',[]); }
+    /** Session cookies stay in process memory for authenticated Moodle media checks. */
+    public function cookies(): array { return $this->send('GET', '/cookie'); }
+    public function clearCookies(): void { $this->send('DELETE', '/cookie'); }
     public function js(string $script,array $args=[]): mixed { return $this->send('POST','/execute/sync',['script'=>$script,'args'=>$args]); }
+    public function jsAsync(string $script,array $args=[]): mixed { return $this->send('POST','/execute/async',['script'=>$script,'args'=>$args]); }
     public function cdp(string $cmd,array $params=[]): mixed { return $this->send('POST','/goog/cdp/execute',['cmd'=>$cmd,'params'=>$params ?: new \stdClass()]); }
     public function wait(string $script,int $seconds=30,array $args=[]): mixed { return wait(fn()=>$this->js($script,$args),$seconds); }
     public function element(string $selector): array { return wait(function()use($selector){$all=$this->send('POST','/elements',['using'=>'css selector','value'=>$selector]);return $all[0]??false;},30); }

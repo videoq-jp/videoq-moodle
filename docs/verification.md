@@ -23,7 +23,9 @@ its source nor starts its API, frontend, scheduler or processing workers.
 | `php lab/check-materials.php` | Disposable PHP service-auth/export/access contracts including replay, scope/audience, hidden source and unenrolled-account rejection; transactional/cache restoration |
 | `php lab/verify-connection.php` | Code UI, issuer binding, exchange retry, cancellation/disconnect/revocation, preserved connections/data |
 | `php lab/verify-background.php FILE` | Normal scheduler/cron/worker export, transcription/indexing, same-course membership, two-video citation/selector switching without losing chat, replacement processing in the same course, source deletion and physical media cleanup |
-| `php lab/verify-load.php --count 2 --live` | Real Moodle learner logins and concurrent real questions; no extra VideoQ accounts, test learners removed |
+| `php lab/verify-course-restore.php` | Actual Moodle `.mbz` backup/restore, disabled-source opt-in and destination links, preserved source and existing videos |
+| `php lab/verify-live-restore.php` | Actual same-site course copy and fresh archive extraction/restore; independent indexing, real scoped AI answers, private history separation, current-site connection, isolated deletion and physical media cleanup |
+| `php lab/verify-load.php --count 100 --live` | 100 distinct real Moodle/LTI logins, simultaneous real questions and authenticated video ranges, native browser playback observer; test questions/users removed, existing logs preserved |
 | `php lab/verify-backup.php` | Consistent database snapshots restored to scratch DBs, matching counts/foreign keys; scratch DBs removed |
 | `php lab/verify-media-backup.php` | Moodle filedir restore/content hashes and disposable S3 upload/download restore; actual Moodle/VideoQ media bytes match |
 | `php lab/verify-readiness.php` | Bounded DB outage/readiness recovery without restarting the API |
@@ -32,8 +34,12 @@ its source nor starts its API, frontend, scheduler or processing workers.
 These integration checks require the isolated trial and an independently deployed
 compatible VideoQ service. The offline PHP checks need neither that service nor
 native browser binaries. Real inference requires valid provider settings on
-VideoQ and may incur charges. A two-learner smoke does not establish capacity
-for 100 simultaneous learners or video decoders; test the target deployment.
+VideoQ and may incur charges. The [100-learner trial](evidence/capacity-100.json)
+completed all 100 questions (median 17.8 s, p95 23.4 s; first-text p95 22.0 s).
+All 100 authenticated 4 MiB video ranges succeeded, paced at a receive limit of
+256 KiB/s per learner. The playback observer had no waiting events, errors or
+dropped frames. This is one burst on the current deployment, not a full-duration
+video test on 100 physical devices or a production capacity/latency guarantee.
 
 The previous JavaScript harness was replaced in v0.8.0, then the intermediate
 Python harness was replaced with PHP. Earlier source remains in Git history;
@@ -43,7 +49,7 @@ reports are stored outside the checkout. No old result is relabeled as a PHP run
 CI fetches the exact revision using Git, runs offline PHP contracts and PHP syntax,
 downloads a paired native Chrome/ChromeDriver through PHP, compiles browser assets,
 validates Compose and builds installers. The trusted tag job rebuilds from verified
-source and publishes ZIPs/checksums using GitHub CLI. Live integration tests are
+source and publishes ZIPs/checksums using the PHP GitHub API publisher. Live integration tests are
 executed against the trial and are not misrepresented as hosted CI checks.
 
 ## Release recovery

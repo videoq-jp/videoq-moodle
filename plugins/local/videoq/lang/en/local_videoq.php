@@ -28,6 +28,7 @@ $string['openlesson'] = 'Open video and questions';
 $string['refreshstatus'] = 'Refresh status';
 $string['state_off'] = 'Not enabled';
 $string['state_queued'] = 'Waiting for synchronization';
+$string['state_restoring'] = 'Preparing restored material';
 $string['state_disabled'] = 'Disabled';
 $string['state_uploading'] = 'Transferring video';
 $string['state_pending'] = 'Waiting for processing';

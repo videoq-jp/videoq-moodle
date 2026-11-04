@@ -1,0 +1,39 @@
+{
+    "verifiedAt": "2026-11-04T14:48:58+00:00",
+    "command": "php lab/verify-live-restore.php",
+    "environment": {
+        "moodle": "5.1.8+ (Build 20261030)",
+        "theme": "Boost",
+        "browser": "Chrome for Testing 157.0.8103.38",
+        "localPlugin": "0.10.0",
+        "launchPlugin": "0.4.1"
+    },
+    "normalSchedulersAndWorker": true,
+    "portableMetadata": [
+        "sourceMoodleActivityId",
+        "role",
+        "enabled"
+    ],
+    "copiesRemoteVideoIdsOrCredentials": false,
+    "results": {
+        "passed": true,
+        "sameSiteCopy": true,
+        "archiveRestore": true,
+        "newCourseAndVideoIdentities": true,
+        "destinationUsesCurrentConnection": true,
+        "disabledSourceStaysOff": true,
+        "unrelatedUrlsPreserved": true,
+        "courseLinksRewritten": true,
+        "privateHistoryNotCopied": true,
+        "sourceHistoryPreserved": true,
+        "destinationDeletionIsolated": true,
+        "retiredMediaDeleted": true,
+        "realAnswersScopedToEachDestination": true,
+        "nativeIncrementalAnswers": true,
+        "existingVideosPreserved": true
+    },
+    "limitations": [
+        "Same-site full-course copy and archive restore",
+        "Cross-site restoration, partial backups and import into an existing course are not established by this test"
+    ]
+}

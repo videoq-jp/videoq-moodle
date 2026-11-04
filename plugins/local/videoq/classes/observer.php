@@ -15,7 +15,8 @@ final class observer {
         foreach ($rows as $row) {
             // Bump even when content is unchanged: permissions and availability
             // changes must revoke already-open question sessions as well.
-            $DB->execute('UPDATE {local_videoq_sync} SET generation = generation + 1, status = ?, timemodified = ? WHERE id = ?',
+            $DB->execute("UPDATE {local_videoq_sync} SET generation = generation + 1,
+                status = CASE WHEN status = 'restoring' THEN status ELSE ? END, timemodified = ? WHERE id = ?",
                 ['queued', time(), $row->id]);
         }
     }

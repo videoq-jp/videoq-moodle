@@ -1,0 +1,45 @@
+{
+    "verifiedAt": "2026-11-04T14:29:47+00:00",
+    "command": "php lab/verify-load.php --count 100 --live",
+    "environment": {
+        "moodle": "5.1.8+ (Build 20261030)",
+        "theme": "Boost",
+        "browser": "Chrome for Testing 157.0.8103.38",
+        "inferenceOrigin": "https://openrouter.ai",
+        "scope": "Existing isolated Moodle and independently deployed VideoQ trial"
+    },
+    "passed": true,
+    "distinctMoodleLearners": 100,
+    "concurrentQuestions": 100,
+    "successfulQuestions": 100,
+    "questionCompletionP50Milliseconds": 17808,
+    "questionCompletionP95Milliseconds": 23413,
+    "firstTextP50Milliseconds": 16341,
+    "firstTextP95Milliseconds": 21956,
+    "firstByteP95Milliseconds": 17633,
+    "concurrentAuthenticatedVideoRanges": 100,
+    "successfulVideoRanges": 100,
+    "videoBytesPerLearner": 4194304,
+    "videoReceiveLimitBytesPerSecond": 262144,
+    "videoRangeP95Milliseconds": 15830,
+    "nativeBrowserPlayback": {
+        "droppedFrames": 0,
+        "errors": 0,
+        "totalFrames": 719,
+        "waitingEvents": 0,
+        "advancedSeconds": 26.365,
+        "observedSeconds": 25.929,
+        "ok": true
+    },
+    "additionalVideoqAccounts": 0,
+    "temporaryMoodleLearnersRemoved": true,
+    "testQuestionsRemoved": true,
+    "existingCourseQuestionsPreserved": true,
+    "limitations": [
+        "Single burst in one existing course and provider configuration",
+        "Video tests transfer 4 MiB ranges, not full-length videos",
+        "One real browser decoder observer; not 100 physical devices",
+        "Authentication occurs before simultaneous question/media traffic",
+        "This trial is not a production hardware or response-time guarantee"
+    ]
+}

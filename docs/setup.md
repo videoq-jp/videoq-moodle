@@ -113,9 +113,17 @@ are protected. If a lost exchange response created a connection on VideoQ, remov
 that unused remote connection in VideoQ as well; cancelling local setup does not
 claim to revoke the remote registration.
 
-Moodle course copy/import and `.mbz` backup/restore do not currently remap VideoQ's
-site-level material bindings or generated links. Do not assume that a copied
-course has an independent, correctly connected assistant. Use a new course and
-normal File uploads/enabling until a dedicated restore implementation is added.
-Database/object-store recovery tests verify disaster recovery of the whole lab,
-not portability of an individual Moodle course.
+For materials-service connections, local_videoq 0.10.0 course backups retain each File's VideoQ opt-in and
+rebuild managed activities and links using the destination course and site's
+connection. Upgrade the destination local plugin to 0.10.0 or later, install the
+launch companion, and configure the destination connection
+before restoring; normal Moodle cron initializes and synchronizes restored
+materials asynchronously. A restored course has its own VideoQ course/videos;
+private questions, answers and connection credentials are not copied by this
+plugin. The restoring user must be allowed to manage the source activities.
+
+Backups made before 0.10.0 have no portable opt-in markers: remove their obsolete
+generated VideoQ activities/links, then enable **VideoQ questions** on the restored
+File activities manually. Whole-database/object-store
+recovery and individual `.mbz` restore are separate capabilities. See the
+[verification scope](verification.md) before relying on a particular workflow.

@@ -28,6 +28,7 @@ $string['openlesson'] = '動画と質問画面を開く';
 $string['refreshstatus'] = '処理状況を更新';
 $string['state_off'] = '未設定';
 $string['state_queued'] = '同期待ち';
+$string['state_restoring'] = '復元した教材を準備中';
 $string['state_disabled'] = '無効';
 $string['state_uploading'] = '動画を転送しています';
 $string['state_pending'] = '動画の処理待ち';
