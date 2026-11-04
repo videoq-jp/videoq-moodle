@@ -1,0 +1,18 @@
+{
+    "passed": true,
+    "moodleVersion": "5.1.8+ (Build: 20261030)",
+    "standardServiceTokenIssued": true,
+    "wrongSignatureRejected": true,
+    "unregisteredMaterialScopeRejected": true,
+    "existingVideoqApiUsed": false,
+    "personalServiceDataRequested": false,
+    "ephemeralToolOnly": true,
+    "extensionHooks": [
+        "get_launch_parameters",
+        "get_jwt_claim_mappings",
+        "get_resources",
+        "get_scopes",
+        "get_permitted_scopes"
+    ],
+    "temporaryToolRemoved": true
+}

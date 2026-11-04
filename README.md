@@ -25,6 +25,14 @@ and connection revocation. At extraction, the corresponding APIs were in the
 VideoQ development working tree. A build of the [source base commit](docs/extraction.md)
 alone does not provide them. Connect to a deployment that includes those APIs.
 
+## Proposed LTI-only setup
+
+The [LTI materials-service design](docs/design/lti-only-integration.md) evaluates
+using the same LTI registration to let VideoQ pull Moodle materials, with no
+separate synchronization API key. It documents the required minimal VideoQ
+changes and the Moodle-side service extension. This is a proposed migration;
+the installation instructions above still describe the current implementation.
+
 ## Development and plugin packages
 
 Use the Node.js version specified in `.nvmrc`. Building plugin ZIPs and running
