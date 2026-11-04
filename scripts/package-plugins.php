@@ -47,4 +47,11 @@ foreach ($plugins as $component => $relative) {
         echo $name . "\n";
     } finally { if (is_file($temporary)) unlink($temporary); }
 }
-file_put_contents($destination . '/SHA256SUMS', implode("\n", $checksums) . "\n");
+$temporary = tempnam($destination, '.videoq-checksums-');
+try {
+    $contents = implode("\n", $checksums) . "\n";
+    if (file_put_contents($temporary, $contents) !== strlen($contents) || !rename($temporary, $destination . '/SHA256SUMS')) {
+        throw new RuntimeException('Cannot publish installer checksums');
+    }
+    chmod($destination . '/SHA256SUMS', 0644);
+} finally { if (is_file($temporary)) unlink($temporary); }
