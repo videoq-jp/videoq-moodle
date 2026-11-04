@@ -29,5 +29,5 @@ private acceptance artifacts were imported. Public lab fixtures remain confined
 to the loopback-only Compose environment. Existing licensing is preserved.
 
 The original extracted JavaScript packager and development harness were replaced
-by PHP packaging and Python/native-browser verification. Their original source
+by PHP packaging and, subsequently, PHP/native-browser verification. Their original source
 is preserved in Git history, not required by the current repository.

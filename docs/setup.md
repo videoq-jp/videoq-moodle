@@ -89,7 +89,7 @@ they do not belong in Moodle. For a failed LTI login, check public HTTPS URLs,
 client/deployment matching, clock synchronization and key discovery. Clear
 Moodle caches after changing tool/plugin configuration through supported APIs.
 
-The [lab](../lab/README.md) provides reproducible PHP/Python/native-browser checks.
+The [lab](../lab/README.md) provides reproducible PHP/native-browser checks.
 [Coverage notes](verification.md) distinguish current checks from historical
 acceptance evidence. A local passing run does not certify LTI interoperability or
 prove capacity for 100 concurrent learners; test the actual target deployment.

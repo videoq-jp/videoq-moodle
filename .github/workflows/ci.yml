@@ -11,7 +11,7 @@ env:
   PHP_IMAGE: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
 jobs:
   verify:
-    name: PHP packages and native browser checks
+    name: PHP-only tooling and native browser checks
     runs-on: ubuntu-latest
     steps:
       # Public checkout through git, so CI itself needs no JavaScript actions.
@@ -27,14 +27,14 @@ jobs:
         run: docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/tool-keys.php
       - name: Check PHP syntax
         run: docker run --rm --network none --entrypoint sh -v "$PWD:/src:ro" -w /src "$PHP_IMAGE" -c 'find plugins scripts tests lab -name "*.php" -print0 | xargs -0 -n1 php -l'
-      - name: Install Python verification dependencies
+      - name: PHP unit and dependency contracts
         run: |
-          python3 -m venv /tmp/videoq-moodle-venv
-          /tmp/videoq-moodle-venv/bin/pip install -r lab/requirements.txt
-      - name: Unit and dependency contracts
-        run: /tmp/videoq-moodle-venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
-      - name: Compile browser assets using native Chrome
-        run: /tmp/videoq-moodle-venv/bin/python lab/check_browser.py
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/lab.php
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/dependencies.php
+      - name: Download paired native browser executables
+        run: php scripts/native-browser.php /tmp/videoq-native-browser >> "$GITHUB_ENV"
+      - name: Compile browser assets through PHP WebDriver
+        run: php lab/check-browser.php
       - name: Check Moodle Compose configuration
         run: docker compose --env-file lab/compose.env.example -f lab/compose.yaml --profile mock config --quiet
       - name: Build installers
@@ -66,7 +66,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           cat > /tmp/release-notes.txt <<'NOTES'
-          Moodle plugins, PHP packaging and Python/native-browser verification. A compatible separately deployed VideoQ service is required. This is a development preview tested on Moodle 5.1.8+ with Boost; see the setup guide before production use.
+          Moodle plugins with PHP-only packaging, verification, and native-browser automation. A compatible separately deployed VideoQ service is required. This is a development preview tested on Moodle 5.1.8+ with Boost; see the setup guide before production use.
 
           Install local_videoq.zip first, then ltisource_videoq.zip. Verify downloads with SHA256SUMS.
           NOTES

@@ -34,7 +34,7 @@ the deployment overlap. The key ring accepts at most three retired public keys.
 
 ## Connect or migrate
 
-1. Install/update `local_videoq` 0.8.0 and `ltisource_videoq`. Finish Moodle's
+1. Install/update `local_videoq` 0.9.0 and `ltisource_videoq`. Finish Moodle's
    plugin upgrade and keep normal Moodle cron/ad-hoc task execution enabled.
 2. In the owning VideoQ account, open Settings → Connect Moodle. Enter the exact
    HTTPS Moodle base URL and generate a connection code. A materials-capable
@@ -95,12 +95,12 @@ with real OpenRouter transcription, embeddings and an answer, and
 Good/Bad/reset and timestamp seeking are covered by
 [the real browser/provider check](evidence/materials-chat.json).
 
-Current verification commands use Python and native Chrome:
+Current verification commands use PHP and native Chrome:
 
 ```sh
-.venv/bin/python lab/verify_chat.py
-.venv/bin/python lab/verify_chat.py --live
-.venv/bin/python lab/verify_background.py --media /private/original-spoken-lesson.mp4
+php lab/verify-chat.php
+php lab/verify-chat.php --live
+php lab/verify-background.php /private/original-spoken-lesson.mp4
 ```
 
 See [coverage](verification.md) for the distinction between historical evidence

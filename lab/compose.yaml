@@ -57,10 +57,11 @@ services:
       start_period: 60s
   ai:
     profiles: [mock]
-    image: python:3.12-slim
-    command: [python, /lab/mock_ai.py]
+    image: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
+    entrypoint: [php, -S, '0.0.0.0:8080', /lab/mock-ai.php]
+    command: []
     volumes:
-      - ./mock_ai.py:/lab/mock_ai.py:ro
+      - ./mock-ai.php:/lab/mock-ai.php:ro
       - ./lesson-scenes.json:/lab/lesson-scenes.json:ro
 volumes:
   pgdata:

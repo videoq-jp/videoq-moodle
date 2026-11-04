@@ -6,8 +6,8 @@ implementation, distribution packages, documentation, and integration lab.
 
 ## Installation
 
-1. Download [local_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.8.0/local_videoq.zip)
-   and [ltisource_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.8.0/ltisource_videoq.zip)
+1. Download [local_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.9.0/local_videoq.zip)
+   and [ltisource_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.9.0/ltisource_videoq.zip)
    from the development-preview release. Install them in that order through
    Moodle's plugin installer. **No Node.js, npm or JavaScript build is required.**
 2. Sign in to the school's VideoQ account. Open **Settings → Connect Moodle**,
@@ -55,23 +55,21 @@ same PHP-only build and publishes ready-to-install ZIPs on version tags.
 Browser JavaScript in `plugins/` is shipped directly as static assets. It connects
 the native Moodle player/chat to VideoQ and needs no bundler or Node runtime.
 
-## Development and verification
+## PHP-only development and verification
 
-This repository has no Node.js runtime, package manager, build tool or CI action
-requirement. PHP builds the installers; Python runs optional verification;
-Selenium uses native Chrome/ChromeDriver. Browser JavaScript stays in `plugins/`
-and is served directly by Moodle.
+The plugins, installer build, optional mock AI, verification tools and CI use PHP.
+No Node.js, Python or Composer package installation is needed. Browser automation
+uses PHP cURL directly with native Chrome/ChromeDriver; the static browser
+JavaScript is served by Moodle unchanged.
 
 ```sh
-python3 -m venv .venv
-.venv/bin/pip install -r lab/requirements.txt
-.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
-.venv/bin/python lab/check_browser.py
+php tests/packages.php
+php tests/tool-keys.php
+php tests/lab.php
+php tests/dependencies.php
+php scripts/package-plugins.php dist
 ```
 
-The [Moodle lab](lab/README.md) connects to an independently deployed VideoQ
-service. This repository does not build or start that server. Its implementation
-and runtime dependencies belong to the VideoQ project.
-
-See [verification coverage](docs/verification.md) for offline checks, browser
-acceptance, background synchronization and the migration from earlier lab tools.
+See the [lab](lab/README.md) for optional native-browser and live integration
+checks, and [verification coverage](docs/verification.md) for their boundaries.
+VideoQ is a separately deployed service whose runtime remains owned by its project.

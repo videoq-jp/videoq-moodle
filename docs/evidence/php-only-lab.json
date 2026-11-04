@@ -1,0 +1,176 @@
+{
+    "verifiedAt": "2026-11-04T11:18:49+00:00",
+    "scope": "videoq-moodle; independently deployed VideoQ application unchanged",
+    "phpOnlyTooling": true,
+    "additionalLanguageSourceAbsent": true,
+    "phpMockService": true,
+    "offlinePhpContractsPassed": true,
+    "nativeBrowserViaPhpWebDriver": true,
+    "webUserTlsPassed": true,
+    "existingVideoIdsPreserved": [
+        27
+    ],
+    "keylessConnectionActive": true,
+    "temporaryFixturesRemoved": true,
+    "reports": {
+        "php-chat-browser": {
+            "passed": true,
+            "realProvider": false,
+            "streaming": true,
+            "nativeMoodleChat": true,
+            "feedbackGoodBadReset": true,
+            "timestampSeek": true,
+            "responsiveWidths": [
+                390,
+                768,
+                1280,
+                1440
+            ],
+            "sourceVideoIds": [
+                27
+            ]
+        },
+        "php-chat-live": {
+            "passed": true,
+            "realProvider": true,
+            "streaming": true,
+            "nativeMoodleChat": true,
+            "feedbackGoodBadReset": true,
+            "timestampSeek": true,
+            "responsiveWidths": [
+                390,
+                768,
+                1280,
+                1440
+            ],
+            "sourceVideoIds": [
+                27
+            ]
+        },
+        "php-materials-service-contract": {
+            "passed": true,
+            "checks": [
+                "Tool signing key obtains scoped service access without sync API key",
+                "Rejects replay",
+                "Rejects wrong audience",
+                "Rejects ungranted scope",
+                "Manifest includes opted-in real Moodle File",
+                "Learner access resolves stable material identity",
+                "Unenrolled account denied",
+                "Unapproved upload origin rejected",
+                "Export queues one durable idempotent ad-hoc job",
+                "Hidden source cannot be used by learner",
+                "Changed visibility cancels queued transfer before network access",
+                "Terminal export clears signed destination",
+                "Restored configuration and cache: servicemode",
+                "Restored configuration and cache: typeid",
+                "Restored configuration and cache: apiurl",
+                "Restored configuration and cache: serviceuploadtargets"
+            ],
+            "transactionRolledBack": true
+        },
+        "php-materials-background": {
+            "passed": true,
+            "normalMoodleCron": true,
+            "normalVideoqScheduler": true,
+            "normalSqsWorker": true,
+            "sameExistingCourse": true,
+            "sourceDeletionAcknowledged": true,
+            "retiredMediaDeleted": true,
+            "existingVideosPreserved": true
+        },
+        "php-course-switch": {
+            "passed": true,
+            "videoCount": 2,
+            "citationChangesVideoAndPosition": true,
+            "conversationPreserved": true,
+            "toolFrameNotReloaded": true
+        },
+        "php-connection": {
+            "passed": true,
+            "materialsMode": true,
+            "wrongIssuerRejected": true,
+            "lostResponseRecovery": true,
+            "cancelPreservesConnection": true,
+            "disconnectedStatePersists": true,
+            "learningDataPreserved": true,
+            "otherConnectionsPreserved": true
+        },
+        "php-load-2": {
+            "passed": true,
+            "realMoodleLogins": 2,
+            "realAi": true,
+            "questionsStartedConcurrently": true,
+            "simultaneousVideoPlaybackTested": false,
+            "additionalVideoqAccounts": 0,
+            "results": [
+                {
+                    "ok": true,
+                    "httpStatus": 200,
+                    "milliseconds": 5083
+                },
+                {
+                    "ok": true,
+                    "httpStatus": 200,
+                    "milliseconds": 5083
+                }
+            ]
+        },
+        "php-database-backup": {
+            "snapshotsConsistent": true,
+            "privateFiles": true,
+            "results": [
+                {
+                    "database": "videoq",
+                    "bytes": 646361,
+                    "counts": {
+                        "users": 1,
+                        "videos": 1,
+                        "video_courses": 3,
+                        "video_course_members": 1,
+                        "scene_embeddings": 26,
+                        "lms_resources": 17,
+                        "lms_courses": 2,
+                        "chat_logs": 279
+                    },
+                    "isolatedRestore": true
+                },
+                {
+                    "database": "moodle",
+                    "bytes": 2135038,
+                    "counts": {
+                        "mdl_course": 3,
+                        "mdl_course_modules": 22,
+                        "mdl_files": 135,
+                        "mdl_local_videoq_sync": 19
+                    },
+                    "isolatedRestore": true
+                }
+            ],
+            "temporaryDatabasesRemoved": true
+        },
+        "php-media-backup": {
+            "passed": true,
+            "moodleFiledirRestored": true,
+            "verifiedContentFiles": 61,
+            "sourceAndVideoqCopyMatch": true,
+            "sha256": "949f3862236c99647d3dede9f4d5694e93a076e4bc0e714716e9000dcdb26edc",
+            "bytes": 281054258,
+            "disposableS3CopyRemoved": true
+        },
+        "php-readiness": {
+            "before": {
+                "health": 200,
+                "ready": 200
+            },
+            "during": {
+                "health": 200,
+                "ready": 503
+            },
+            "after": {
+                "health": 200,
+                "ready": 200
+            }
+        }
+    }
+}

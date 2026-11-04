@@ -149,8 +149,8 @@ position as part of the question text in its existing guest question logs.
 ## Reproducible verification
 
 See the [Moodle lab](../../../lab/README.md) and
-[verification coverage](../../../docs/verification.md). PHP validates the plugin
-and packages; Python with native Chrome tests streaming, feedback and seeking.
+[verification coverage](../../../docs/verification.md). PHP validates the plugin and packages, and drives native Chrome to test
+streaming, feedback and seeking.
 The default chat test uses a browser-only held response and no paid provider.
 The `--live` test makes one actual model request.
 
