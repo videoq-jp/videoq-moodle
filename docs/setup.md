@@ -17,7 +17,7 @@ connection JSON and operator registration commands:
 
 1. Install **both** `local_videoq` and `ltisource_videoq` in Moodle and finish its
    plugin upgrade. Build the standard installer archives with
-   `node scripts/package-plugins.mjs OUTPUT_DIRECTORY`; install
+   `php scripts/package-plugins.php OUTPUT_DIRECTORY`; install
    `local_videoq.zip` and then `ltisource_videoq.zip` through Moodle's plugin installer.
 2. Sign in to the school's existing VideoQ account. Open **Settings → Connect
    Moodle**, enter the exact HTTPS Moodle base URL (including a subdirectory, if

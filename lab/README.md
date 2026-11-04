@@ -1,5 +1,11 @@
 # Moodle interoperability lab
 
+This directory contains optional Node.js development tools. They are not required
+to install, run or package the Moodle plugins. Install their dependencies with
+`npm ci --prefix lab`; browser tests also need
+`npm --prefix lab exec -- playwright install chromium`. Run the commands below
+from the repository root.
+
 An isolated local Moodle + VideoQ + PostgreSQL/pgvector deployment with HTTPS and
 an OpenAI-compatible deterministic fixture. Only `127.0.0.1:18443` is published.
 The default mode uses lab-only accounts, generated videos and deterministic AI.
@@ -75,8 +81,8 @@ listed in [the setup guide](../docs/setup.md). At extraction these API changes
 were still in the source development working tree; the base commit alone is not
 a compatible VideoQ release. The Moodle repository does not duplicate those APIs.
 
-Prerequisites: Docker Compose, `npm ci` in this repository and a separate VideoQ checkout,
-the Node.js version in `.nvmrc`, Playwright Chromium, FFmpeg, a Japanese font (or
+Prerequisites: Docker Compose, `npm ci --prefix lab` in this repository and a separate VideoQ checkout,
+the Node.js version in `lab/.nvmrc`, Playwright Chromium, FFmpeg, a Japanese font (or
 `LTI_LAB_JAPANESE_FONT` pointing to one), Git, and about 3 GB of additional disk space. The
 first run downloads the official Moodle PHP image. Run from the repository root.
 Use `sudo` for Docker commands if required by your local Docker permissions.

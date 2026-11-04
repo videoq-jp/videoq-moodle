@@ -2,28 +2,68 @@ name: Moodle integration
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 permissions:
   contents: read
+env:
+  PHP_IMAGE: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
 jobs:
   package:
+    name: PHP-only installers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify installer contract without Node or network access
+        run: docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/packages.php
+      - name: Build installer ZIPs and checksums
+        run: |
+          mkdir -p dist
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" -v "$PWD/dist:/output" "$PHP_IMAGE" /src/scripts/package-plugins.php /output
+      - name: Check PHP syntax
+        run: docker run --rm --network none --entrypoint sh -v "$PWD:/src:ro" -w /src "$PHP_IMAGE" -c 'find plugins scripts tests lab -name "*.php" -print0 | xargs -0 -n1 php -l'
+      - name: Check Moodle Compose configuration
+        run: docker compose --env-file lab/compose.env.example -f lab/compose.yaml -f lab/compose.sync.yaml -f lab/compose.live-sync.yaml -f lab/compose.web.yaml config --quiet
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: moodle-plugins
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS
+  lab:
+    name: Optional Node lab tools
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
-          node-version-file: .nvmrc
+          node-version-file: lab/.nvmrc
           cache: npm
-      - run: npm ci --ignore-scripts
-      - run: npm run check
-      - run: npm test
-      - run: npm run package:plugins
-      - name: Check Moodle Compose configuration
-        run: npm run lab:config
-      - name: Check PHP syntax
-        run: docker run --rm -v "$PWD:/src:ro" -w /src php:8.3-cli sh -c 'find plugins lab -name "*.php" -print0 | xargs -0 -n1 php -l'
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: moodle-plugins
-          path: dist/*.zip
+          cache-dependency-path: lab/package-lock.json
+      - run: npm ci --ignore-scripts --prefix lab
+      - run: npm run check --prefix lab
+      - run: npm test --prefix lab
+  release:
+    name: Publish tagged ZIPs
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Publish development-preview installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh run download "$GITHUB_RUN_ID" --name moodle-plugins --dir dist
+          cat > notes.txt <<'NOTES'
+          Ready-to-install Moodle plugins; Node.js and npm are not required to install, run or build them.
+
+          This is a development preview, tested on Moodle 5.1.8+ with Boost. A compatible VideoQ server is required. See the repository setup guide before connecting a production system.
+
+          Install local_videoq.zip first, then ltisource_videoq.zip. SHA256SUMS verifies the downloaded ZIPs.
+          NOTES
+          gh release create "$GITHUB_REF_NAME" dist/local_videoq.zip dist/ltisource_videoq.zip dist/SHA256SUMS --verify-tag --prerelease --title "VideoQ for Moodle $GITHUB_REF_NAME" --notes-file notes.txt

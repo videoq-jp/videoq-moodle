@@ -6,9 +6,10 @@ implementation, distribution packages, documentation, and integration lab.
 
 ## Installation
 
-1. Download `local_videoq.zip` and `ltisource_videoq.zip` from the CI artifacts,
-   or build them using the commands below. Install them in that order through
-   Moodle's plugin installer.
+1. Download [local_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.7.1/local_videoq.zip)
+   and [ltisource_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.7.1/ltisource_videoq.zip)
+   from the development-preview release. Install them in that order through
+   Moodle's plugin installer. **No Node.js, npm or JavaScript build is required.**
 2. Sign in to the school's VideoQ account. Open **Settings → Connect Moodle**,
    enter the Moodle URL, and generate a connection code.
 3. In Moodle, open **Site administration → Plugins → Local plugins → Connect to
@@ -37,21 +38,38 @@ The [architecture decision](docs/design/decision-lti-materials-handoff.md) expla
 the division of responsibilities. The earlier pure media-pull proposal is retained
 as historical analysis. Existing legacy connections remain compatible.
 
-## Development and plugin packages
+## Build installers with PHP
 
-Use the Node.js version specified in `.nvmrc`. Building plugin ZIPs and running
-the standard tests do not require a VideoQ application checkout.
+PHP CLI with `ext-zip` is sufficient. Neither npm dependencies nor a VideoQ
+checkout is needed:
 
-```bash
-npm ci
-npm run check
-npm test
-npm run package:plugins
+```sh
+php scripts/package-plugins.php dist
+php tests/packages.php
 ```
 
-This generates `dist/local_videoq.zip` and `dist/ltisource_videoq.zip`. Both archives
-start with the `videoq/` directory required by Moodle. CI runs the same checks,
-checks PHP 8.3 syntax, and uploads the ZIPs as build artifacts.
+This creates `dist/local_videoq.zip`, `dist/ltisource_videoq.zip` and
+`dist/SHA256SUMS`. Each archive has Moodle's required `videoq/` root. CI runs the
+same PHP-only build and publishes ready-to-install ZIPs on version tags.
+
+Browser JavaScript in `plugins/` is shipped directly as static assets. It connects
+the native Moodle player/chat to VideoQ and needs no bundler or Node runtime.
+
+## Optional development lab
+
+Node.js is confined to optional tools under `lab/`, including browser automation
+and the separate VideoQ trial environment. Plugin installation and PHP packaging
+do not use these tools:
+
+```sh
+npm ci --prefix lab
+npm run check --prefix lab
+npm test --prefix lab
+```
+
+Use the Node version in `lab/.nvmrc`. See [lab instructions](lab/README.md) for
+browser and integration tests. VideoQ itself has its own deployment requirements;
+this repository does not change the VideoQ server's runtime.
 
 ## Repository responsibilities
 

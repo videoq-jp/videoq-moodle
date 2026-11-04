@@ -27,3 +27,5 @@ VideoQ checkout. It does not create a production dependency on this repository.
 No runtime credentials, uploaded videos, database snapshots, provider settings or
 private acceptance artifacts were imported. Public lab fixtures remain confined
 to the loopback-only Compose environment. Existing licensing is preserved.
+
+The original extracted Node packager has since been replaced by `scripts/package-plugins.php`. Node-based lab tooling and its dependencies now live under `lab/` and are optional.

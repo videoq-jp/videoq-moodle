@@ -6,6 +6,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 let checked = 0;
 async function check(directory) {
   for (const entry of await readdir(resolve(root, directory), { withFileTypes: true })) {
+    if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
     const path = directory + '/' + entry.name;
     if (entry.isDirectory()) await check(path);
     else if (/\.(mjs|js)$/.test(path)) { execFileSync(process.execPath, ['--check', resolve(root, path)], { stdio: 'pipe' }); checked++; }
