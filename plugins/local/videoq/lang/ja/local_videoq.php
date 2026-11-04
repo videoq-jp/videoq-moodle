@@ -10,7 +10,7 @@ $string['video'] = '動画教材';
 $string['questions'] = '教材に質問';
 $string['privacy:metadata'] = 'このプラグインは教材の紐付けと同期状態を保存し、受講者の情報は保存しません。質問機能を有効にした教材はVideoQへ転送されます。';
 $string['privacy:metadata:video'] = '管理者が紐付けたVideoQ動画の識別子。';
-$string['privacy:metadata:position'] = '受講者が質問に添えるか選択できる、現在の動画の再生位置。';
+$string['privacy:metadata:position'] = '取得できる場合に質問へ添えられる、現在の動画の再生位置。';
 $string['privacy:metadata:videoq'] = '紐付けたVideoQのLTIツールへ再生位置を送信します。このプラグインは受講者の記録をローカル保存しません。質問とセッションはLTIツールが管理します。';
 $string['apiurl'] = 'VideoQのAPIオリジン';
 $string['synctoken'] = '同期用接続キー';
@@ -65,6 +65,7 @@ $string['connectionnext'] = '講座に動画をファイル教材として追加
 $string['connectioninstructions'] = 'VideoQの「設定 → Moodleと連携」で、このMoodleのURLを指定して発行した接続コードを貼り付けてください。LTIと同期設定を自動で登録します。';
 $string['connectionfailed'] = '接続できませんでした。両方のVideoQプラグイン、接続先URL、コードの有効期限を確認してください。通信エラーの場合は同じコードで再試行してください。既存の接続設定は変更していません。';
 $string['cancelconnection'] = '未完了の設定を中止してやり直す';
+$string['cancelconnectionhint'] = '未使用のローカル設定を取り消します。VideoQ側に接続が表示されている場合は、そちらでも接続を解除してください。';
 $string['advancedsettings'] = 'VideoQ 詳細設定（手動接続）';
 
 $string['connectionconfigured'] = 'LTI接続が設定されています。接続状態はVideoQの設定画面で確認できます。';

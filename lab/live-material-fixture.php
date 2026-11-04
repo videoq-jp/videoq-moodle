@@ -22,7 +22,21 @@ if ($action === 'create') {
     \local_videoq\synchronizer::enable($state['cmid']);
 }
 if (!$state) throw new \RuntimeException('No acceptance fixture');
-if ($action === 'delete') {
+if ($action === 'replace') {
+    $cm = get_coursemodule_from_id('resource', $state['cmid'], 5, false, MUST_EXIST);
+    if ($cm->name !== 'VideoQ acceptance ' . $state['run']) throw new \RuntimeException('Unexpected source identity');
+    $transaction = $DB->start_delegated_transaction();
+    $context = context_module::instance($cm->id);
+    get_file_storage()->delete_area_files($context->id, 'mod_resource', 'content', 0);
+    get_file_storage()->create_file_from_pathname(['contextid' => $context->id, 'component' => 'mod_resource',
+        'filearea' => 'content', 'itemid' => 0, 'filepath' => '/', 'filename' => 'acceptance.mp4',
+        'mimetype' => 'video/mp4', 'sortorder' => 1], '/tmp/videoq-materials-replacement.mp4');
+    $DB->execute('UPDATE {resource} SET revision = revision + 1, timemodified = ? WHERE id = ?', [time(), $cm->instance]);
+    $transaction->allow_commit();
+    rebuild_course_cache(5, true);
+    \core\event\course_module_updated::create(['objectid' => $cm->id, 'context' => $context,
+        'other' => ['modulename' => 'resource', 'instanceid' => $cm->instance, 'name' => $cm->name]])->trigger();
+} else if ($action === 'delete') {
     $cm = get_coursemodule_from_id('resource', $state['cmid'], 5, false, IGNORE_MISSING);
     if ($cm) {
         if ($cm->name !== 'VideoQ acceptance ' . $state['run']) throw new \RuntimeException('Unexpected source identity');

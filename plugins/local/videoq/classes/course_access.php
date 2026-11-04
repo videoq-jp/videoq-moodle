@@ -16,6 +16,10 @@ final class course_access {
         foreach ($DB->get_records('local_videoq_sync', ['courseid' => $courseid, 'enabled' => 1, 'status' => 'completed']) as $row) {
             $items[] = ['id' => 'sync_' . $row->cmid, 'videoCmid' => (int)$row->cmid, 'ltiCmid' => (int)$row->lticmid];
         }
+        // The materials service grants only explicitly synchronized sources.
+        // Legacy/manual associations have no external material identity and
+        // must not break or widen a migrated course's access manifest.
+        if (get_config('local_videoq', 'servicemode') === 'lti') return $items;
         foreach (lesson::parse(get_config('local_videoq', 'lessons') ?: '[]') as $item) {
             // A source migrated to automatic synchronization has one current authority.
             if ($DB->record_exists('local_videoq_sync', ['cmid' => $item['videoCmid']])) continue;

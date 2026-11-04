@@ -64,7 +64,7 @@ final class materials_service {
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('export-' . $cmid, 5);
         if (!$lock) throw new \RuntimeException('Export busy');
         try {
-            $row = $DB->get_record('local_videoq_sync', ['cmid' => (int)$cmid, 'courseid' => $courseid], '*', MUST_EXIST);
+            $row = $DB->get_record('local_videoq_sync', ['cmid' => (int)$cmid, 'courseid' => $courseid, 'typeid' => $typeid], '*', MUST_EXIST);
             $manifest = synchronizer::run((int)$row->id, true);
             if (!$manifest['enabled'] || $manifest['generation'] !== $generation) throw new \RuntimeException('Stale source');
             $hash = hash('sha256', $typeid . ':' . $courseid . ':' . $cmid . ':' . $generation . ':' . $input['idempotencyKey']);
@@ -89,8 +89,8 @@ final class materials_service {
                 !is_int($input['generation'] ?? null) || !in_array($input['status'] ?? '',
                 ['disabled', 'uploading', 'pending', 'processing', 'indexing', 'completed', 'error', 'blocked', 'awaiting_upload'], true)) throw new \RuntimeException('Invalid acknowledgement');
         $error = in_array($input['error'] ?? '', ['STORAGE_LIMIT_EXCEEDED', 'MONTHLY_UPLOAD_LIMIT_EXCEEDED'], true) ? $input['error'] : '';
-        $DB->execute('UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE cmid = ? AND courseid = ? AND generation = ?',
-            [$input['status'], $error, time(), (int)$input['externalId'], $courseid, $input['generation']]);
+        $DB->execute('UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE cmid = ? AND courseid = ? AND typeid = ? AND generation = ?',
+            [$input['status'], $error, time(), (int)$input['externalId'], $courseid, $typeid, $input['generation']]);
         return ['acknowledged' => true];
     }
     public static function status(int $courseid, int $typeid, string $jobid): array {

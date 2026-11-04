@@ -7,7 +7,22 @@ function data(): string { return getenv('LTI_LAB_DIR') ?: (getenv('HOME').'/.loc
 function moodle(): string { return rtrim(getenv('MOODLE_URL') ?: 'https://moodle.localhost:18443', '/'); }
 function videoq(): string { return rtrim(getenv('VIDEOQ_URL') ?: 'https://videoq.localhost:18443', '/'); }
 function container(): string { return getenv('MOODLE_CONTAINER') ?: 'videoq-lti-lab-moodle-1'; }
-function guard(): void { ensure(moodle() === 'https://moodle.localhost:18443' && videoq() === 'https://videoq.localhost:18443', 'Mutating checks require the isolated lab'); }
+function guard(bool $exclusive = true): void {
+    ensure(moodle() === 'https://moodle.localhost:18443' && videoq() === 'https://videoq.localhost:18443', 'Mutating checks require the isolated lab');
+    static $lock = null;
+    if (!$exclusive || is_resource($lock)) return;
+    $directory = data() . '/acceptance';
+    if (!is_dir($directory)) mkdir($directory, 0700, true);
+    $handle = fopen($directory . '/.live-check.lock', 'c');
+    ensure($handle !== false, 'Cannot lock the live lab');
+    if (!flock($handle, LOCK_EX | LOCK_NB)) {
+        fclose($handle);
+        throw new \RuntimeException('Another live integration check is running; run checks sequentially');
+    }
+    chmod($directory . '/.live-check.lock', 0600);
+    $lock = $handle;
+    register_shutdown_function(static function() use ($handle): void { flock($handle, LOCK_UN); fclose($handle); });
+}
 function command(array $args, ?string $input = null, $output = null): string {
     $process = proc_open($args, [0=>['pipe','r'],1=>$output ?: ['pipe','w'],2=>['file','/dev/null','w']], $pipes);
     ensure(is_resource($process), 'Cannot start lab command');
@@ -23,7 +38,7 @@ function fixture(string $script, ?string $action = null, ?array $input = null): 
     return json_decode(docker(['exec','-i',container(),'php','/lab/'.$script,...($action === null ? [] : [$action])], $input === null ? null : json_encode($input, JSON_THROW_ON_ERROR)), true, 32, JSON_THROW_ON_ERROR);
 }
 function connect(string $database = 'videoq'): \PgSql\Connection {
-    guard(); ensure((bool)preg_match('/^[a-z_0-9]+$/D',$database),'Invalid database');
+    guard(false); ensure((bool)preg_match('/^[a-z_0-9]+$/D',$database),'Invalid database');
     $override = getenv($database === 'videoq' ? 'VIDEOQ_TEST_DATABASE_URL' : 'MOODLE_TEST_DATABASE_URL');
     if (!$override) {
         $networks = json_decode(docker(['inspect','--format','{{json .NetworkSettings.Networks}}',getenv('LAB_DB_CONTAINER') ?: 'videoq-lti-lab-db-1']),true,16,JSON_THROW_ON_ERROR);
@@ -56,6 +71,12 @@ function wait(callable $condition, int $seconds = 120, int $milliseconds = 250):
     $until = microtime(true)+$seconds;
     do { $value = $condition(); if ($value) return $value; usleep($milliseconds*1000); } while (microtime(true)<$until);
     throw new \RuntimeException('Acceptance condition timed out');
+}
+function ready(): void {
+    wait(static function(): bool {
+        try { return request(videoq() . '/ready')['status'] === 200; }
+        catch (\Throwable $error) { return false; }
+    }, 60, 1000);
 }
 function report(string $name, array $values): void {
     ensure((bool)preg_match('/^[a-z0-9-]+$/D',$name),'Invalid report name');

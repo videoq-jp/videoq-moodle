@@ -3,7 +3,7 @@ declare(strict_types=1);
 require __DIR__.'/support/browser.php';require __DIR__.'/support/stream.php';
 use VideoQLab\Browser;
 use function VideoQLab\{guard,rows,videoq,ensure,answer,report,data};
-guard();$live=in_array('--live',$argv,true);$videos=array_column(rows("SELECT video_id FROM lms_resources WHERE installation_id='moodle-sync-lab' AND video_id IS NOT NULL"),'video_id');
+guard();\VideoQLab\ready();$live=in_array('--live',$argv,true);$videos=array_column(rows("SELECT video_id FROM lms_resources WHERE installation_id='moodle-sync-lab' AND video_id IS NOT NULL"),'video_id');
 ensure((bool)$videos,'Indexed video required');
 $fixture=str_replace(['VIDEOQ_ORIGIN','VIDEO_ID'],[json_encode(videoq()),(string)$videos[0]],file_get_contents(__DIR__.'/support/chat-fixture.js'));
 $b=new Browser($live?'':$fixture);$new='.answer:not([data-existing])';

@@ -73,7 +73,7 @@ In the owning VideoQ account, open its connection settings, select the Moodle
 connection and choose **Disconnect**. Confirm the displayed connection. Subsequent
 launches, questions and synchronization are denied. Existing learning data is
 retained. Removing local Moodle settings alone does not revoke server access.
-Generate a new code to reconnect through the supported workflow.
+Generate a new code to reconnect through the supported workflow.\nFor platform-side trust revocation as well, disable/remove the registered VideoQ\nexternal tool in Moodle through its standard tool administration. The remote\nVideoQ disconnect does not delete Moodle's tool registration.
 
 ## Operations and troubleshooting
 
@@ -93,3 +93,29 @@ The [lab](../lab/README.md) provides reproducible PHP/native-browser checks.
 [Coverage notes](verification.md) distinguish current checks from historical
 acceptance evidence. A local passing run does not certify LTI interoperability or
 prove capacity for 100 concurrent learners; test the actual target deployment.
+
+## Course layout and lifecycle limits
+
+For one visible assistant entry per course, enable **Site administration →
+Advanced features → Allow stealth activities** before enabling VideoQ questions,
+and use a course format that supports activities available but not shown on the
+course page. Otherwise Moodle also displays the generated per-video transport
+activities and shortcuts. The plugin does not change this site-wide setting.
+
+Manual lesson associations are a legacy mode. Materials-service connections use
+only File activities explicitly enabled for synchronization; legacy JSON
+associations cannot extend their permitted material list. A legacy `VIDEOQ1.` code
+cannot replace an active materials-service connection.
+
+A failed **new, unused** materials setup can be cancelled from the connection
+page. Configured connections and tool registrations already used by activities
+are protected. If a lost exchange response created a connection on VideoQ, remove
+that unused remote connection in VideoQ as well; cancelling local setup does not
+claim to revoke the remote registration.
+
+Moodle course copy/import and `.mbz` backup/restore do not currently remap VideoQ's
+site-level material bindings or generated links. Do not assume that a copied
+course has an independent, correctly connected assistant. Use a new course and
+normal File uploads/enabling until a dedicated restore implementation is added.
+Database/object-store recovery tests verify disaster recovery of the whole lab,
+not portability of an individual Moodle course.

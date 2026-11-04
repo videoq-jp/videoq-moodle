@@ -37,6 +37,7 @@ jobs:
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/lab.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/dependencies.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/release.php
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/live-lock.php
       - name: Download paired native browser executables
         run: php scripts/native-browser.php /tmp/videoq-native-browser >> "$GITHUB_ENV"
       - name: Compile browser assets through PHP WebDriver

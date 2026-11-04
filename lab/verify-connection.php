@@ -5,7 +5,9 @@ use function VideoQLab\{guard,rows,ensure,request,videoq,report};
 guard();$issuer='https://disconnect.videoq.example';$installation=$secret=null;
 $snapshot=static fn()=>rows("SELECT (SELECT coalesce(jsonb_agg(to_jsonb(v) ORDER BY v.id),'[]'::jsonb) FROM videos v) AS videos,(SELECT count(*) FROM scene_embeddings) AS vectors,(SELECT count(*) FROM chat_logs) AS logs,(SELECT count(*) FROM video_course_members) AS memberships");
 $before=$snapshot();$connections=rows('SELECT id,active FROM lms_installations ORDER BY id');
-ensure(request(videoq().'/api/lms/pairing/connections/unknown/disconnect',[])['status']===401,'Anonymous disconnect allowed');
+\VideoQLab\ready();
+$anonymous=request(videoq().'/api/lms/pairing/connections/unknown/disconnect',[])['status'];
+ensure($anonymous===401,'Expected anonymous disconnect rejection; received HTTP '.$anonymous);
 $b=new Browser();$button=static fn($label,$root)=>$b->js("const el=[...document.querySelector(arguments[0]).querySelectorAll('button')].find(el=>el.textContent.trim()===arguments[1]);if(!el)throw new Error('Missing button');el.click()",[$root,$label]);
 try{
     $b->login('videoq_lab',videoq());$b->go(videoq().'/settings#moodle');$b->fill('#moodle-url',$issuer);$b->click('#moodle form button[type=submit]');$b->element('#moodle-code');$code=$b->value('#moodle-code');

@@ -21,6 +21,52 @@ try {
     set_config('typeid', $fixture['typeid'], 'local_videoq');
     set_config('apiurl', 'https://videoq.localhost:18443', 'local_videoq');
     set_config('serviceuploadtargets', json_encode([['origin' => 'https://storage.videoq.localhost:18443', 'prefix' => '/lti-sync/media/videos/lti-lab-owner/']]), 'local_videoq');
+    $typesbefore = $DB->count_records('lti_types');
+    $codepayload = base64_encode(json_encode(['origin' => 'https://videoq.localhost:18443', 'secret' => str_repeat('0', 64)]));
+    $rejected = false;
+    try { \local_videoq\connection_setup::connect('VIDEOQ1.' . $codepayload); }
+    catch (\Throwable $error) { $rejected = true; }
+    contract_check($rejected && $DB->count_records('lti_types') === $typesbefore &&
+        (int)get_config('local_videoq', 'typeid') === $fixture['typeid'] && !get_config('local_videoq', 'pendingconnection'),
+        'Legacy code cannot replace the configured materials connection');
+    $DB->set_field('config_plugins', 'name', 'acceptance_version', ['plugin' => 'ltisource_videoq', 'name' => 'version']);
+    try {
+        $rejected = false;
+        try { \local_videoq\lti_connection_setup::connect('VIDEOQ2.' . $codepayload); }
+        catch (\Throwable $error) { $rejected = true; }
+        contract_check($rejected && $DB->count_records('lti_types') === $typesbefore && !get_config('local_videoq', 'pendinglticonnection'),
+            'Missing launch plugin is rejected before creating or changing a connection');
+    } finally {
+        $DB->set_field('config_plugins', 'name', 'version', ['plugin' => 'ltisource_videoq', 'name' => 'acceptance_version']);
+    }
+    \local_videoq\synchronizer::enable($fixture['cmid']);
+    $rejected = false;
+    try { \local_videoq\connection_setup::cancel_pending(); } catch (\Throwable $error) { $rejected = true; }
+    contract_check($rejected && $DB->record_exists('lti_types', ['id' => $fixture['typeid']]), 'Cancel cannot remove a configured connection');
+    $savedconnection = [];
+    foreach (['typeid', 'servicemode', 'apiurl', 'synctoken'] as $name) {
+        $savedconnection[$name] = get_config('local_videoq', $name);
+        unset_config($name, 'local_videoq');
+    }
+    try {
+        set_config('pendinglticonnection', json_encode(['origin' => 'https://videoq.localhost:18443', 'typeid' => $fixture['typeid']]), 'local_videoq');
+        $rejected = false;
+        try { \local_videoq\connection_setup::cancel_pending(); } catch (\Throwable $error) { $rejected = true; }
+        contract_check($rejected && $DB->record_exists('lti_types', ['id' => $fixture['typeid']]), 'Cancel cannot remove a tool with course activities');
+        $unusedtype = lti_add_type((object)['state' => LTI_TOOL_STATE_CONFIGURED], (object)[
+            'lti_typename' => 'Unused VideoQ setup acceptance', 'lti_toolurl' => 'https://videoq.localhost:18443/api/lti/launch',
+            'lti_ltiversion' => LTI_VERSION_1P3, 'lti_initiatelogin' => 'https://videoq.localhost:18443/api/lti/login',
+            'lti_redirectionuris' => 'https://videoq.localhost:18443/api/lti/launch']);
+        set_config('pendinglticonnection', json_encode(['origin' => 'https://videoq.localhost:18443', 'typeid' => (int)$unusedtype]), 'local_videoq');
+        \local_videoq\connection_setup::cancel_pending();
+        contract_check(!$DB->record_exists('lti_types', ['id' => $unusedtype]) && !get_config('local_videoq', 'pendinglticonnection'), 'An unused failed materials setup can be cancelled');
+    } finally {
+        unset_config('pendinglticonnection', 'local_videoq');
+        foreach ($savedconnection as $name => $value) {
+            if ($value === false) unset_config($name, 'local_videoq');
+            else set_config($name, $value, 'local_videoq');
+        }
+    }
     $issued = \local_videoq\service_auth::issue(['grant_type' => 'client_credentials',
         'client_assertion_type' => 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         'scope' => \local_videoq\service_auth::SCOPE, 'client_assertion' => $testinput['jwt']]);
@@ -43,9 +89,69 @@ try {
     $snapshot = \local_videoq\materials_service::manifest($fixture['courseid'], $fixture['typeid']);
     contract_check($snapshot['complete'] && count($snapshot['resources']) === 1 && $snapshot['resources'][0]['manifest']['enabled'], 'Manifest includes opted-in real Moodle File');
     $item = $snapshot['resources'][0];
+    $foreign = clone $DB->get_record('local_videoq_sync', ['cmid' => $fixture['cmid']], '*', MUST_EXIST);
+    unset($foreign->id);
+    $foreign->cmid = (int)$DB->get_field_sql('SELECT MAX(id) FROM {course_modules}') + 1000000;
+    $foreign->typeid = $fixture['typeid'] + 1000000;
+    $foreign->status = 'completed';
+    $foreign->id = $DB->insert_record('local_videoq_sync', $foreign);
+    $foreignbefore = $DB->get_record('local_videoq_sync', ['id' => $foreign->id], '*', MUST_EXIST);
+    \local_videoq\materials_service::acknowledge($fixture['courseid'], $fixture['typeid'], [
+        'externalId' => (string)$foreign->cmid, 'generation' => (int)$foreign->generation, 'status' => 'disabled']);
+    contract_check($DB->get_record('local_videoq_sync', ['id' => $foreign->id]) == $foreignbefore,
+        'Status acknowledgements cannot modify another tool registration');
+    $rejected = false;
+    try {
+        \local_videoq\materials_service::export($fixture['courseid'], $fixture['typeid'], [
+            'externalId' => (string)$foreign->cmid, 'generation' => (int)$foreign->generation,
+            'uploadUrl' => 'https://storage.videoq.localhost:18443/lti-sync/media/videos/lti-lab-owner/test.mp4?signature=fixture',
+            'idempotencyKey' => str_repeat('b', 32)]);
+    } catch (\Throwable $error) { $rejected = true; }
+    contract_check($rejected && $DB->get_record('local_videoq_sync', ['id' => $foreign->id]) == $foreignbefore,
+        'Export cannot read or change another tool registration');
+    $DB->delete_records('local_videoq_sync', ['id' => $foreign->id]);
     $DB->set_field('local_videoq_sync', 'status', 'completed', ['cmid' => $fixture['cmid']]);
-    $access = \local_videoq\materials_service::access($fixture['courseid'], $fixture['typeid'], $item['manifest']['resourceLinkId'], (string)$fixture['learnerid']);
+    $legacylessons = get_config('local_videoq', 'lessons');
+    try {
+        set_config('lessons', 'malformed legacy association fixture', 'local_videoq');
+        $access = \local_videoq\materials_service::access($fixture['courseid'], $fixture['typeid'], $item['manifest']['resourceLinkId'], (string)$fixture['learnerid']);
+        contract_check(count($access['resources']) === 1, 'Migrated service ignores legacy manual associations');
+    } finally {
+        if ($legacylessons === false) unset_config('lessons', 'local_videoq');
+        else set_config('lessons', $legacylessons, 'local_videoq');
+    }
     contract_check(count($access['resources']) === 1 && $access['resources'][0]['externalId'] === (string)$fixture['cmid'], 'Learner access resolves stable material identity');
+    $proof = \local_videoq\course_access::launch((int)$item['manifest']['resourceLinkId'], $fixture['learnerid'])['custom_videoq_access'];
+    $resolve = static fn($token, $subject) => \local_videoq\course_access::resolve($token, (string)$subject, (string)$fixture['courseid'], $item['manifest']['resourceLinkId']);
+    foreach (['tampered' => [$proof . 'f', $fixture['learnerid']], 'wrong learner' => [$proof, get_admin()->id]] as $label => [$token, $subject]) {
+        $denied = false;
+        try { $resolve($token, $subject); } catch (\Throwable $error) { $denied = true; }
+        contract_check($denied, 'Access proof rejects ' . $label);
+    }
+    $payload = json_decode(hex2bin(explode('.', $proof)[0]), true, 8, JSON_THROW_ON_ERROR);
+    $payload['exp'] = time() - 1;
+    $encoded = bin2hex(json_encode($payload, JSON_THROW_ON_ERROR));
+    $expired = $encoded . '.' . hash_hmac('sha256', $encoded, hex2bin(get_config('local_videoq', 'accesssigningkey')));
+    $denied = false;
+    try { $resolve($expired, $fixture['learnerid']); } catch (\Throwable $error) { $denied = true; }
+    contract_check($denied, 'Expired access proof is rejected');
+    $DB->set_field('user', 'suspended', 1, ['id' => $fixture['learnerid']]);
+    try {
+        $denied = false;
+        try { $resolve($proof, $fixture['learnerid']); } catch (\Throwable $error) { $denied = true; }
+        contract_check($denied, 'An already issued proof cannot bypass account suspension');
+    } finally { $DB->set_field('user', 'suspended', 0, ['id' => $fixture['learnerid']]); }
+    $availability = $DB->get_field('course_modules', 'availability', ['id' => $fixture['cmid']]);
+    try {
+        $DB->set_field('course_modules', 'availability', json_encode(['op' => '&', 'c' => [['type' => 'date', 'd' => '>=', 't' => time() + 3600]], 'showc' => [true]]), ['id' => $fixture['cmid']]);
+        rebuild_course_cache($fixture['courseid'], true);
+        $denied = false;
+        try { $resolve($proof, $fixture['learnerid']); } catch (\Throwable $error) { $denied = true; }
+        contract_check($denied, 'An already issued proof respects updated conditional availability');
+    } finally {
+        $DB->set_field('course_modules', 'availability', $availability, ['id' => $fixture['cmid']]);
+        rebuild_course_cache($fixture['courseid'], true);
+    }
     $outsider = $DB->get_field('user', 'id', ['username' => 'teacher'], MUST_EXIST);
     $denied = false;
     try { \local_videoq\materials_service::access($fixture['courseid'], $fixture['typeid'], $item['manifest']['resourceLinkId'], (string)$outsider); }

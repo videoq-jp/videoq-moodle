@@ -28,7 +28,9 @@ final class connection_setup {
         if (!$lock) throw new \RuntimeException('Setup is busy');
         try {
             // Replacing a configured installation would detach its existing resources.
-            if (get_config('local_videoq', 'synctoken')) throw new \RuntimeException('Already configured');
+            if (get_config('local_videoq', 'synctoken') || get_config('local_videoq', 'servicemode') === 'lti') {
+                throw new \RuntimeException('Already configured');
+            }
             if (!$DB->record_exists('config_plugins', ['plugin' => 'ltisource_videoq', 'name' => 'version'])) {
                 throw new \RuntimeException('Install both VideoQ plugins first');
             }
@@ -73,15 +75,29 @@ final class connection_setup {
             $transaction->allow_commit();
         } finally { $lock->release(); }
     }
-    /** Only abandon an unregistered attempt; a committed remote identity must be recovered. */
+    /** Abandon only unused local setup; preserve configured or activity-bound identities. */
     public static function cancel_pending(): void {
-        global $CFG;
+        global $CFG, $DB;
         require_capability('moodle/site:config', \context_system::instance());
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('connection-setup', 10);
         if (!$lock) throw new \RuntimeException('Setup is busy');
         try {
-            if (get_config('local_videoq', 'synctoken')) throw new \RuntimeException('Already configured');
+            if (get_config('local_videoq', 'synctoken') || get_config('local_videoq', 'typeid') || get_config('local_videoq', 'servicemode') === 'lti') {
+                throw new \RuntimeException('Already configured');
+            }
+            $pendinglti = json_decode((string)get_config('local_videoq', 'pendinglticonnection'), true);
+            if ($pendinglti) {
+                // Only abandon a new, unused local registration. A migration
+                // reuses the configured tool above and must never delete it.
+                $type = $DB->get_record('lti_types', ['id' => (int)$pendinglti['typeid']], '*', MUST_EXIST);
+                if (rtrim($type->baseurl, '/') !== $pendinglti['origin'] . '/api/lti/launch' ||
+                        $DB->record_exists('lti', ['typeid' => $type->id]) ||
+                        $DB->record_exists('local_videoq_sync', ['typeid' => $type->id])) throw new \RuntimeException('Tool is already in use');
+                lti_delete_type($type->id);
+                unset_config('pendinglticonnection', 'local_videoq');
+                return;
+            }
             $pending = json_decode((string)get_config('local_videoq', 'pendingconnection'), true);
             if (!$pending) return;
             if (self::probe($pending)) throw new \RuntimeException('Retry the original code to recover the connection');

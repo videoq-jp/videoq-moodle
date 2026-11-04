@@ -16,7 +16,7 @@ final class export_material extends \core\task\adhoc_task {
             if (!in_array($job->status, ['queued', 'uploading'], true)) return;
             $type = \local_videoq\service_auth::type();
             if ((int)$type->id !== (int)$job->typeid || $job->timecreated < time() - 1800) throw new \RuntimeException('Expired export');
-            $row = $DB->get_record('local_videoq_sync', ['cmid' => $job->cmid, 'courseid' => $job->courseid], '*', MUST_EXIST);
+            $row = $DB->get_record('local_videoq_sync', ['cmid' => $job->cmid, 'courseid' => $job->courseid, 'typeid' => $job->typeid], '*', MUST_EXIST);
             $manifest = \local_videoq\synchronizer::run((int)$row->id, true);
             if (!$manifest['enabled'] || $manifest['generation'] !== (int)$job->generation) {
                 $DB->update_record('local_videoq_exports', (object)['id' => $job->id, 'status' => 'stale', 'uploadurl' => null, 'timemodified' => time()]);

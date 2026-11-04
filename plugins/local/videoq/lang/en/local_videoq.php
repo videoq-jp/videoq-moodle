@@ -10,7 +10,7 @@ $string['video'] = 'Video lesson';
 $string['questions'] = 'Ask about this lesson';
 $string['privacy:metadata'] = 'This plugin stores lesson mappings and synchronization state, with no learner data. Video lessons with questions enabled are transferred to VideoQ.';
 $string['privacy:metadata:video'] = 'The administrator-associated VideoQ video identifier.';
-$string['privacy:metadata:position'] = 'The current playback position, which the learner can choose to attach to a question.';
+$string['privacy:metadata:position'] = 'The current playback position attached to a question when available.';
 $string['privacy:metadata:videoq'] = 'The companion sends playback hints to the associated VideoQ LTI tool. It stores no learner records locally. The LTI tool manages its own question and session data.';
 $string['apiurl'] = 'VideoQ API origin';
 $string['synctoken'] = 'Synchronization key';
@@ -65,6 +65,7 @@ $string['connectionnext'] = 'Add a video File activity to a course and enable Vi
 $string['connectioninstructions'] = 'In VideoQ Settings → Connect Moodle, generate a code for this Moodle URL and paste it here. LTI and synchronization are configured automatically.';
 $string['connectionfailed'] = 'Could not connect. Check that both VideoQ plugins are installed, the Moodle URL matches, and the code has not expired. After a network error, retry with the same code. Existing connection settings were preserved.';
 $string['cancelconnection'] = 'Cancel incomplete setup and start again';
+$string['cancelconnectionhint'] = 'Cancel removes an unused local setup. If the connection already appears in VideoQ, disconnect it there as well.';
 $string['advancedsettings'] = 'VideoQ advanced settings (manual connection)';
 
 $string['connectionconfigured'] = 'LTI connection is configured. Check the connection status in your VideoQ account settings.';

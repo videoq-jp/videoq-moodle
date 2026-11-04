@@ -22,7 +22,7 @@ its source nor starts its API, frontend, scheduler or processing workers.
 | `php lab/verify-chat.php --live` | Real model streaming/sources, incremental native display, persisted Good/Bad/reset and timestamp seek |
 | `php lab/check-materials.php` | Disposable PHP service-auth/export/access contracts including replay, scope/audience, hidden source and unenrolled-account rejection; transactional/cache restoration |
 | `php lab/verify-connection.php` | Code UI, issuer binding, exchange retry, cancellation/disconnect/revocation, preserved connections/data |
-| `php lab/verify-background.php FILE` | Normal scheduler/cron/worker export, transcription/indexing, same-course membership, two-video citation/selector switching without losing chat, source deletion and physical media cleanup |
+| `php lab/verify-background.php FILE` | Normal scheduler/cron/worker export, transcription/indexing, same-course membership, two-video citation/selector switching without losing chat, replacement processing in the same course, source deletion and physical media cleanup |
 | `php lab/verify-load.php --count 2 --live` | Real Moodle learner logins and concurrent real questions; no extra VideoQ accounts, test learners removed |
 | `php lab/verify-backup.php` | Consistent database snapshots restored to scratch DBs, matching counts/foreign keys; scratch DBs removed |
 | `php lab/verify-media-backup.php` | Moodle filedir restore/content hashes and disposable S3 upload/download restore; actual Moodle/VideoQ media bytes match |
@@ -61,3 +61,8 @@ failed Actions runs remain historical records; recovery has its own run URL.
 
 `php tests/release.php` covers ambiguous creation/upload/publication responses,
 idempotent publication, mismatched assets, and authorization failures offline.
+
+The [integration review](integration-review.md) records current findings, corrections
+and deployment limits, including the distinction between whole-lab recovery and
+Moodle course backup/restore. Live integration checks are serialized by a PHP lock;
+`php tests/live-lock.php` verifies concurrent checks are rejected and locks released.

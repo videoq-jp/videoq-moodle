@@ -47,7 +47,9 @@ echo html_writer::tag('textarea', '', ['id' => 'videoq-connectioncode', 'name' =
     'maxlength' => 8192, 'required' => 'required', 'autocomplete' => 'off', 'spellcheck' => 'false', 'class' => 'form-control mb-3']);
 echo html_writer::tag('button', get_string('connectbutton', 'local_videoq'), ['type' => 'submit', 'class' => 'btn btn-primary']);
 echo html_writer::end_tag('form');
-if (get_config('local_videoq', 'pendingconnection')) {
+if ((get_config('local_videoq', 'pendingconnection') || get_config('local_videoq', 'pendinglticonnection')) &&
+        !get_config('local_videoq', 'typeid') && !get_config('local_videoq', 'synctoken') && get_config('local_videoq', 'servicemode') !== 'lti') {
+    echo html_writer::tag('p', get_string('cancelconnectionhint', 'local_videoq'));
     echo $OUTPUT->single_button(new moodle_url('/local/videoq/connect.php', ['action' => 'cancel']),
         get_string('cancelconnection', 'local_videoq'), 'post');
 }

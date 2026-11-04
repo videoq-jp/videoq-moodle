@@ -52,7 +52,12 @@ The [synchronization lab](../../../lab/README.md#automatic-synchronization-accep
 verifies the full lifecycle with real storage/queue/worker processing and
 deterministic inference providers on Moodle 5.1.8+.
 
-## Manual companion mode
+## Manual companion mode (legacy connections only)
+
+Materials-service connections use synchronized File activities instead of manual
+JSON associations. See the setup guide for supported course layout and lifecycle
+limits.
+
 
 A Moodle 5.1 local plugin that places an existing Moodle video File activity next
 to an existing VideoQ LTI 1.3 activity. Desktop uses two columns; screens up to

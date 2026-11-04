@@ -5,7 +5,7 @@ namespace VideoQLab;
 require_once __DIR__.'/runtime.php';
 final class Storage {
     public function operation(string $method,string $key,?string $file=null): array {
-        guard();$path='/lti-sync/'.implode('/',array_map('rawurlencode',explode('/',$key)));
+        guard(false);$path='/lti-sync/'.implode('/',array_map('rawurlencode',explode('/',$key)));
         $date=gmdate('Ymd');$now=gmdate('Ymd\THis\Z');$host='storage.videoq.localhost:18443';
         $hash=$method==='PUT'?hash_file('sha256',$file):hash('sha256','');
         $headers="host:$host\nx-amz-content-sha256:$hash\nx-amz-date:$now\n";

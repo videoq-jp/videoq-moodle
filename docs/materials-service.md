@@ -34,7 +34,7 @@ the deployment overlap. The key ring accepts at most three retired public keys.
 
 ## Connect or migrate
 
-1. Install/update `local_videoq` 0.9.0 and `ltisource_videoq`. Finish Moodle's
+1. Install/update `local_videoq` 0.9.1 and `ltisource_videoq`. Finish Moodle's
    plugin upgrade and keep normal Moodle cron/ad-hoc task execution enabled.
 2. In the owning VideoQ account, open Settings → Connect Moodle. Enter the exact
    HTTPS Moodle base URL and generate a connection code. A materials-capable

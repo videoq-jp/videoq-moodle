@@ -3,7 +3,7 @@
 declare(strict_types=1);
 require __DIR__.'/support/browser.php';require __DIR__.'/support/stream.php';use VideoQLab\Browser;
 use function VideoQLab\{guard,rows,docker,container,ensure,videoq,report,answer,data};
-guard();$options=getopt('',['count:','live']);$count=(int)($options['count']??5);$live=isset($options['live']);ensure($count>=1&&$count<=200,'Learner count must be 1–200');
+guard();\VideoQLab\ready();$options=getopt('',['count:','live']);$count=(int)($options['count']??5);$live=isset($options['live']);ensure($count>=1&&$count<=200,'Learner count must be 1–200');
 if($live){$quota=rows("SELECT ai_answers_limit,used_ai_answers FROM users WHERE id='lti-lab-owner'")[0];ensure($quota['ai_answers_limit']-$quota['used_ai_answers']>=$count,'Insufficient reserved quota');}
 $accounts=rows('SELECT count(*) AS n FROM users')[0]['n'];$users=[];$tokens=[];$results=[];$handles=[];$multi=null;
 try{

@@ -82,7 +82,7 @@ docker exec -u www-data videoq-lti-lab-moodle-1 php /lab/check-materials-tls.php
 ## Automatic synchronization acceptance test
 
 The migrated trial uses course 5, source 82 and installation `moodle-sync-lab`.
-Mutation commands reject other base URLs; do not run them against production.
+Mutation commands reject other base URLs; do not run them against production.\nLive checks share mutable fixtures and must run sequentially; a PHP file lock\nrejects overlapping runs instead of producing misleading preservation failures.
 Reports go to `$LTI_LAB_DIR/acceptance`, defaulting to
 `$HOME/.local/share/videoq-moodle-lab/acceptance`. They exclude private tokens and
 keys. Consistent database/media snapshots remain private files outside this repo.
@@ -104,7 +104,7 @@ Real AI commands may incur provider charges. `verify-load.php` supports 1–200
 learners and measures question concurrency, not simultaneous video decoding.
 The background check preserves existing videos, creates one uniquely tagged File,
 waits for normal cron/export/processing, verifies two-video citation switching
-without resetting the conversation, deletes only its own source, and waits for
+without resetting the conversation, replaces its own File and verifies a new\nindexed video in the same course, deletes only its own source, and waits for
 physical S3 cleanup. PHP signs its own lab S3 requests; it does not execute code
 inside the external processing worker or require that worker's SDK.
 
