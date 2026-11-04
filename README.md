@@ -27,6 +27,10 @@ alone does not provide them. Connect to a deployment that includes those APIs.
 
 ## Proposed LTI-only setup
 
+The [architecture decision](docs/design/decision-lti-materials-handoff.md) recommends
+LTI service authentication and Moodle-side direct export to VideoQ storage.
+An isolated spike validates the direction; production migration remains pending.
+
 The [LTI materials-service design](docs/design/lti-only-integration.md) evaluates
 using the same LTI registration to let VideoQ pull Moodle materials, with no
 separate synchronization API key. It documents the required minimal VideoQ

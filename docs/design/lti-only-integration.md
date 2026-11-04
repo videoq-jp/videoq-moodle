@@ -1,6 +1,7 @@
 # LTI-only setup with a Moodle-hosted materials service
 
-Status: proposed design, not implemented. The current push-based integration and
+Status: historical proposal. Its media-pull transport is superseded by the
+[accepted handoff decision](decision-lti-materials-handoff.md). Migration is not implemented. The current push-based integration and
 its synchronization credential remain unchanged. This document is an architecture
 assessment, not a claim of LTI certification or a completed migration.
 
