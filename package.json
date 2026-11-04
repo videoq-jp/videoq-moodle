@@ -1,0 +1,17 @@
+{
+  "name": "videoq-moodle",
+  "version": "0.6.0",
+  "private": true,
+  "description": "Moodle plugins and interoperability lab for VideoQ",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test lab/openrouter-config.test.mjs tests/*.test.mjs",
+    "package:plugins": "node scripts/package-plugins.mjs dist",
+    "lab:config": "docker compose --env-file lab/compose.env.example -f lab/compose.yaml -f lab/compose.sync.yaml -f lab/compose.live-sync.yaml -f lab/compose.web.yaml config --quiet"
+  },
+  "dependencies": { "fflate": "0.8.3" },
+  "devDependencies": { "pg": "8.23.1", "playwright": "1.64.1" }
+}

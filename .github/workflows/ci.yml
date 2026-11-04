@@ -1,0 +1,29 @@
+name: Moodle integration
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm test
+      - run: npm run package:plugins
+      - name: Check Moodle Compose configuration
+        run: npm run lab:config
+      - name: Check PHP syntax
+        run: docker run --rm -v "$PWD:/src:ro" -w /src php:8.3-cli sh -c 'find plugins lab -name "*.php" -print0 | xargs -0 -n1 php -l'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: moodle-plugins
+          path: dist/*.zip

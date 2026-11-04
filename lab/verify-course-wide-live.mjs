@@ -1,0 +1,40 @@
+// Real transcription, retrieval and streaming answer across every current synchronized lesson.
+import { chromium } from 'playwright';
+import { execFileSync } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
+import { readLtiAnswer } from './read-lti-answer.mjs';
+const root='/tmp/videoq-lti-lab/acceptance';
+const expected=JSON.parse(readFileSync(root+'/course-organization.json'));
+const query=`import {labDatabase} from '/fixtures/lab-database.mjs'; const db=await labDatabase();console.log(JSON.stringify((await db.query("SELECT r.external_id,r.course_id,r.video_id,v.transcript FROM lms_resources r JOIN videos v ON v.id=r.video_id WHERE r.installation_id='moodle-sync-lab' AND r.enabled AND v.status='completed' ORDER BY r.external_id")).rows));await db.end();`;
+const bindings=JSON.parse(execFileSync('sudo',['-n','docker','exec','videoq-lti-lab-api-1','node','--input-type=module','-e',query],{encoding:'utf8'}));
+assert.equal(bindings.length,3);assert.equal(new Set(bindings.map(r=>r.course_id)).size,1);
+assert.match(bindings.find(r=>r.external_id==='5').transcript,/blue\s+lantern/i);
+assert.match(bindings.find(r=>r.external_id==='21').transcript,/green\s+compass/i);
+const browser=await chromium.launch({headless:true,args:['--no-proxy-server']});
+try{
+ const page=await browser.newPage({ignoreHTTPSErrors:true,viewport:{width:1440,height:1000}});
+ await page.goto('https://moodle.localhost:18443/login/index.php');
+ await page.locator('#username').fill('learner');await page.locator('.toggle-sensitive-wrapper #password').waitFor({state:'attached'});await page.locator('#password').fill('Lti-lab-only-123!');
+ await Promise.all([page.waitForURL(url=>!url.pathname.includes('/login/')),page.locator('#loginbtn').click()]);
+ await page.goto('https://moodle.localhost:18443/course/view.php?id=2');
+ await page.locator('#module-'+expected.assistantCmid+' a.aalink').click();
+ await page.waitForURL('**/local/videoq/view.php?course=2');
+ await page.waitForFunction(()=>document.querySelector('#videoq-native-controls')?.disabled===false);
+ const options=await page.locator('#videoq-lesson option').evaluateAll(items=>items.map(item=>item.value));
+ assert.deepEqual([...options].sort(),['sync_21','sync_30','sync_5']);
+ const chat=page.locator('#videoq-native-chat');
+ const responsePromise=page.waitForResponse(r=>r.url().endsWith('/api/lti/messages/stream'),{timeout:120000});
+ await chat.locator('[data-region="send-message-txt"]').fill('この講座の第1章・第2章・実習教材に出てくる特別な練習例の英語名を、それぞれ根拠を添えて列挙してください。実習教材は「Moodle and VideoQ integration lesson」と話し始める教材です。');
+ await chat.locator('[data-action="send-message"]').click();
+ const response=await responsePromise;assert.equal(response.status(),200);assert.match(response.headers()['content-type'],/charset=utf-8/i);
+ const result=await readLtiAnswer(response);
+ await page.waitForFunction(()=>document.querySelector('#videoq-native-controls')?.disabled===false,{},{timeout:120000});
+ const answer=await chat.locator('.answer [data-region="text-container"]').innerText();
+ for(const name of [/blue\s+lantern/i,/green\s+compass/i,/silver\s+maple/i])assert.match(answer,name);
+ const sourceIds=[...new Set(result.answer.sources.map(source=>String(source.video_id)))].sort();
+ assert.deepEqual(sourceIds,bindings.map(r=>String(r.video_id)).sort());
+ await page.screenshot({path:root+'/course-wide-live.png',fullPage:true});
+ writeFileSync(root+'/course-wide-live.json',JSON.stringify({commonEntryIndependentOfVideo:true,oneCourseId:bindings[0].course_id,searchableLessons:options,realTranscripts:true,realEmbeddings:true,realAnswer:true,answer,sourceVideoIds:sourceIds,manualSeeding:false},null,2));
+ console.log('The shared course entry searches all three real-transcribed videos and returns a real answer citing all three.');
+}finally{await browser.close();}

@@ -1,0 +1,2 @@
+CREATE DATABASE moodle;
+CREATE DATABASE videoq;

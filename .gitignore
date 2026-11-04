@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+**/compose.env
+**/openrouter.env
+*.mp4
+*.m4v
+*.wav
+*.dump
+*.sql.gz
+*.log
+artifacts/
+backups/
+certificates/
