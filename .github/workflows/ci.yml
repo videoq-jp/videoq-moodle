@@ -5,6 +5,11 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing version tag to verify and resume publishing (optional)'
+        required: false
+        type: string
 permissions:
   contents: read
 env:
@@ -31,6 +36,7 @@ jobs:
         run: |
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/lab.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/dependencies.php
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/release.php
       - name: Download paired native browser executables
         run: php scripts/native-browser.php /tmp/videoq-native-browser >> "$GITHUB_ENV"
       - name: Compile browser assets through PHP WebDriver
@@ -42,32 +48,35 @@ jobs:
           mkdir -p dist
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" -v "$PWD/dist:/output" "$PHP_IMAGE" /src/scripts/package-plugins.php /output
   release:
-    name: Publish tagged ZIPs
-    if: startsWith(github.ref, 'refs/tags/v')
+    name: Publish or verify tagged ZIPs
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.release_tag != '')
     needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
     steps:
-      - name: Fetch verified tagged source
+      - name: Fetch publisher and exact tagged source
         run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]
           git init .
           git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
-          git fetch --depth=1 origin "$GITHUB_REF"
+          git fetch --depth=1 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-      - name: Build installers from verified source
+          cp scripts/publish-release.php /tmp/videoq-publish-release.php
+          git fetch --depth=1 origin "refs/tags/$RELEASE_TAG"
+          git checkout --detach FETCH_HEAD
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          fi
+      - name: Verify and build tagged installers offline
         run: |
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/packages.php
           mkdir -p dist
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" -v "$PWD/dist:/output" "$PHP_IMAGE" /src/scripts/package-plugins.php /output
-      - name: Publish development preview installers
+      - name: Reconcile release and verify immutable assets
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: |
-          cat > /tmp/release-notes.txt <<'NOTES'
-          Moodle plugins with PHP-only packaging, verification, and native-browser automation. A compatible separately deployed VideoQ service is required. This is a development preview tested on Moodle 5.1.8+ with Boost; see the setup guide before production use.
-
-          Install local_videoq.zip first, then ltisource_videoq.zip. Verify downloads with SHA256SUMS.
-          NOTES
-          gh release create "$GITHUB_REF_NAME" dist/local_videoq.zip dist/ltisource_videoq.zip dist/SHA256SUMS --verify-tag --prerelease --title "VideoQ for Moodle $GITHUB_REF_NAME" --notes-file /tmp/release-notes.txt
+        run: php /tmp/videoq-publish-release.php "$RELEASE_TAG" dist

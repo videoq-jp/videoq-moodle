@@ -45,3 +45,19 @@ downloads a paired native Chrome/ChromeDriver through PHP, compiles browser asse
 validates Compose and builds installers. The trusted tag job rebuilds from verified
 source and publishes ZIPs/checksums using GitHub CLI. Live integration tests are
 executed against the trial and are not misrepresented as hosted CI checks.
+
+## Release recovery
+
+The PHP publisher re-reads server state after transient API failures. It resumes
+drafts, verifies uploaded asset hashes, and treats an already published release
+with matching assets as success. It never deletes a release or replaces an
+existing asset; mismatched published assets fail explicitly. This covers a server
+error returned after GitHub already accepted an upload or publication request.
+
+Run the workflow manually from `main` with `release_tag` set to an existing
+version (for example `v0.9.0`) to verify or resume its publication. The workflow
+uses the verified publisher and rebuilds installers from that exact tag. Previous
+failed Actions runs remain historical records; recovery has its own run URL.
+
+`php tests/release.php` covers ambiguous creation/upload/publication responses,
+idempotent publication, mismatched assets, and authorization failures offline.
