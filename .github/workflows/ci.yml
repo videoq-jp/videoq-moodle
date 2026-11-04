@@ -10,60 +10,64 @@ permissions:
 env:
   PHP_IMAGE: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
 jobs:
-  package:
-    name: PHP-only installers
+  verify:
+    name: PHP packages and native browser checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Verify installer contract without Node or network access
+      # Public checkout through git, so CI itself needs no JavaScript actions.
+      - name: Fetch the exact event revision
+        run: |
+          git init .
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Verify installer contract offline
         run: docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/packages.php
-      - name: Build installer ZIPs and checksums
+      - name: Verify private signing-key helper offline
+        run: docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/tool-keys.php
+      - name: Check PHP syntax
+        run: docker run --rm --network none --entrypoint sh -v "$PWD:/src:ro" -w /src "$PHP_IMAGE" -c 'find plugins scripts tests lab -name "*.php" -print0 | xargs -0 -n1 php -l'
+      - name: Install Python verification dependencies
+        run: |
+          python3 -m venv /tmp/videoq-moodle-venv
+          /tmp/videoq-moodle-venv/bin/pip install -r lab/requirements.txt
+      - name: Unit and dependency contracts
+        run: /tmp/videoq-moodle-venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Compile browser assets using native Chrome
+        run: /tmp/videoq-moodle-venv/bin/python lab/check_browser.py
+      - name: Check Moodle Compose configuration
+        run: docker compose --env-file lab/compose.env.example -f lab/compose.yaml --profile mock config --quiet
+      - name: Build installers
         run: |
           mkdir -p dist
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" -v "$PWD/dist:/output" "$PHP_IMAGE" /src/scripts/package-plugins.php /output
-      - name: Check PHP syntax
-        run: docker run --rm --network none --entrypoint sh -v "$PWD:/src:ro" -w /src "$PHP_IMAGE" -c 'find plugins scripts tests lab -name "*.php" -print0 | xargs -0 -n1 php -l'
-      - name: Check Moodle Compose configuration
-        run: docker compose --env-file lab/compose.env.example -f lab/compose.yaml -f lab/compose.sync.yaml -f lab/compose.live-sync.yaml -f lab/compose.web.yaml config --quiet
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: moodle-plugins
-          path: |
-            dist/*.zip
-            dist/SHA256SUMS
-  lab:
-    name: Optional Node lab tools
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version-file: lab/.nvmrc
-          cache: npm
-          cache-dependency-path: lab/package-lock.json
-      - run: npm ci --ignore-scripts --prefix lab
-      - run: npm run check --prefix lab
-      - run: npm test --prefix lab
   release:
     name: Publish tagged ZIPs
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: package
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: read
     steps:
-      - name: Publish development-preview installers
+      - name: Fetch verified tagged source
+        run: |
+          git init .
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_REF"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Build installers from verified source
+        run: |
+          mkdir -p dist
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" -v "$PWD/dist:/output" "$PHP_IMAGE" /src/scripts/package-plugins.php /output
+      - name: Publish development preview installers
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh run download "$GITHUB_RUN_ID" --name moodle-plugins --dir dist
-          cat > notes.txt <<'NOTES'
-          Ready-to-install Moodle plugins; Node.js and npm are not required to install, run or build them.
+          cat > /tmp/release-notes.txt <<'NOTES'
+          Moodle plugins, PHP packaging and Python/native-browser verification. A compatible separately deployed VideoQ service is required. This is a development preview tested on Moodle 5.1.8+ with Boost; see the setup guide before production use.
 
-          This is a development preview, tested on Moodle 5.1.8+ with Boost. A compatible VideoQ server is required. See the repository setup guide before connecting a production system.
-
-          Install local_videoq.zip first, then ltisource_videoq.zip. SHA256SUMS verifies the downloaded ZIPs.
+          Install local_videoq.zip first, then ltisource_videoq.zip. Verify downloads with SHA256SUMS.
           NOTES
-          gh release create "$GITHUB_REF_NAME" dist/local_videoq.zip dist/ltisource_videoq.zip dist/SHA256SUMS --verify-tag --prerelease --title "VideoQ for Moodle $GITHUB_REF_NAME" --notes-file notes.txt
+          gh release create "$GITHUB_REF_NAME" dist/local_videoq.zip dist/ltisource_videoq.zip dist/SHA256SUMS --verify-tag --prerelease --title "VideoQ for Moodle $GITHUB_REF_NAME" --notes-file /tmp/release-notes.txt

@@ -1,0 +1,175 @@
+{
+  "verifiedAt": "2026-11-04T06:26:15.308719+00:00",
+  "scope": "videoq-moodle repository and its Moodle lab; VideoQ server deployed separately",
+  "nodeDependencyAbsent": true,
+  "unitTestsPassed": 12,
+  "phpPackageAndKeyContractsPassed": true,
+  "nativeBrowserSyntaxPassed": true,
+  "moodleServicesWithoutRuntimeExecutables": [
+    "moodle",
+    "videoq-sync",
+    "proxy",
+    "ai",
+    "db"
+  ],
+  "existingVideosPreserved": [
+    {
+      "id": 27,
+      "status": "completed"
+    }
+  ],
+  "activeKeylessConnection": true,
+  "noTemporaryMaterialFixtures": true,
+  "simultaneousVideoPlaybackCapacityTested": false,
+  "reports": {
+    "chat-browser": {
+      "passed": true,
+      "realProvider": false,
+      "nativeMoodleChat": true,
+      "streaming": true,
+      "feedbackGoodBadReset": true,
+      "timestampSeek": true,
+      "responsiveWidths": [
+        390,
+        768,
+        1280,
+        1440
+      ],
+      "sourceVideoIds": [
+        27,
+        51
+      ]
+    },
+    "chat-live": {
+      "passed": true,
+      "realProvider": true,
+      "nativeMoodleChat": true,
+      "streaming": true,
+      "feedbackGoodBadReset": true,
+      "timestampSeek": true,
+      "responsiveWidths": [
+        390,
+        768,
+        1280,
+        1440
+      ],
+      "sourceVideoIds": [
+        27,
+        51
+      ]
+    },
+    "materials-background": {
+      "passed": true,
+      "normalMoodleCron": true,
+      "normalVideoqScheduler": true,
+      "normalSqsWorker": true,
+      "sameExistingCourse": true,
+      "sourceDeletionAcknowledged": true,
+      "retiredMediaDeleted": true,
+      "existingVideosPreserved": true
+    },
+    "course-switch": {
+      "passed": true,
+      "nativeMoodlePlayer": true,
+      "videoCount": 2,
+      "citationChangesVideoAndPosition": true,
+      "selectorChangesBack": true,
+      "conversationPreserved": true,
+      "toolFrameNotReloaded": true
+    },
+    "connection": {
+      "passed": true,
+      "materialsMode": true,
+      "wrongIssuerRejected": true,
+      "lostResponseRecovery": true,
+      "cancelPreservesConnection": true,
+      "disconnectedStatePersists": true,
+      "learningDataPreserved": true,
+      "otherConnectionsPreserved": true
+    },
+    "materials-service-contract": {
+      "passed": true,
+      "checks": [
+        "Tool signing key obtains scoped service access without sync API key",
+        "Rejects replay",
+        "Rejects wrong audience",
+        "Rejects ungranted scope",
+        "Manifest includes opted-in real Moodle File",
+        "Learner access resolves stable material identity",
+        "Unenrolled account denied",
+        "Unapproved upload origin rejected",
+        "Export queues one durable idempotent ad-hoc job",
+        "Hidden source cannot be used by learner",
+        "Changed visibility cancels queued transfer before network access",
+        "Terminal export clears signed destination",
+        "Restored configuration and cache: servicemode",
+        "Restored configuration and cache: typeid",
+        "Restored configuration and cache: apiurl",
+        "Restored configuration and cache: serviceuploadtargets"
+      ],
+      "transactionRolledBack": true
+    },
+    "database-backup": {
+      "snapshotsConsistent": true,
+      "privateFiles": true,
+      "results": [
+        {
+          "database": "videoq",
+          "bytes": 639213,
+          "counts": {
+            "users": 1,
+            "videos": 1,
+            "video_courses": 3,
+            "video_course_members": 1,
+            "scene_embeddings": 26,
+            "lms_resources": 17,
+            "lms_courses": 2,
+            "chat_logs": 276
+          },
+          "isolatedRestore": true
+        },
+        {
+          "database": "moodle",
+          "bytes": 2117889,
+          "counts": {
+            "mdl_course": 3,
+            "mdl_course_modules": 22,
+            "mdl_files": 107,
+            "mdl_local_videoq_sync": 19
+          },
+          "isolatedRestore": true
+        }
+      ],
+      "temporaryDatabasesRemoved": true
+    },
+    "media-backup": {
+      "passed": true,
+      "moodleFiledirRestored": true,
+      "verifiedContentFiles": 82,
+      "sourceAndVideoqCopyMatch": true,
+      "sha256": "949f3862236c99647d3dede9f4d5694e93a076e4bc0e714716e9000dcdb26edc",
+      "bytes": 281054258,
+      "disposableS3CopyRemoved": true
+    },
+    "load-2": {
+      "passed": true,
+      "realMoodleLogins": 2,
+      "realAi": true,
+      "questionsStartedConcurrently": true,
+      "simultaneousVideoPlaybackTested": false,
+      "additionalVideoqAccounts": 0,
+      "results": [
+        {
+          "ok": true,
+          "httpStatus": 200,
+          "milliseconds": 4746
+        },
+        {
+          "ok": true,
+          "httpStatus": 200,
+          "milliseconds": 4837
+        }
+      ]
+    }
+  }
+}

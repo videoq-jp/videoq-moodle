@@ -21,11 +21,13 @@ VideoQ. At extraction these corresponding API changes were also uncommitted;
 the base commit alone does not contain them. A compatible VideoQ build/deployment
 is required until they are published by the application repository. Moodle plugins
 depend on their HTTPS contracts, not source imports.
-The lab is an optional integration development dependency on a separately built
-VideoQ checkout. It does not create a production dependency on this repository.
+The lab connects to a separately deployed VideoQ HTTPS service. It does not import
+application source, build VideoQ or own its runtime dependencies.
 
 No runtime credentials, uploaded videos, database snapshots, provider settings or
 private acceptance artifacts were imported. Public lab fixtures remain confined
 to the loopback-only Compose environment. Existing licensing is preserved.
 
-The original extracted Node packager has since been replaced by `scripts/package-plugins.php`. Node-based lab tooling and its dependencies now live under `lab/` and are optional.
+The original extracted JavaScript packager and development harness were replaced
+by PHP packaging and Python/native-browser verification. Their original source
+is preserved in Git history, not required by the current repository.

@@ -21,8 +21,8 @@ Keep the existing queue, processing worker and maintenance scheduler running.
 Generate the tool signing key ring once, outside the checkout:
 
 ```sh
-cd /path/to/videoq/apps/api
-node scripts/generate-lti-tool-keys.mjs /secure/path/lti-tool-keys.json
+cd /path/to/videoq-moodle
+php scripts/generate-lti-tool-keys.php /secure/path/lti-tool-keys.json
 ```
 
 Load that JSON file as the **VideoQ server secret** `LTI_TOOL_KEYS`. Do not put it
@@ -34,7 +34,7 @@ the deployment overlap. The key ring accepts at most three retired public keys.
 
 ## Connect or migrate
 
-1. Install/update `local_videoq` 0.7.1 and `ltisource_videoq`. Finish Moodle's
+1. Install/update `local_videoq` 0.8.0 and `ltisource_videoq`. Finish Moodle's
    plugin upgrade and keep normal Moodle cron/ad-hoc task execution enabled.
 2. In the owning VideoQ account, open Settings → Connect Moodle. Enter the exact
    HTTPS Moodle base URL and generate a connection code. A materials-capable
@@ -95,21 +95,18 @@ with real OpenRouter transcription, embeddings and an answer, and
 Good/Bad/reset and timestamp seeking are covered by
 [the real browser/provider check](evidence/materials-chat.json).
 
-Development commands (the runtime fixture requires the disconnected disposable
-lab, and must not run against an active connection):
+Current verification commands use Python and native Chrome:
 
 ```sh
-node lab/check-materials-service.mjs
-VIDEOQ_ROOT=/path/to/videoq MATERIALS_REAL_AI=1 node lab/check-materials-runtime.mjs
-node lab/migrate-materials-browser.mjs
-node lab/verify-materials-chat.mjs
-node lab/verify-materials-background.mjs
+.venv/bin/python lab/verify_chat.py
+.venv/bin/python lab/verify_chat.py --live
+.venv/bin/python lab/verify_background.py --media /private/original-spoken-lesson.mp4
 ```
 
-The runtime fixture uses an isolated queue and temporary course/tool. It restores
-its Moodle configuration and temporary database schema; production inference uses
-the user's private provider file without printing credentials. The browser rollout
-command intentionally leaves the approved existing lab connection migrated.
+See [coverage](verification.md) for the distinction between historical evidence
+and current executable tests. Mutating acceptance requires the isolated local
+lab; real inference may incur provider charges.
+
 Large-file stress, broad LMS interoperability and production concurrency still
 need deployment-specific verification. Do not treat a local acceptance run as an
 LTI certification or a production capacity guarantee.

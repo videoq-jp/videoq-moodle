@@ -148,36 +148,11 @@ position as part of the question text in its existing guest question logs.
 
 ## Reproducible verification
 
-The repository's `lab` lab mounts this plugin, creates a 24-second
-original silent video as a Moodle File activity, and associates it with the test
-VideoQ resource. Its AI provider defaults to a deterministic fixture; the lab
-also supports an explicitly enabled real OpenRouter mode.
-
-```bash
-node lab/verify-companion.mjs
-```
-
-That command also toggles the lab's File/LTI visibility and restores it in `finally`
-blocks to verify access denial; it must run only against the isolated lab.
-It checks anonymous access, an unenrolled account, both learner and teacher views,
-actual video playback while submitting a question, desktop columns and mobile
-stacking. Screenshots and `companion-verification.json` go to the lab directory.
-
-The lab's `check-plugin.php` checks valid and malformed JSON associations,
-duplicate IDs, wrong module-ID types, unknown keys and admin setting validation.
-
-Playback checks (default does not call a paid model):
-
-```bash
-node lab/verify-playback.mjs
-# One real AI answer at the 10-second VideoQ scene:
-node lab/verify-playback.mjs --live
-```
-
-The first test checks origin/window/channel rejection, cross-video and out-of-range
-seek rejection, SRT timestamp handling, citation filtering, automatic playback context
-and preservation of paused playback. The live check exercises the actual model
-and seeks back to its cited 8-second scene.
+See the [Moodle lab](../../../lab/README.md) and
+[verification coverage](../../../docs/verification.md). PHP validates the plugin
+and packages; Python with native Chrome tests streaming, feedback and seeking.
+The default chat test uses a browser-only held response and no paid provider.
+The `--live` test makes one actual model request.
 
 ## Native Moodle messaging interface
 
@@ -221,61 +196,5 @@ Video.js player. Auth and File-activity access checks run before page context is
 changed to the course for rendering. The demo can be localized with
 `lab/localize.php` after installing the official Japanese pack.
 
-```bash
-node lab/verify-design.mjs
-node lab/verify-course.mjs
-```
-
-These checks intercept answer responses and make no paid AI calls. They verify
-standard message/composer markup, theme inheritance, core textarea resizing,
-scrolling, rich-text safety, IME handling, retry/connection errors, playback,
-conversation preservation and cross-video citations at desktop/mobile widths.
-
-## Course-wide questions and switching videos
-
-Install both plugins: `local/videoq` into `local/videoq`, and
-`plugins/ltisource/videoq` into `mod/lti/source/videoq`. Run Moodle's normal plugin
-upgrade. The source plugin adds an expiring, Moodle-signed custom access proof to
-LTI launches; the companion initializes its private signing key during install or
-upgrade. Do not copy that key between Moodle sites.
-
-Automatic synchronization groups videos by **installation + Moodle course ID**.
-Enabling another video adds it to that VideoQ course; replacement, hiding,
-disabling or deleting one video leaves its siblings intact. The course title
-comes from Moodle. Run VideoQ database migrations 0048 and 0049 when upgrading.
-0049 consolidates existing LMS resource bindings and memberships; it preserves
-original courses and their records rather than deleting them.
-
-Database-backed LTI registrations require live Moodle permission checks. For
-administrator-managed static bindings, set `courseAccess: "moodle"` on the
-registration and map all related resources to the same `courseId`, with an
-individual `videoId` per resource. A manually configured registration without
-this option retains its administrator-defined course scope; do not put
-learner-restricted videos into such a shared scope.
-
-At launch and before each question, VideoQ calls the trusted Moodle issuer's
-`/local/videoq/access.php`. This cookie-free endpoint accepts only a signed,
-one-hour proof bound to the learner, course and launch activity. It rechecks
-account/enrolment state, course and activity visibility, `uservisible` (including
-availability conditions), deletion and view capabilities for each video and LTI
-activity. Failure to reach Moodle denies the question. VideoQ intersects this
-list with its current enabled, processed resource bindings and course membership
-before retrieval, including transcript/scene tools. Changed permissions also
-remove prior answer context from the model input for that session.
-
-The video selector and citations use the same permitted catalog. A citation in
-another lecture changes the Moodle player source, seeks and starts playback,
-without replacing the question iframe or clearing its conversation. Player URLs
-come only from Moodle's server-rendered catalog; received messages cannot supply
-an arbitrary media URL. Position hints follow the selected video. The regular
-File activity continues to enforce access when serving the media.
-
-The source plugin also supports launching a course conversation in a separate
-window through the same tool type. Without the companion player, citations are
-text references. The companion's selector contains processed, accessible videos
-only; it does not add timestamp controls or suggested questions. Reload the
-companion after adding a lesson to refresh its server-rendered media catalog.
-
-The player uses the configured Moodle Video.js CSS class and standard controls,
-play button, colors and proportions. Companion CSS controls the surrounding
-layout only; it does not override Video.js skin selectors.
+Current commands and coverage are documented in the lab guide. Earlier browser
+acceptance evidence is retained in `docs/evidence/` and Git history.

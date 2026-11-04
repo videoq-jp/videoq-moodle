@@ -3,7 +3,7 @@
 define('CLI_SCRIPT', true);
 require('/var/www/html/config.php');
 if ($CFG->wwwroot !== 'https://moodle.localhost:18443' || $CFG->dbhost !== 'db') throw new \RuntimeException('Lab only');
-$fixture = json_decode((string)get_config('local_videoq_pull_spike', 'fixture'), true, 16, JSON_THROW_ON_ERROR);
+$fixture = json_decode((string)get_config('local_videoq_materials_acceptance', 'fixture'), true, 16, JSON_THROW_ON_ERROR);
 if (!$fixture || !preg_match('/^[a-f0-9]{32}$/D', $fixture['run'])) throw new \RuntimeException('Isolated fixture required');
 \core\session\manager::set_user(get_admin());
 $baseline = [];
@@ -26,6 +26,19 @@ try {
         'scope' => \local_videoq\service_auth::SCOPE, 'client_assertion' => $testinput['jwt']]);
     $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $issued['access_token'];
     contract_check((int)\local_videoq\service_auth::authenticate()->id === $fixture['typeid'], 'Tool signing key obtains scoped service access without sync API key');
+    foreach (['replay' => ['jwt' => $testinput['jwt'], 'scope' => \local_videoq\service_auth::SCOPE],
+            'wrong audience' => ['jwt' => $testinput['wrongAudience'], 'scope' => \local_videoq\service_auth::SCOPE],
+            'ungranted scope' => ['jwt' => $testinput['jwt'], 'scope' => 'https://attacker.example/scope']] as $label => $negative) {
+        $rejected = false;
+        // Moodle's PostgreSQL driver recovers failed statements using its own
+        // savepoint; an additional raw savepoint is discarded by that recovery.
+        try {
+            \local_videoq\service_auth::issue(['grant_type' => 'client_credentials',
+                'client_assertion_type' => 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+                'scope' => $negative['scope'], 'client_assertion' => $negative['jwt']]);
+        } catch (\Throwable $error) { $rejected = true; }
+        contract_check($rejected, 'Rejects ' . $label);
+    }
     \local_videoq\synchronizer::enable($fixture['cmid']);
     $snapshot = \local_videoq\materials_service::manifest($fixture['courseid'], $fixture['typeid']);
     contract_check($snapshot['complete'] && count($snapshot['resources']) === 1 && $snapshot['resources'][0]['manifest']['enabled'], 'Manifest includes opted-in real Moodle File');
@@ -33,6 +46,11 @@ try {
     $DB->set_field('local_videoq_sync', 'status', 'completed', ['cmid' => $fixture['cmid']]);
     $access = \local_videoq\materials_service::access($fixture['courseid'], $fixture['typeid'], $item['manifest']['resourceLinkId'], (string)$fixture['learnerid']);
     contract_check(count($access['resources']) === 1 && $access['resources'][0]['externalId'] === (string)$fixture['cmid'], 'Learner access resolves stable material identity');
+    $outsider = $DB->get_field('user', 'id', ['username' => 'teacher'], MUST_EXIST);
+    $denied = false;
+    try { \local_videoq\materials_service::access($fixture['courseid'], $fixture['typeid'], $item['manifest']['resourceLinkId'], (string)$outsider); }
+    catch (\Throwable $error) { $denied = true; }
+    contract_check($denied, 'Unenrolled account denied');
     try { \local_videoq\materials_service::destination('https://attacker.example/upload'); throw new \LogicException('Accepted arbitrary destination'); }
     catch (\RuntimeException $e) { contract_check(true, 'Unapproved upload origin rejected'); }
     $job = \local_videoq\materials_service::export($fixture['courseid'], $fixture['typeid'], [
@@ -45,6 +63,10 @@ try {
         'idempotencyKey' => str_repeat('a', 32)]);
     contract_check($job['status'] === 'queued' && $again['jobId'] === $job['jobId'], 'Export queues one durable idempotent ad-hoc job');
     set_coursemodule_visible($fixture['cmid'], 0);
+    $denied = false;
+    try { \local_videoq\materials_service::access($fixture['courseid'], $fixture['typeid'], $item['manifest']['resourceLinkId'], (string)$fixture['learnerid']); }
+    catch (\Throwable $error) { $denied = true; }
+    contract_check($denied, 'Hidden source cannot be used by learner');
     $task = new \local_videoq\task\export_material(); $task->set_custom_data(['jobid' => $job['jobId']]); $task->execute();
     $receipt = \local_videoq\materials_service::status($fixture['courseid'], $fixture['typeid'], $job['jobId']);
     contract_check($receipt['status'] === 'stale', 'Changed visibility cancels queued transfer before network access');

@@ -1,4 +1,3 @@
-node_modules/
 dist/
 .env
 .env.*
@@ -14,3 +13,7 @@ dist/
 artifacts/
 backups/
 certificates/
+
+.venv/
+__pycache__/
+*.pyc

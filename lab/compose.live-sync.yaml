@@ -1,8 +1,0 @@
-# Combine with compose.yaml and compose.sync.yaml; credentials remain in private files.
-services:
-  api:
-    command: [node, /fixtures/start-live-sync-api.mjs]
-  worker:
-    command: [python, /lab/start-live-worker.py]
-    volumes:
-      - ${LTI_LAB_DIR:?Set LTI_LAB_DIR}/worker-provider.json:/run/secrets/videoq-provider.json:ro

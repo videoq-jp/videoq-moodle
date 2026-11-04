@@ -6,8 +6,8 @@ implementation, distribution packages, documentation, and integration lab.
 
 ## Installation
 
-1. Download [local_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.7.1/local_videoq.zip)
-   and [ltisource_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.7.1/ltisource_videoq.zip)
+1. Download [local_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.8.0/local_videoq.zip)
+   and [ltisource_videoq.zip](https://github.com/yukiharada1228/videoq-moodle/releases/download/v0.8.0/ltisource_videoq.zip)
    from the development-preview release. Install them in that order through
    Moodle's plugin installer. **No Node.js, npm or JavaScript build is required.**
 2. Sign in to the school's VideoQ account. Open **Settings → Connect Moodle**,
@@ -55,53 +55,23 @@ same PHP-only build and publishes ready-to-install ZIPs on version tags.
 Browser JavaScript in `plugins/` is shipped directly as static assets. It connects
 the native Moodle player/chat to VideoQ and needs no bundler or Node runtime.
 
-## Optional development lab
+## Development and verification
 
-Node.js is confined to optional tools under `lab/`, including browser automation
-and the separate VideoQ trial environment. Plugin installation and PHP packaging
-do not use these tools:
+This repository has no Node.js runtime, package manager, build tool or CI action
+requirement. PHP builds the installers; Python runs optional verification;
+Selenium uses native Chrome/ChromeDriver. Browser JavaScript stays in `plugins/`
+and is served directly by Moodle.
 
 ```sh
-npm ci --prefix lab
-npm run check --prefix lab
-npm test --prefix lab
+python3 -m venv .venv
+.venv/bin/pip install -r lab/requirements.txt
+.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
+.venv/bin/python lab/check_browser.py
 ```
 
-Use the Node version in `lab/.nvmrc`. See [lab instructions](lab/README.md) for
-browser and integration tests. VideoQ itself has its own deployment requirements;
-this repository does not change the VideoQ server's runtime.
+The [Moodle lab](lab/README.md) connects to an independently deployed VideoQ
+service. This repository does not build or start that server. Its implementation
+and runtime dependencies belong to the VideoQ project.
 
-## Repository responsibilities
-
-| This repository | VideoQ application |
-|---|---|
-| `plugins/local/videoq`: synchronization, video/chat interface, connection setup | LTI authentication, sessions, connection registration and revocation APIs |
-| `plugins/ltisource/videoq`: access proofs supplied at LTI launch | Video management, transcription, retrieval, AI answers |
-| `scripts/`: package generation and source checks | School accounts, quotas, storage, workers |
-| `lab/`: Moodle integration environment and acceptance checks | API and database migrations |
-
-The plugins connect through HTTPS LTI and synchronization APIs. Connection-code
-issuance and disconnection controls belong to VideoQ, which manages the account.
-The plugins do not import VideoQ application source at runtime.
-
-## Integration testing
-
-Follow the [lab instructions](lab/README.md). Integration tests additionally
-require a built checkout of the [VideoQ application](https://github.com/yukiharada1228/videoq).
-
-Use `lab/compose.env.example` as a template. Set `VIDEOQ_ROOT` to the application
-checkout and `MOODLE_INTEGRATION_ROOT` to this checkout, using absolute paths.
-Compose mounts the plugins from this repository and the API and worker from VideoQ.
-
-The isolated lab contains public fixture credentials; never use them in production.
-Real API keys, uploaded media, acceptance artifacts, and backups stay outside this
-repository.
-
-## Licensing and provenance
-
-The Moodle plugins retain their existing **GPL-3.0-or-later** license; see each
-plugin's `LICENSE` file. Lab scripts and documentation retain the source project's
-[PolyForm Noncommercial 1.0.0 license](LICENSE). The VideoQ application license is
-unchanged.
-
-The [extraction record](docs/extraction.md) documents the source and repository boundary.
+See [verification coverage](docs/verification.md) for offline checks, browser
+acceptance, background synchronization and the migration from earlier lab tools.
