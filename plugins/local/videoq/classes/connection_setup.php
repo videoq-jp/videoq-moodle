@@ -98,7 +98,7 @@ final class connection_setup {
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl();
         $curl->setHeader(['Authorization: Bearer ' . $pending['token'], 'Accept: application/json']);
-        $response = $curl->get($pending['origin'] . '/api/lms/connection', [], ['CURLOPT_FOLLOWLOCATION' => 0, 'CURLOPT_TIMEOUT' => 15]);
+        $response = $curl->get($pending['origin'] . '/api/lms/connection', [], client::http_options(15));
         $status = (int)($curl->get_info()['http_code'] ?? 0);
         if ($curl->get_errno() || !in_array($status, [200, 401], true)) throw new \RuntimeException('Connection check unavailable');
         if ($status === 401) return null;
@@ -111,7 +111,7 @@ final class connection_setup {
         $curl = new \curl();
         $curl->setHeader(['Content-Type: application/json', 'Accept: application/json']);
         $curl->post($origin . '/api/lms/pairing/exchange', json_encode($request, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
-            ['CURLOPT_FOLLOWLOCATION' => 0, 'CURLOPT_TIMEOUT' => 30]);
+            client::http_options());
         if ($curl->get_errno() || (int)($curl->get_info()['http_code'] ?? 0) !== 200) {
             throw new \RuntimeException('Connection could not be completed');
         }

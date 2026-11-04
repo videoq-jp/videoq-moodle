@@ -29,7 +29,7 @@ final class export_material extends \core\task\adhoc_task {
             $curl = new \curl();
             $curl->setHeader(['Content-Type: ' . $file->get_mimetype(), 'Content-Length: ' . $file->get_filesize(), 'Expect:']);
             $temp = $file->copy_content_to_temp('local_videoq');
-            try { $curl->put($job->uploadurl, ['file' => $temp], ['CURLOPT_FOLLOWLOCATION' => 0, 'CURLOPT_TIMEOUT' => 1800, 'CURLOPT_USERPWD' => false]); }
+            try { $curl->put($job->uploadurl, ['file' => $temp], \local_videoq\client::http_options(1800) + ['CURLOPT_USERPWD' => false]); }
             finally { if (is_file($temp)) unlink($temp); }
             $code = (int)($curl->get_info()['http_code'] ?? 0);
             if ($curl->get_errno() || $code < 200 || $code >= 300) throw new \RuntimeException('Transfer failed');

@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "normalMoodleCron": true,
+  "normalVideoqScheduler": true,
+  "normalSqsWorker": true,
+  "realProvider": "openrouter",
+  "verifiedHttps": true,
+  "sameExistingCourse": true,
+  "sourceDeletionAcknowledged": true,
+  "retiredMediaDeleted": true,
+  "existingVideosPreserved": true
+}

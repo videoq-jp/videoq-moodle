@@ -19,12 +19,17 @@ final class client {
         }
         return 'https://' . strtolower($parts['host']) . (isset($parts['port']) && $parts['port'] !== 443 ? ':' . $parts['port'] : '');
     }
+    public static function http_options(int $timeout = 30): array {
+        // Moodle's curl wrapper otherwise defaults SSL peer verification to off.
+        return ['CURLOPT_FOLLOWLOCATION' => 0, 'CURLOPT_TIMEOUT' => $timeout,
+            'CURLOPT_SSL_VERIFYPEER' => true, 'CURLOPT_SSL_VERIFYHOST' => 2];
+    }
     public function request(string $method, string $path, ?array $body = null): array {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl();
         $curl->setHeader(['Authorization: Bearer ' . $this->token, 'Content-Type: application/json', 'Accept: application/json']);
-        $options = ['CURLOPT_FOLLOWLOCATION' => 0, 'CURLOPT_TIMEOUT' => 30];
+        $options = self::http_options();
         $url = $this->origin . '/api/lms/' . $path;
         $json = $body === null ? '' : json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if ($method === 'GET') $response = $curl->get($url, [], $options);
@@ -46,9 +51,7 @@ final class client {
         $curl->setHeader($headers);
         $temp = $file->copy_content_to_temp('local_videoq');
         try {
-            $curl->put($upload['url'], ['file' => $temp], [
-                'CURLOPT_FOLLOWLOCATION' => 0, 'CURLOPT_TIMEOUT' => 1800, 'CURLOPT_USERPWD' => false,
-            ]);
+            $curl->put($upload['url'], ['file' => $temp], self::http_options(1800) + ['CURLOPT_USERPWD' => false]);
             $code = (int)($curl->get_info()['http_code'] ?? 0);
             if ($curl->get_errno() || $code < 200 || $code >= 300) throw new \RuntimeException('Video upload failed');
         } finally { if (is_file($temp)) unlink($temp); }

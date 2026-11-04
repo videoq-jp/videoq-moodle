@@ -529,3 +529,18 @@ resource. The retirement marker prevents media preparation from recreating them.
 Run `LTI_VERIFY_LIBRARY=1 node lab/verify-moodle-source-deletion.mjs`
 to exercise actual source deletion and automatic removal from the open library;
 its disposable course and media are cleaned up afterward.
+
+
+## LTI materials-service mode
+
+See [setup and migration](../docs/materials-service.md) for the compatible server,
+operator tool signing secret and the `VIDEOQ2.` setup. The live API and maintenance
+loader read `/tmp/videoq-lti-lab/lti-tool-keys.json` without printing it. Normal
+Moodle cron/ad-hoc execution performs media exports; the scoped lab runner now
+runs only VideoQ synchronization and export tasks.
+
+`trust-lab-ca.php` copies Caddy's public CA into a web-readable Moodle trust bundle,
+combined with the system roots. It never copies the private signing key or disables
+TLS verification. Run `check-materials-tls.php` as `www-data` to verify both trusted
+and rejected certificate paths. This fixes the difference between root CLI and
+web PHP when fetching the tool JWKS.

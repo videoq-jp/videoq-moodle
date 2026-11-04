@@ -6,7 +6,9 @@ if ($hassiteconfig) {
         new moodle_url('/local/videoq/connect.php')));
     $settings = new admin_settingpage('local_videoq', get_string('advancedsettings', 'local_videoq'));
     $settings->add(new admin_setting_configtext('local_videoq/apiurl', get_string('apiurl', 'local_videoq'), '', '', PARAM_URL));
-    $settings->add(new admin_setting_configpasswordunmask('local_videoq/synctoken', get_string('synctoken', 'local_videoq'), '', ''));
+    if (get_config('local_videoq', 'servicemode') !== 'lti') {
+        $settings->add(new admin_setting_configpasswordunmask('local_videoq/synctoken', get_string('synctoken', 'local_videoq'), '', ''));
+    }
     $settings->add(new admin_setting_configtext('local_videoq/typeid', get_string('typeid', 'local_videoq'), '', '', PARAM_INT));
     $settings->add(new \local_videoq\admin_setting_lessons(
         'local_videoq/lessons', get_string('lessons', 'local_videoq'),

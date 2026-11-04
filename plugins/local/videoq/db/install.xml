@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB PATH="local/videoq/db" VERSION="2026110402" COMMENT="VideoQ synchronization state">
+<XMLDB PATH="local/videoq/db" VERSION="2026110403" COMMENT="VideoQ synchronization state">
   <TABLES>
     <TABLE NAME="local_videoq_sync" COMMENT="Source activities and durable synchronization state, with no learner data">
       <FIELDS>

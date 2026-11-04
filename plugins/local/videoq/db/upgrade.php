@@ -41,5 +41,6 @@ function xmldb_local_videoq_upgrade($oldversion) {
         }
         upgrade_plugin_savepoint(true, 2026110402, 'local', 'videoq');
     }
+    if ($oldversion < 2026110403) upgrade_plugin_savepoint(true, 2026110403, 'local', 'videoq');
     return true;
 }

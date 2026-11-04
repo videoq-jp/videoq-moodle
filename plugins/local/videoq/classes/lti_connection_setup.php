@@ -37,7 +37,7 @@ final class lti_connection_setup {
                 'secret' => $value['secret'], 'issuer' => $CFG->wwwroot, 'clientId' => $type->clientid,
                 'deploymentId' => (string)$type->id, 'mode' => 'materials',
                 'materialsService' => ['tokenEndpoint' => $CFG->wwwroot . '/local/videoq/token.php', 'endpoint' => $CFG->wwwroot . '/local/videoq/materials.php']], JSON_THROW_ON_ERROR),
-                ['CURLOPT_FOLLOWLOCATION' => 0, 'CURLOPT_TIMEOUT' => 30]);
+                client::http_options());
             if ($curl->get_errno() || (int)($curl->get_info()['http_code'] ?? 0) !== 200 || strlen($raw) > 16384) throw new \RuntimeException('Connection failed');
             $result = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
             if (($result['toolOrigin'] ?? '') !== $value['origin'] || !is_array($result['uploadTargets'] ?? null) || !$result['uploadTargets'] || count($result['uploadTargets']) > 4) throw new \RuntimeException('Invalid connection response');

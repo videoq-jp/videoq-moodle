@@ -8,4 +8,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || (int)($_SERVER['CONTENT_LEN
     http_response_code(400); echo json_encode(['error' => 'invalid_request']); exit;
 }
 try { echo json_encode(\local_videoq\service_auth::issue($_POST), JSON_THROW_ON_ERROR); }
-catch (\Throwable $error) { http_response_code(401); echo json_encode(['error' => 'invalid_client']); }
+catch (\Throwable $error) {
+    error_log(json_encode(['event' => 'videoq_service_token_rejected', 'type' => get_class($error), 'file' => basename($error->getFile()), 'line' => $error->getLine()]));
+    http_response_code(401); echo json_encode(['error' => 'invalid_client']); }
