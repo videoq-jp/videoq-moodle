@@ -19,8 +19,11 @@ network error, retry with the same code. Existing connections are preserved.
 Run Moodle cron every minute. The operator must first apply current VideoQ
 migrations, enable database LTI registrations, and run its worker/queue/storage
 and recovery scheduler. See the
-[complete setup guide](../../../docs/setup.md#connect-moodle-with-a-one-time-code).
-Manual operator provisioning remains available in **VideoQ advanced settings**.
+[materials-service setup guide](../../../docs/materials-service.md).
+A compatible server with tool signing keys issues `VIDEOQ2.` codes and uses LTI
+service authentication without a sync API key. Existing connections can update
+or reconnect from the collapsed section of the Moodle connection page. Legacy
+`VIDEOQ1.` setup and manual provisioning remain compatible.
 
 Teachers can then enable **VideoQ questions** in a video File activity's settings
 navigation. The plugin creates the question activity and combined lesson link,
@@ -28,7 +31,8 @@ transfers the video, and shows processing state. Video replacement, rename,
 visibility/availability changes and deletion are automatically synchronized.
 Teachers can retry or disable the feature from Moodle.
 
-Each supported video File activity can contain a video up to 5 GiB. The source
+File size must fit both Moodle/PHP limits and VideoQ's reported upload maximum.
+The local lab allows 2 GiB; larger transfers need deployment-specific testing. The source
 stays on Moodle; VideoQ processes its copy with the normal worker. Temporary disk
 space is needed while transferring. HTTP retries do not duplicate videos or
 upload usage; ordered generations prevent stale updates restoring an old lesson.

@@ -47,6 +47,10 @@ final class synchronizer {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
         $type = $DB->get_record('lti_types', ['id' => (int)get_config('local_videoq', 'typeid')], '*', MUST_EXIST);
+        if (get_config('local_videoq', 'servicemode') === 'lti') {
+            if ($type->ltiversion !== LTI_VERSION_1P3 || rtrim($type->baseurl, '/') !== rtrim((string)get_config('local_videoq', 'apiurl'), '/') . '/api/lti/launch') throw new \RuntimeException('Invalid LTI connection');
+            return $type;
+        }
         $connection = (new client())->request('GET', 'connection');
         if ($type->ltiversion !== LTI_VERSION_1P3 || ($connection['issuer'] ?? '') !== $CFG->wwwroot
                 || ($connection['clientId'] ?? '') !== $type->clientid || ($connection['deploymentId'] ?? '') !== (string)$type->id
@@ -85,7 +89,7 @@ final class synchronizer {
             if ($row && $DB->record_exists('course_modules', ['id' => $row->lticmid, 'deletioninprogress' => 0])
                     && $DB->record_exists('course_modules', ['id' => $row->linkcmid, 'deletioninprogress' => 0])) {
                 if ($repair) return;
-                $DB->execute('UPDATE {local_videoq_sync} SET enabled = 1, generation = generation + 1, status = ?, timemodified = ? WHERE id = ?', ['queued', time(), $row->id]);
+                $DB->execute('UPDATE {local_videoq_sync} SET enabled = 1, typeid = ?, generation = generation + 1, status = ?, timemodified = ? WHERE id = ?', [(int)$type->id, 'queued', time(), $row->id]);
                 self::hide_transport_entries((int)$course->id, [(int)$row->lticmid, (int)$row->linkcmid]);
                 self::ensure_course_entry((int)$course->id);
                 return;
@@ -105,7 +109,7 @@ final class synchronizer {
                 'externalurl' => $CFG->wwwroot . '/local/videoq/view.php?course=' . $course->id . '&video=' . $cmid,
                 'display' => 0, 'printintro' => 0, 'parameters' => [],
             ]), $course);
-            $values = (object)['cmid' => $cmid, 'courseid' => $course->id, 'lticmid' => $lti->coursemodule,
+            $values = (object)['typeid' => (int)$type->id, 'cmid' => $cmid, 'courseid' => $course->id, 'lticmid' => $lti->coursemodule,
                 'ltiinstance' => $lti->instance, 'linkcmid' => $link->coursemodule, 'enabled' => 1, 'status' => 'queued', 'timemodified' => time()];
             if ($row) {
                 $values->id = $row->id; $values->generation = $row->generation + 1; $values->fingerprint = '';
@@ -122,11 +126,14 @@ final class synchronizer {
             self::ensure_course_entry((int)$course->id);
         } finally { $lock->release(); }
     }
-    public static function run(int $id): void {
+    public static function run(int $id, bool $snapshot = false): ?array {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('sync-' . $id, 0);
-        if (!$lock) return;
+        if (!$lock) {
+            if ($snapshot) throw new \RuntimeException('Material is being updated');
+            return null;
+        }
         try {
             $row = $DB->get_record('local_videoq_sync', ['id' => $id], '*', MUST_EXIST);
             $cm = get_coursemodule_from_id('resource', $row->cmid, 0, false, IGNORE_MISSING);
@@ -207,8 +214,9 @@ final class synchronizer {
             if ($row->fingerprint !== $fingerprint) {
                 $DB->execute('UPDATE {local_videoq_sync} SET generation = generation + 1, fingerprint = ?, status = ? WHERE id = ?', [$fingerprint, 'queued', $id]);
                 $row = $DB->get_record('local_videoq_sync', ['id' => $id], '*', MUST_EXIST);
-            } else if (in_array($row->status, ['completed', 'disabled'], true)) return;
+            } else if (!$snapshot && in_array($row->status, ['completed', 'disabled'], true)) return null;
             $manifest['generation'] = (int)$row->generation;
+            if ($snapshot) return $manifest;
             $client = new client(); $path = 'resources/' . $row->cmid;
             $result = $client->request('PUT', $path, $manifest);
             if (!empty($result['upload'])) {
@@ -220,5 +228,6 @@ final class synchronizer {
             $error = in_array($result['error'] ?? '', ['STORAGE_LIMIT_EXCEEDED', 'MONTHLY_UPLOAD_LIMIT_EXCEEDED'], true) ? $result['error'] : '';
             $DB->execute('UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE id = ? AND generation = ?', [$status, $error, time(), $id, $row->generation]);
         } finally { $lock->release(); }
+        return null;
     }
 }

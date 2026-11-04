@@ -1,26 +1,66 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/videoq/db" VERSION="2026110303" COMMENT="VideoQ synchronization state">
+<?xml version='1.0' encoding='UTF-8'?>
+<XMLDB PATH="local/videoq/db" VERSION="2026110402" COMMENT="VideoQ synchronization state">
   <TABLES>
     <TABLE NAME="local_videoq_sync" COMMENT="Source activities and durable synchronization state, with no learner data">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-        <FIELD NAME="lticmid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-        <FIELD NAME="ltiinstance" TYPE="int" LENGTH="10" NOTNULL="true"/>
-        <FIELD NAME="linkcmid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
-        <FIELD NAME="generation" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
-        <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT=""/>
-        <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="queued"/>
-        <FIELD NAME="errorcode" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT=""/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
-        <FIELD NAME="lastsynced" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+        <FIELD NAME="typeid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="lticmid" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="ltiinstance" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="linkcmid" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
+        <FIELD NAME="generation" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" />
+        <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" />
+        <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="queued" />
+        <FIELD NAME="errorcode" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" />
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="lastsynced" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
       </FIELDS>
-      <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+      </KEYS>
       <INDEXES>
-        <INDEX NAME="cmid_unique" UNIQUE="true" FIELDS="cmid"/>
-        <INDEX NAME="course_idx" UNIQUE="false" FIELDS="courseid"/>
+        <INDEX NAME="cmid_unique" UNIQUE="true" FIELDS="cmid" />
+        <INDEX NAME="course_idx" UNIQUE="false" FIELDS="courseid" />
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_videoq_assertions" COMMENT="LTI materials service state">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" NOTNULL="true" LENGTH="10" SEQUENCE="true" />
+        <FIELD NAME="assertionhash" TYPE="char" NOTNULL="true" LENGTH="64" />
+        <FIELD NAME="expires" TYPE="int" NOTNULL="true" LENGTH="10" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="assertion_unique" UNIQUE="true" FIELDS="assertionhash" />
+        <INDEX NAME="expires_idx" UNIQUE="false" FIELDS="expires" />
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_videoq_exports" COMMENT="LTI materials service state">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" NOTNULL="true" LENGTH="10" SEQUENCE="true" />
+        <FIELD NAME="jobid" TYPE="char" NOTNULL="true" LENGTH="64" />
+        <FIELD NAME="requesthash" TYPE="char" NOTNULL="true" LENGTH="64" />
+        <FIELD NAME="typeid" TYPE="int" NOTNULL="true" LENGTH="10" />
+        <FIELD NAME="cmid" TYPE="int" NOTNULL="true" LENGTH="10" />
+        <FIELD NAME="courseid" TYPE="int" NOTNULL="true" LENGTH="10" />
+        <FIELD NAME="generation" TYPE="int" NOTNULL="true" LENGTH="19" />
+        <FIELD NAME="uploadurl" TYPE="text" NOTNULL="false" />
+        <FIELD NAME="status" TYPE="char" NOTNULL="true" LENGTH="16" DEFAULT="queued" />
+        <FIELD NAME="bytes" TYPE="int" NOTNULL="true" LENGTH="19" DEFAULT="0" />
+        <FIELD NAME="timecreated" TYPE="int" NOTNULL="true" LENGTH="10" />
+        <FIELD NAME="timemodified" TYPE="int" NOTNULL="true" LENGTH="10" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="job_unique" UNIQUE="true" FIELDS="jobid" />
+        <INDEX NAME="request_unique" UNIQUE="true" FIELDS="requesthash" />
       </INDEXES>
     </TABLE>
   </TABLES>

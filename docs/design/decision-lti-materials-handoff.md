@@ -1,7 +1,9 @@
 # Decision: LTI service authentication with Moodle-side media export
 
-Status: accepted architecture direction; isolated spike validated. Production
-migration is not implemented. Existing connections and deployment are unchanged.
+Status: implemented in the compatible development checkout and migrated in the
+local trial. Lifecycle, real inference and browser acceptance are verified. See
+[setup and migration](../materials-service.md). This is not a production rollout
+or an LTI certification.
 
 ## Decision
 
@@ -56,19 +58,21 @@ retrieval when access cannot be verified; purge only after an authoritative
 source deletion. Hiding a source revokes learner retrieval while retaining its
 processed copy for reopening.
 
-## Minimum production changes still required
+## VideoQ implementation boundary
 
-This does require one VideoQ release. The spike's zero production-source changes
+Deployment requires the compatible VideoQ release. The spike's zero production-source changes
 mean it ran as a standalone adapter, not that a plugin can add missing backend
 features to an unchanged deployed VideoQ.
 
-VideoQ needs signing-key/JWKS lifecycle, launch bootstrap before materials are
-processed, a materials-service controller and scheduled reconciliation, export
-job polling, and a connection mode that does not require the legacy sync-key
-hash. Keep these at the generic LTI/materials boundary. Moodle-specific code stays
+VideoQ now provides tool signing/JWKS, a materials-service controller and
+scheduled course discovery/reconciliation, export job polling, and a connection
+mode that does not require the legacy sync-key hash. Background discovery starts
+processing without waiting for a learner launch; Moodle shows processing state
+until its existing launch boundary can authorize a completed material. These
+features stay at the generic LTI/materials boundary. Moodle-specific code stays
 in the separate repository. Existing playback and AI processing need no redesign.
 
-The production Moodle exporter must return 202 and a job identifier, rather than
+The Moodle exporter returns 202 and a job identifier, rather than
 hold an LTI launch or API request open during a large upload. Require scoped
 course access, stable version and idempotency identifiers, destination origin and
 object-prefix restrictions, no redirects, expiring URL renewal and retry handling.
@@ -87,15 +91,20 @@ filtering. Negative authentication cases cover replay, wrong audience, ungranted
 scope, stock-token-endpoint scope bypass and anonymous access. Existing videos
 and connection states are compared before and after; temporary fixtures are removed.
 
-This is a small-file synchronous export proof. Production async export, browser
-launch/bootstrap, persistent scheduling, large files, multiple courses, pagination,
-JWKS rotation and load behavior remain unvalidated. The adapter uses a placeholder
-legacy hash solely to fit the current schema; it is not a sync credential.
+That initial spike was a small-file synchronous proof and used a placeholder
+legacy hash. The implemented path now uses Moodle ad-hoc export tasks, the
+scheduled VideoQ sweep and a null synchronization credential. The newer browser
+acceptance verifies registered JWKS authentication and the existing chat/player.
+Large-file stress, pagination beyond the bounded contract and production load
+behavior remain deployment-specific verification work.
 
-The lab's external AI key had expired. Processing therefore used deterministic
+During the initial spike the lab's external AI key had expired. Processing therefore used deterministic
 local HTTP inference, with real storage and worker code. This validates pipeline
 integration, not transcription accuracy or real-provider answer quality. The
-existing provider configuration was not changed.
+existing provider configuration was not changed during that spike. The user
+subsequently renewed the key; the implementation acceptance run uses real
+OpenRouter transcription, embeddings and an answer. See the linked setup guide
+for the newer evidence and remaining deployment-specific limits.
 
 ## Alternatives
 
@@ -105,5 +114,5 @@ worker. That is a poorer fit for minimizing core changes here. A separate
 federation service or manually configured sync key adds administration without
 solving a requirement that the registered tool key cannot cover.
 
-Adopt the revised architecture; do not claim the current production integration
-has already migrated or that all LMS products become compatible automatically.
+Adopt the revised architecture; the local trial has migrated, while a production
+deployment still needs its compatible release and configuration. Other LMS products still need their own implementation of the materials contract.

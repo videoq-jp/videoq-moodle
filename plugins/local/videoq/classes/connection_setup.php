@@ -7,7 +7,7 @@ defined('MOODLE_INTERNAL') || die();
 final class connection_setup {
     public static function decode(string $code): array {
         $code = trim($code);
-        if (strlen($code) > 8192 || !str_starts_with($code, 'VIDEOQ1.')) throw new \InvalidArgumentException('Invalid connection code');
+        if (strlen($code) > 8192 || !preg_match('/^VIDEOQ[12]\./', $code)) throw new \InvalidArgumentException('Invalid connection code');
         $json = base64_decode(substr($code, 8), true);
         $value = $json === false ? null : json_decode($json, true);
         if (!is_array($value) || array_diff(array_keys($value), ['origin', 'secret']) ||
@@ -15,10 +15,12 @@ final class connection_setup {
                 !preg_match('/^[a-f0-9]{64}$/D', $value['secret']) || client::origin($value['origin']) !== $value['origin']) {
             throw new \InvalidArgumentException('Invalid connection code');
         }
+        if (str_starts_with($code, 'VIDEOQ2.')) $value['mode'] = 'materials';
         return $value;
     }
 
     public static function connect(string $code): void {
+        if (str_starts_with(trim($code), 'VIDEOQ2.')) { lti_connection_setup::connect(trim($code)); return; }
         global $CFG, $DB;
         require_capability('moodle/site:config', \context_system::instance());
         require_once($CFG->dirroot . '/mod/lti/locallib.php');

@@ -25,17 +25,17 @@ and connection revocation. At extraction, the corresponding APIs were in the
 VideoQ development working tree. A build of the [source base commit](docs/extraction.md)
 alone does not provide them. Connect to a deployment that includes those APIs.
 
-## Proposed LTI-only setup
+## LTI materials-service setup
 
-The [architecture decision](docs/design/decision-lti-materials-handoff.md) recommends
-LTI service authentication and Moodle-side direct export to VideoQ storage.
-An isolated spike validates the direction; production migration remains pending.
+The [setup and migration guide](docs/materials-service.md) describes the new mode:
+one LTI registration, automatic service authentication and Moodle-side background
+exports directly to VideoQ storage. No synchronization API key is configured.
+The compatible VideoQ implementation is required; the local trial has been
+migrated and verified with real provider calls and the native Moodle chat.
 
-The [LTI materials-service design](docs/design/lti-only-integration.md) evaluates
-using the same LTI registration to let VideoQ pull Moodle materials, with no
-separate synchronization API key. It documents the required minimal VideoQ
-changes and the Moodle-side service extension. This is a proposed migration;
-the installation instructions above still describe the current implementation.
+The [architecture decision](docs/design/decision-lti-materials-handoff.md) explains
+the division of responsibilities. The earlier pure media-pull proposal is retained
+as historical analysis. Existing legacy connections remain compatible.
 
 ## Development and plugin packages
 

@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "checks": [
+    "Production core materials orchestrator uses scoped LTI service authentication without a sync API key.",
+    "Moodle exported a real File directly to VideoQ storage; unchanged quota/upload/worker code completed processing with OpenRouter inference.",
+    "A real AI answer was generated using retrieval restricted to the fixture video.",
+    "Moodle learner permissions exclude hidden material; hiding and reopening retain the existing processed copy.",
+    "Replacement creates a processed new video in the same course and deletes the retired media object.",
+    "Source deletion revokes retrieval membership and removes the video row, vector data and media object.",
+    "All pre-existing VideoQ videos and their file/status identities were preserved."
+  ],
+  "transport": "handoff",
+  "ltiToolKeyAuthentication": true,
+  "videoBytesThroughVideoqApi": false,
+  "productionSourceFilesEditedByHarness": 0,
+  "usesProductionMaterialsImplementation": true,
+  "productionApiRestarted": false,
+  "isolatedQueue": true,
+  "realMoodleFile": true,
+  "realTransfer": true,
+  "existingTranscriptionAndIndexingPipeline": true,
+  "inferenceProvider": "openrouter",
+  "syncApiKeyUsed": false,
+  "existingCoreFunctionsReused": [
+    "sweepMaterials",
+    "synchronizeMaterials",
+    "syncLmsResource",
+    "presignR2Put",
+    "confirmVideoUpload"
+  ],
+  "limits": [
+    "Core scheduled sweep and Moodle task tested through a standalone driver; browser setup requires separate acceptance",
+    "Runtime uses inline ephemeral tool public key; public key publication and rotation overlap are covered separately by unit tests",
+    "New materials mode stores a null sync credential"
+  ],
+  "temporaryVideoIds": [
+    "47",
+    "48"
+  ],
+  "temporaryFixturesRemoved": true,
+  "existingConnectionStatesPreserved": true
+}

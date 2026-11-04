@@ -6,6 +6,13 @@ final class synchronize extends \core\task\scheduled_task {
     public function get_name() { return get_string('synchronize', 'local_videoq'); }
     public function execute() {
         global $DB;
+        if (get_config('local_videoq', 'servicemode') === 'lti') {
+            $DB->execute('UPDATE {local_videoq_exports} SET status = ?, uploadurl = NULL, timemodified = ? WHERE timecreated < ? AND status IN (?, ?)',
+                ['failed', time(), time() - 3600, 'queued', 'uploading']);
+            $DB->delete_records_select('local_videoq_exports', 'timemodified < ? AND status IN (?, ?, ?)', [time() - 86400, 'uploaded', 'failed', 'stale']);
+            $DB->delete_records_select('local_videoq_assertions', 'expires < ?', [time() - 120]);
+            return;
+        }
         if (!get_config('local_videoq', 'apiurl') || !get_config('local_videoq', 'synctoken')) return;
         $rows = $DB->get_records_select('local_videoq_sync', 'enabled = 1 OR status <> ?', ['disabled'], 'lastsynced ASC, id ASC');
         foreach ($rows as $row) {

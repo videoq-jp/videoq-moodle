@@ -66,3 +66,7 @@ $string['connectioninstructions'] = 'VideoQの「設定 → Moodleと連携」�
 $string['connectionfailed'] = '接続できませんでした。両方のVideoQプラグイン、接続先URL、コードの有効期限を確認してください。通信エラーの場合は同じコードで再試行してください。既存の接続設定は変更していません。';
 $string['cancelconnection'] = '未完了の設定を中止してやり直す';
 $string['advancedsettings'] = 'VideoQ 詳細設定（手動接続）';
+
+$string['connectionconfigured'] = 'LTI接続が設定されています。接続状態はVideoQの設定画面で確認できます。';
+
+$string['updateconnection'] = 'VideoQの接続を更新・再接続する';

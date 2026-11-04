@@ -66,3 +66,7 @@ $string['connectioninstructions'] = 'In VideoQ Settings → Connect Moodle, gene
 $string['connectionfailed'] = 'Could not connect. Check that both VideoQ plugins are installed, the Moodle URL matches, and the code has not expired. After a network error, retry with the same code. Existing connection settings were preserved.';
 $string['cancelconnection'] = 'Cancel incomplete setup and start again';
 $string['advancedsettings'] = 'VideoQ advanced settings (manual connection)';
+
+$string['connectionconfigured'] = 'LTI connection is configured. Check the connection status in your VideoQ account settings.';
+
+$string['updateconnection'] = 'Update or reconnect VideoQ';

@@ -5,7 +5,12 @@ description: Connect Moodle to an existing VideoQ account and automatically sync
 
 # Connect an LMS with LTI 1.3
 
-## Connect Moodle with a one-time code
+For the new LTI-authenticated materials mode without a synchronization API key,
+use the [materials-service setup and migration guide](materials-service.md).
+It requires a compatible VideoQ server and its tool signing-key configuration.
+The following sections retain the legacy setup for existing deployments.
+
+## Legacy setup: connect Moodle with a one-time code
 
 For a new Moodle installation, the administrator can avoid manual LTI identifiers,
 connection JSON and operator registration commands:

@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "realProvider": "openrouter",
+  "nativeMoodleChat": true,
+  "streamingAnswer": true,
+  "sourceVideoIds": [
+    27
+  ],
+  "feedbackGoodBadAndReset": true,
+  "timestampSeek": true
+}

@@ -4,7 +4,7 @@ set -u
 cd /workspace/apps/api
 trap 'exit 0' TERM INT
 while :; do
-  if node dist/node.mjs maintenance; then
+  if node /fixtures/start-materials-maintenance.mjs maintenance; then
     node -e 'require("fs").writeFileSync("/tmp/videoq-maintenance-ready",String(Date.now()))'
   fi
   sleep 30 &
