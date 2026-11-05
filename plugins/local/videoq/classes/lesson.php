@@ -55,6 +55,12 @@ final class lesson {
         }
         return null;
     }
+    /**
+     * Validates and decodes the administrator-defined lesson mappings.
+     *
+     * @param string $json Administrator-provided JSON mappings.
+     * @return array
+     */
     public static function parse(string $json): array {
         $items = json_decode($json, false, 64, JSON_THROW_ON_ERROR);
         if (!is_array($items) || !array_is_list($items) || count($items) > 500) {
@@ -82,6 +88,12 @@ final class lesson {
         return $lessons;
     }
 
+    /**
+     * Finds a configured lesson by its administrator-assigned identifier.
+     *
+     * @param string $id Material binding or lesson identifier.
+     * @return array
+     */
     public static function find(string $id): array {
         global $DB;
         if (preg_match('/^sync_([1-9][0-9]*)$/D', $id, $match)) {

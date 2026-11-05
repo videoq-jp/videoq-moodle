@@ -83,7 +83,13 @@ if (!$courseid) {
 require_once($CFG->dirroot . '/mod/lti/locallib.php');
 $lti = $DB->get_record('lti', ['id' => $lticm->instance], '*', MUST_EXIST);
 $type = $DB->get_record('lti_types', ['id' => $lti->typeid], '*', MUST_EXIST);
-if ($type->ltiversion !== LTI_VERSION_1P3 || !in_array((int)lti_get_launch_container($lti, lti_get_type_type_config($type->id)), [LTI_LAUNCH_CONTAINER_EMBED, LTI_LAUNCH_CONTAINER_EMBED_NO_BLOCKS], true)) {
+if (
+    $type->ltiversion !== LTI_VERSION_1P3 || !in_array(
+        (int)lti_get_launch_container($lti, lti_get_type_type_config($type->id)),
+        [LTI_LAUNCH_CONTAINER_EMBED, LTI_LAUNCH_CONTAINER_EMBED_NO_BLOCKS],
+        true
+    )
+) {
     throw new moodle_exception('invalidmodules', 'local_videoq');
 }
 $PAGE->activityheader->disable();
@@ -142,7 +148,10 @@ $sourcefile = \local_videoq\synchronizer::video_file((int)$videocm->id);
 echo html_writer::tag('video', html_writer::empty_tag('source', ['src' => $videourl->out(false), 'type' => $sourcefile ? $sourcefile->get_mimetype() : 'video/mp4']), [
     'id' => 'videoq-player', 'class' => get_config('media_videojs', 'videocssclass') ?: 'video-js',
     'controls' => 'controls', 'playsinline' => 'playsinline', 'preload' => 'metadata',
-    'data-setup-lazy' => json_encode(['fluid' => true, 'playbackRates' => [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], 'userActions' => ['hotkeys' => true], 'language' => current_language()]),
+    'data-setup-lazy' => json_encode([
+        'fluid' => true, 'playbackRates' => [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+        'userActions' => ['hotkeys' => true], 'language' => current_language(),
+    ]),
     'aria-label' => get_string('video', 'local_videoq'),
 ]);
 echo html_writer::end_div();

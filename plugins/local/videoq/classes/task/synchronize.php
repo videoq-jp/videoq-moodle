@@ -29,9 +29,19 @@ defined('MOODLE_INTERNAL') || die();
  * Recovers pending synchronization jobs using the scheduler.
  */
 final class synchronize extends \core\task\scheduled_task {
+    /**
+     * Returns the localized name of the scheduled synchronization task.
+     *
+     * @return string
+     */
     public function get_name() {
         return get_string('synchronize', 'local_videoq');
     }
+    /**
+     * Reconciles enabled materials and recovers pending transfers.
+     *
+     * @return void
+     */
     public function execute() {
         global $DB;
         if (get_config('local_videoq', 'servicemode') === 'lti') {

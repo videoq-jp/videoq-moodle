@@ -29,6 +29,11 @@ defined('MOODLE_INTERNAL') || die();
  * Portable opt-in/layout markers only: no remote IDs, credentials or conversations.
  */
 class backup_local_videoq_plugin extends backup_local_plugin {
+    /**
+     * Defines the source-binding metadata included in a module backup.
+     *
+     * @return \backup_plugin_element|null
+     */
     protected function define_module_plugin_structure() {
         $cmid = (int)$this->task->get_moduleid();
         $metadata = \local_videoq\restoration::describe($cmid);

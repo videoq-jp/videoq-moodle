@@ -30,6 +30,11 @@ defined('MOODLE_INTERNAL') || die();
  * Large media transfer runs outside launch/API requests. URLs never enter task logs.
  */
 final class export_material extends \core\task\adhoc_task {
+    /**
+     * Transfers a queued source video to its signed upload destination.
+     *
+     * @return void
+     */
     public function execute() {
         global $CFG, $DB;
         require_once($CFG->libdir . '/filelib.php');

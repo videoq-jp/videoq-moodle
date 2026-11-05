@@ -30,6 +30,11 @@ defined('MOODLE_INTERNAL') || die();
  * Retire copied transports and initialize sources after Moodle finishes restoring.
  */
 final class restore_material extends \core\task\adhoc_task {
+    /**
+     * Recreates the source binding after a Moodle course restore.
+     *
+     * @return void
+     */
     public function execute() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');

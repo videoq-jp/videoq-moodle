@@ -30,6 +30,12 @@ defined('MOODLE_INTERNAL') || die();
  * Administrator-selected VideoQ host, session state and S256 proof binding.
  */
 final class browser_connection {
+    /**
+     * Starts discovery and stores a session-bound connection approval request.
+     *
+     * @param string $url HTTPS service or upload URL to validate.
+     * @return string
+     */
     public static function start(string $url): string {
         global $CFG, $SESSION, $USER;
         require_capability('moodle/site:config', \context_system::instance());
@@ -95,6 +101,11 @@ final class browser_connection {
         return true;
     }
 
+    /**
+     * Retries an interrupted connection exchange for the current administrator.
+     *
+     * @return bool
+     */
     public static function retry(): bool {
         global $SESSION;
         $pending = $SESSION->local_videoq_browser ?? [];

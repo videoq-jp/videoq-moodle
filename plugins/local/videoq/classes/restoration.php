@@ -30,6 +30,12 @@ defined('MOODLE_INTERNAL') || die();
  * Moodle backup markers and destination-only restoration of source opt-ins.
  */
 final class restoration {
+    /**
+     * Produces portable source-role metadata for a course activity backup.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return array|null
+     */
     public static function describe(int $cmid): ?array {
         global $CFG, $DB;
         $cm = get_coursemodule_from_id('', $cmid, 0, false, MUST_EXIST);

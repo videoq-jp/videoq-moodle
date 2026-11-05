@@ -24,6 +24,13 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+/**
+ * Adds synchronization controls for teachers managing a File activity.
+ *
+ * @param settings_navigation $nav Settings navigation for the current page.
+ * @param context $context Context of the currently managed File activity.
+ * @return void
+ */
 function local_videoq_extend_settings_navigation(settings_navigation $nav, context $context) {
     global $PAGE;
     if (

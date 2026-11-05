@@ -30,6 +30,12 @@ defined('MOODLE_INTERNAL') || die();
  * Administrator-only, recoverable pairing. Existing synchronized courses are never rebound.
  */
 final class connection_setup {
+    /**
+     * Parses a bounded connection code and validates its service origin.
+     *
+     * @param string $code Temporary connection approval code.
+     * @return array
+     */
     public static function decode(string $code): array {
         $code = trim($code);
         if (strlen($code) > 8192 || !preg_match('/^VIDEOQ[12]\./', $code)) {
@@ -50,6 +56,12 @@ final class connection_setup {
         return $value;
     }
 
+    /**
+     * Validates a connection approval and configures the registered VideoQ tool.
+     *
+     * @param string $code Temporary connection approval code.
+     * @return void
+     */
     public static function connect(string $code): void {
         if (str_starts_with(trim($code), 'VIDEOQ2.')) {
             lti_connection_setup::connect(trim($code));
@@ -159,10 +171,24 @@ final class connection_setup {
             $lock->release();
         }
     }
+    /**
+     * Checks whether a service probe matches the pending connection request.
+     *
+     * @param array|null $data Stored connection or restored binding metadata.
+     * @param array $request Pending connection request to match.
+     * @param string $origin Validated VideoQ service origin.
+     * @return bool
+     */
     private static function matches(?array $data, array $request, string $origin): bool {
         return $data && ($data['issuer'] ?? '') === $request['issuer'] && ($data['clientId'] ?? '') === $request['clientId'] &&
             ($data['deploymentId'] ?? '') === $request['deploymentId'] && ($data['toolOrigin'] ?? '') === $origin;
     }
+    /**
+     * Probes an interrupted exchange before deciding whether to retry.
+     *
+     * @param array $pending Session-bound interrupted connection exchange.
+     * @return array|null
+     */
     private static function probe(array $pending): ?array {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
@@ -179,6 +205,13 @@ final class connection_setup {
         $data = json_decode($response, true);
         return is_array($data) ? $data : null;
     }
+    /**
+     * Completes a connection exchange at the validated VideoQ service origin.
+     *
+     * @param string $origin Validated VideoQ service origin.
+     * @param array $request Pending connection request to match.
+     * @return void
+     */
     private static function exchange(string $origin, array $request): void {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');

@@ -30,7 +30,13 @@ defined('MOODLE_INTERNAL') || die();
  * LTI tool-key service authentication. No separately configured bearer credential.
  */
 final class service_auth {
+    /** @var string OAuth scope required for course materials service requests. */
     public const SCOPE = 'https://videoq.org/spec/lti-materials/v1';
+    /**
+     * Loads the registered VideoQ LTI tool and verifies its identity.
+     *
+     * @return \stdClass
+     */
     public static function type(): \stdClass {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
@@ -43,6 +49,12 @@ final class service_auth {
         }
         return $type;
     }
+    /**
+     * Verifies a service assertion and issues a short-lived scoped access token.
+     *
+     * @param array $input Validated request input fields.
+     * @return array
+     */
     public static function issue(array $input): array {
         global $CFG, $DB;
         $type = self::type();
@@ -78,6 +90,11 @@ final class service_auth {
         $token = lti_new_access_token($type->id, [self::SCOPE]);
         return ['access_token' => $token->token, 'token_type' => 'Bearer', 'expires_in' => LTI_ACCESS_TOKEN_LIFE, 'scope' => self::SCOPE];
     }
+    /**
+     * Validates the bearer token on a materials service request.
+     *
+     * @return \stdClass
+     */
     public static function authenticate(): \stdClass {
         global $DB;
         $type = self::type();

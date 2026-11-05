@@ -30,6 +30,13 @@ defined('MOODLE_INTERNAL') || die();
  * Opted-in materials only. Missing manifest entries are never deletion instructions.
  */
 final class materials_service {
+    /**
+     * Loads course bindings and rejects mismatched or excessive tool grants.
+     *
+     * @param int $courseid Moodle course identifier.
+     * @param int $typeid Registered LTI tool identifier.
+     * @return array
+     */
     public static function course(int $courseid, int $typeid): array {
         global $DB;
         $rows = $DB->get_records('local_videoq_sync', ['courseid' => $courseid, 'typeid' => $typeid], 'id ASC');
@@ -44,6 +51,13 @@ final class materials_service {
         }
         return $rows;
     }
+    /**
+     * Returns a complete snapshot of the synchronized course materials.
+     *
+     * @param int $courseid Moodle course identifier.
+     * @param int $typeid Registered LTI tool identifier.
+     * @return array
+     */
     public static function manifest(int $courseid, int $typeid): array {
         $items = [];
         foreach (self::course($courseid, $typeid) as $row) {
@@ -55,6 +69,15 @@ final class materials_service {
         }
         return ['contextId' => (string)$courseid, 'complete' => true, 'resources' => $items];
     }
+    /**
+     * Rechecks the learner and returns the currently permitted course resources.
+     *
+     * @param int $courseid Moodle course identifier.
+     * @param int $typeid Registered LTI tool identifier.
+     * @param string $resource Launch resource identifier.
+     * @param string $subject Moodle user identifier from the LTI launch.
+     * @return array
+     */
     public static function access(int $courseid, int $typeid, string $resource, string $subject): array {
         global $DB;
         self::course($courseid, $typeid);
@@ -72,6 +95,12 @@ final class materials_service {
         }
         return $access;
     }
+    /**
+     * Validates the signed upload destination against Moodle HTTP policy.
+     *
+     * @param string $url HTTPS service or upload URL to validate.
+     * @return void
+     */
     public static function destination(string $url): void {
         $parts = parse_url($url);
         if (strlen($url) > 8192 || !$parts || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment']) || ($parts['scheme'] ?? '') !== 'https') {
@@ -90,9 +119,23 @@ final class materials_service {
         }
         throw new \RuntimeException('Untrusted destination');
     }
+    /**
+     * Returns the public status and byte count of an export job.
+     *
+     * @param \stdClass $job Persisted export job.
+     * @return array
+     */
     public static function receipt(\stdClass $job): array {
         return ['jobId' => $job->jobid, 'generation' => (int)$job->generation, 'status' => $job->status, 'bytes' => (int)$job->bytes];
     }
+    /**
+     * Creates or reuses an idempotent asynchronous source-file export job.
+     *
+     * @param int $courseid Moodle course identifier.
+     * @param int $typeid Registered LTI tool identifier.
+     * @param array $input Validated request input fields.
+     * @return array
+     */
     public static function export(int $courseid, int $typeid, array $input): array {
         global $DB;
         self::course($courseid, $typeid);
@@ -135,6 +178,14 @@ final class materials_service {
             $lock->release();
         }
     }
+    /**
+     * Applies a synchronization acknowledgement for the current generation.
+     *
+     * @param int $courseid Moodle course identifier.
+     * @param int $typeid Registered LTI tool identifier.
+     * @param array $input Validated request input fields.
+     * @return array
+     */
     public static function acknowledge(int $courseid, int $typeid, array $input): array {
         global $DB;
         self::course($courseid, $typeid);
@@ -155,6 +206,14 @@ final class materials_service {
         );
         return ['acknowledged' => true];
     }
+    /**
+     * Loads an export receipt within the granted course and tool scope.
+     *
+     * @param int $courseid Moodle course identifier.
+     * @param int $typeid Registered LTI tool identifier.
+     * @param string $jobid Export job identifier.
+     * @return array
+     */
     public static function status(int $courseid, int $typeid, string $jobid): array {
         global $DB;
         self::course($courseid, $typeid);

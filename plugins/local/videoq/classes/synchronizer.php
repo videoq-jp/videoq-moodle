@@ -72,6 +72,12 @@ final class synchronizer {
             }
         }
     }
+    /**
+     * Finds the source video file belonging to a Moodle File activity.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return \stored_file|null
+     */
     public static function video_file(int $cmid): ?\stored_file {
         $context = \context_module::instance($cmid, IGNORE_MISSING);
         if (!$context) {
@@ -81,6 +87,11 @@ final class synchronizer {
         $file = reset($files);
         return $file && str_starts_with($file->get_mimetype(), 'video/') ? $file : null;
     }
+    /**
+     * Checks that the configured LTI tool matches the VideoQ connection.
+     *
+     * @return \stdClass
+     */
     public static function check_connection(): \stdClass {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
@@ -101,6 +112,12 @@ final class synchronizer {
         }
         return $type;
     }
+    /**
+     * Enables questions and creates the material binding for a source activity.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return void
+     */
     public static function enable(int $cmid): void {
         self::configure($cmid, false);
     }
@@ -110,6 +127,12 @@ final class synchronizer {
     public static function restore_source(int $cmid): void {
         self::configure($cmid, true);
     }
+    /**
+     * Disables synchronization and its generated assistant activities.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return void
+     */
     public static function disable(int $cmid): void {
         global $DB;
         require_capability('moodle/course:manageactivities', \context_module::instance($cmid));
@@ -161,7 +184,10 @@ final class synchronizer {
                 if ($repair) {
                     return;
                 }
-                $DB->execute('UPDATE {local_videoq_sync} SET enabled = 1, typeid = ?, generation = generation + 1, status = ?, timemodified = ? WHERE id = ?', [(int)$type->id, 'queued', time(), $row->id]);
+                $DB->execute(
+                    'UPDATE {local_videoq_sync} SET enabled = 1, typeid = ?, generation = generation + 1, status = ?, timemodified = ? WHERE id = ?',
+                    [(int)$type->id, 'queued', time(), $row->id]
+                );
                 self::hide_transport_entries((int)$course->id, [(int)$row->lticmid, (int)$row->linkcmid]);
                 self::ensure_course_entry((int)$course->id);
                 return;
@@ -208,6 +234,13 @@ final class synchronizer {
             $lock->release();
         }
     }
+    /**
+     * Reconciles a material binding with its current Moodle source activity.
+     *
+     * @param int $id Material binding or lesson identifier.
+     * @param bool $snapshot Whether to return a manifest without starting a transfer.
+     * @return array|null
+     */
     public static function run(int $id, bool $snapshot = false): ?array {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');
@@ -300,7 +333,8 @@ final class synchronizer {
                 && !$cm->deletioninprogress && $lti && $lti->visible && !$lti->deletioninprogress
                 && $link && $link->visible && !$link->deletioninprogress);
             $manifest = ['contextId' => (string)$row->courseid, 'courseTitle' => $course ? $course->fullname : 'Moodle', 'resourceLinkId' => (string)$row->ltiinstance,
-                'deleted' => (bool)(!$row->enabled || !$file || !$cm || $cm->deletioninprogress || !$course || !$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress),
+                'deleted' => (bool)(!$row->enabled || !$file || !$cm || $cm->deletioninprogress || !$course
+                    || !$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress),
                 'enabled' => $enabled, 'title' => $cm ? \core_text::substr(strip_tags($cm->name), 0, 255) : 'Deleted video'];
             if ($file) {
                 $manifest['file'] = ['filename' => $file->get_filename(), 'contentType' => $file->get_mimetype(),
@@ -327,9 +361,16 @@ final class synchronizer {
                 $client->upload($result['upload'], $file);
                 $result = $client->request('POST', $path . '/confirm', ['generation' => (int)$row->generation]);
             }
-            $status = in_array($result['status'] ?? '', ['disabled', 'uploading', 'pending', 'processing', 'indexing', 'completed', 'error', 'blocked', 'awaiting_upload'], true) ? $result['status'] : 'error';
+            $status = in_array(
+                $result['status'] ?? '',
+                ['disabled', 'uploading', 'pending', 'processing', 'indexing', 'completed', 'error', 'blocked', 'awaiting_upload'],
+                true
+            ) ? $result['status'] : 'error';
             $error = in_array($result['error'] ?? '', ['STORAGE_LIMIT_EXCEEDED', 'MONTHLY_UPLOAD_LIMIT_EXCEEDED'], true) ? $result['error'] : '';
-            $DB->execute('UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE id = ? AND generation = ?', [$status, $error, time(), $id, $row->generation]);
+            $DB->execute(
+                'UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE id = ? AND generation = ?',
+                [$status, $error, time(), $id, $row->generation]
+            );
         } finally {
             $lock->release();
         }

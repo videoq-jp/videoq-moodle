@@ -161,3 +161,16 @@ developer-debug exercise is still required; the fixture is not that exercise.
 Full standalone PHP tests passed after the change. Official PHPCS now reports
 **60 errors and 80 warnings**, mainly missing method documentation and long lines.
 The earlier forbidden `error_log()` finding is resolved. No suppressions were added.
+
+## Function documentation pass (2026-11-05)
+
+Added missing method documentation with parameter/return types and descriptions,
+member/constant documentation, and wrapped over-limit expressions. Full official
+Moodle PHPCS now reports **0 errors and 81 warnings**. Warnings still need work;
+this is not a clean PHPCS result or Marketplace approval.
+
+The 22 changed PHP files have identical syntax trees to the preceding commit
+when source positions and comments are excluded. Full standalone PHP tests,
+including real Moodle metadata classes, endpoint rejection, packaging and real
+RSA signing, passed. Installed-Moodle developer debugging, cross-database tests,
+AMOS translation preparation and the publication/payment decision remain open.

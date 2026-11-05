@@ -30,6 +30,13 @@ defined('MOODLE_INTERNAL') || die();
  * A single expiring pairing code registers LTI service access; no sync key is issued.
  */
 final class lti_connection_setup {
+    /**
+     * Validates a connection approval and configures the registered VideoQ tool.
+     *
+     * @param string $code Temporary connection approval code.
+     * @param string|null $codeverifier Optional S256 proof verifier from the initiating session.
+     * @return void
+     */
     public static function connect(string $code, ?string $codeverifier = null): void {
         global $CFG, $DB;
         require_capability('moodle/site:config', \context_system::instance());
@@ -85,7 +92,10 @@ final class lti_connection_setup {
                 throw new \RuntimeException('Connection failed');
             }
             $result = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
-            if (($result['toolOrigin'] ?? '') !== $value['origin'] || !is_array($result['uploadTargets'] ?? null) || !$result['uploadTargets'] || count($result['uploadTargets']) > 4) {
+            if (
+                ($result['toolOrigin'] ?? '') !== $value['origin'] || !is_array($result['uploadTargets'] ?? null)
+                || !$result['uploadTargets'] || count($result['uploadTargets']) > 4
+            ) {
                 throw new \RuntimeException('Invalid connection response');
             }
             foreach ($result['uploadTargets'] as $target) {

@@ -24,6 +24,12 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+/**
+ * Applies schema and configuration upgrades with Moodle savepoints.
+ *
+ * @param int $oldversion Previously installed plugin version.
+ * @return bool
+ */
 function xmldb_local_videoq_upgrade($oldversion) {
     global $DB;
     if ($oldversion < 2026110303) {

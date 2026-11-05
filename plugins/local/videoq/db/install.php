@@ -24,6 +24,11 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+/**
+ * Initializes a private site key for learner access proofs.
+ *
+ * @return void
+ */
 function xmldb_local_videoq_install() {
     set_config('accesssigningkey', bin2hex(random_bytes(32)), 'local_videoq');
 }

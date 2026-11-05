@@ -29,6 +29,12 @@ defined('MOODLE_INTERNAL') || die();
  * Queues synchronization after source activity changes.
  */
 final class observer {
+    /**
+     * Queues reconciliation after a source activity is changed or removed.
+     *
+     * @param \core\event\base $event Moodle activity event.
+     * @return void
+     */
     public static function changed(\core\event\base $event): void {
         global $DB;
         $data = $event->get_data();

@@ -44,7 +44,10 @@ try {
     }
     $input = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
     if (($input['action'] ?? '') === 'courses') {
-        $ids = $DB->get_fieldset_sql('SELECT DISTINCT courseid FROM {local_videoq_sync} WHERE typeid = ? AND (enabled = 1 OR status <> ?) ORDER BY courseid', [(int)$type->id, 'disabled']);
+        $ids = $DB->get_fieldset_sql(
+            'SELECT DISTINCT courseid FROM {local_videoq_sync} WHERE typeid = ? AND (enabled = 1 OR status <> ?) ORDER BY courseid',
+            [(int)$type->id, 'disabled']
+        );
         if (count($ids) > 1000) {
             throw new \RuntimeException('Too many contexts');
         }

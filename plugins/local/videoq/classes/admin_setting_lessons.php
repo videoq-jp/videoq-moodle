@@ -30,6 +30,12 @@ defined('MOODLE_INTERNAL') || die();
  * Validates legacy video activity associations.
  */
 final class admin_setting_lessons extends \admin_setting_configtextarea {
+    /**
+     * Validates lesson mapping settings and returns a localized error if invalid.
+     *
+     * @param string $data Stored connection or restored binding metadata.
+     * @return bool|string
+     */
     public function validate($data) {
         try {
             lesson::parse($data);

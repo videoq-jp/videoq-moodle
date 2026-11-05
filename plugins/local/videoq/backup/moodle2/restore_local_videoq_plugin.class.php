@@ -29,9 +29,20 @@ defined('MOODLE_INTERNAL') || die();
  * Restore against the destination site's connection, never the source site's binding.
  */
 class restore_local_videoq_plugin extends restore_local_plugin {
+    /**
+     * Declares the metadata paths read during module restoration.
+     *
+     * @return array
+     */
     protected function define_module_plugin_structure() {
         return [new restore_path_element('videoq_binding', $this->get_pathfor('/binding'))];
     }
+    /**
+     * Validates and maps restored source metadata to the destination activity.
+     *
+     * @param array|\stdClass $data Stored connection or restored binding metadata.
+     * @return void
+     */
     public function process_videoq_binding($data) {
         $data = (object)$data;
         if (
@@ -50,6 +61,11 @@ class restore_local_videoq_plugin extends restore_local_plugin {
             ['role' => $data->role, 'enabled' => (int)$data->enabled]
         );
     }
+    /**
+     * Queues reconstruction of material bindings after a module restore.
+     *
+     * @return void
+     */
     public function after_restore_module() {
         \local_videoq\restoration::finish($this->get_restoreid(), (int)$this->task->get_courseid());
     }

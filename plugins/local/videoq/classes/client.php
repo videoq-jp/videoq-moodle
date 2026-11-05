@@ -29,8 +29,14 @@ defined('MOODLE_INTERNAL') || die();
  * Sends authenticated requests to legacy synchronization endpoints.
  */
 final class client {
+    /** @var string Canonical HTTPS origin of the configured legacy service. */
     private string $origin;
+    /** @var string Site-owned legacy synchronization credential. */
     private string $token;
+    /**
+     * Loads and validates the configured legacy synchronization credentials.
+     *
+     */
     public function __construct() {
         $this->origin = rtrim((string)get_config('local_videoq', 'apiurl'), '/');
         $this->token = (string)get_config('local_videoq', 'synctoken');
@@ -38,6 +44,12 @@ final class client {
             throw new \moodle_exception('invalidconfiguration', 'local_videoq');
         }
     }
+    /**
+     * Returns the canonical HTTPS origin after validating the service URL.
+     *
+     * @param string $url HTTPS service or upload URL to validate.
+     * @return string
+     */
     public static function origin(string $url): string {
         $parts = parse_url($url);
         if (!$parts || ($parts['scheme'] ?? '') !== 'https' || empty($parts['host']) || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment'])) {
@@ -45,11 +57,25 @@ final class client {
         }
         return 'https://' . strtolower($parts['host']) . (isset($parts['port']) && $parts['port'] !== 443 ? ':' . $parts['port'] : '');
     }
+    /**
+     * Returns bounded Moodle HTTP options with TLS verification and no redirects.
+     *
+     * @param int $timeout Maximum HTTP request duration in seconds.
+     * @return array
+     */
     public static function http_options(int $timeout = 30): array {
         // Moodle's curl wrapper otherwise defaults SSL peer verification to off.
         return ['CURLOPT_FOLLOWLOCATION' => 0, 'CURLOPT_TIMEOUT' => $timeout,
             'CURLOPT_SSL_VERIFYPEER' => true, 'CURLOPT_SSL_VERIFYHOST' => 2];
     }
+    /**
+     * Sends an authenticated JSON request to the configured legacy service.
+     *
+     * @param string $method HTTP request method.
+     * @param string $path Service-relative request path.
+     * @param array|null $body Optional JSON request payload.
+     * @return array
+     */
     public function request(string $method, string $path, ?array $body = null): array {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
@@ -75,6 +101,13 @@ final class client {
         }
         return $data;
     }
+    /**
+     * Transfers the source file using the service-provided signed upload target.
+     *
+     * @param array $upload Service-provided upload target and metadata.
+     * @param \stored_file $file Source video file.
+     * @return void
+     */
     public function upload(array $upload, \stored_file $file): void {
         if (!isset($upload['url'], $upload['direct']) || !is_bool($upload['direct'])) {
             throw new \RuntimeException('Invalid upload response');

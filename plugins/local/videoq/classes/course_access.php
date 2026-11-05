@@ -30,6 +30,11 @@ defined('MOODLE_INTERNAL') || die();
  * Stateless, expiring proof bound to one Moodle user, course and LTI activity.
  */
 final class course_access {
+    /**
+     * Loads and validates the site key used to sign course access proofs.
+     *
+     * @return string
+     */
     private static function secret(): string {
         $key = (string)get_config('local_videoq', 'accesssigningkey');
         if (!preg_match('/^[a-f0-9]{64}$/D', $key)) {
@@ -37,6 +42,12 @@ final class course_access {
         }
         return hex2bin($key);
     }
+    /**
+     * Lists synchronized or legacy material bindings for a course.
+     *
+     * @param int $courseid Moodle course identifier.
+     * @return array
+     */
     public static function lessons(int $courseid): array {
         global $DB;
         $items = [];
@@ -61,6 +72,13 @@ final class course_access {
         }
         return $items;
     }
+    /**
+     * Creates an expiring proof bound to a learner and registered launch activity.
+     *
+     * @param int $ltiid Launch activity instance identifier.
+     * @param int $userid Moodle learner identifier.
+     * @return array
+     */
     public static function launch(int $ltiid, int $userid): array {
         global $DB;
         $cm = get_coursemodule_from_instance('lti', $ltiid, 0, false, IGNORE_MISSING);
@@ -79,6 +97,15 @@ final class course_access {
         }
         return [];
     }
+    /**
+     * Verifies a course access proof and rechecks current learner permissions.
+     *
+     * @param string $token Signed access proof.
+     * @param string $subject Moodle user identifier from the LTI launch.
+     * @param string $context Course identifier bound to the proof.
+     * @param string $resource Launch resource identifier.
+     * @return array
+     */
     public static function resolve(string $token, string $subject, string $context, string $resource): array {
         global $DB;
         if (
