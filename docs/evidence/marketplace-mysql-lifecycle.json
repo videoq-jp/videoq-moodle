@@ -1,0 +1,112 @@
+{
+  "scope": "Actual isolated MySQL install, old-main upgrade, uninstall and candidate reinstall",
+  "mysqlVersion": "8.4.13",
+  "mysqlImage": "mysql@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902",
+  "moodleSourceCommit": "a682566412e1d429b95ac8ef4351a518f61b94c5",
+  "moodleRelease": "5.1.8+ (Build 20261030)",
+  "baselinePluginCommit": "2d195b22a14a11365f256b3c5f0c9ca242b93827",
+  "candidatePluginCommit": "f0b12f6",
+  "reports": {
+    "mysql-upgrade-seed": {
+      "passed": true,
+      "phase": "seed",
+      "database": "mysqli",
+      "baselineVersion": 2026110501,
+      "courseCreated": true,
+      "sourceVideoCreated": true,
+      "synchronizationTablesSeeded": 3
+    },
+    "mysql-upgrade-verify": {
+      "passed": true,
+      "phase": "verify",
+      "database": "mysqli",
+      "version": 2026110503,
+      "coursePreserved": true,
+      "sourceVideoBytesPreserved": true,
+      "accessKeyPreserved": true,
+      "allSynchronizationRecordsPreserved": true
+    },
+    "mysql-upgraded-runtime": {
+      "passed": true,
+      "database": "mysqli",
+      "moodle": "5.1.8+ (Build: 20261030)",
+      "developerDebugging": true,
+      "tables": [
+        "local_videoq_sync",
+        "local_videoq_exports",
+        "local_videoq_assertions"
+      ],
+      "versions": {
+        "local_videoq": 2026110503,
+        "ltisource_videoq": 2026110406
+      },
+      "privacyMetadata": true,
+      "schemaWithoutRepairs": true,
+      "accessKeyInitialized": true
+    },
+    "mysql-uninstalled": {
+      "passed": true,
+      "phase": "uninstalled",
+      "database": "mysqli",
+      "tablesRemoved": true,
+      "settingsRemoved": true,
+      "coreSitePreserved": true
+    },
+    "mysql-uninstalled-preserved": {
+      "passed": true,
+      "phase": "verify-uninstalled",
+      "database": "mysqli",
+      "coursePreserved": true,
+      "sourceVideoBytesPreserved": true,
+      "pluginTablesRemoved": true,
+      "pluginSettingsRemoved": true
+    },
+    "mysql-reinstalled": {
+      "passed": true,
+      "database": "mysqli",
+      "moodle": "5.1.8+ (Build: 20261030)",
+      "developerDebugging": true,
+      "tables": [
+        "local_videoq_sync",
+        "local_videoq_exports",
+        "local_videoq_assertions"
+      ],
+      "versions": {
+        "local_videoq": 2026110503,
+        "ltisource_videoq": 2026110406
+      },
+      "privacyMetadata": true,
+      "schemaWithoutRepairs": true,
+      "accessKeyInitialized": true
+    },
+    "mysql-reinstalled-preserved": {
+      "passed": true,
+      "phase": "verify-reinstalled",
+      "database": "mysqli",
+      "coursePreserved": true,
+      "sourceVideoBytesPreserved": true,
+      "freshPluginTables": true,
+      "accessKeyRenewed": true
+    }
+  },
+  "limits": [
+    "No paid AI or external LTI launch exercised",
+    "Disabled synchronization fixtures; no production data",
+    "No Marketplace submission or approval implied"
+  ],
+  "baselineKnownXmlDbRepairDiagnostics": [
+    "fingerprint",
+    "errorcode"
+  ],
+  "candidateUpgradeUninstallReinstallDiagnostics": 0,
+  "candidateArchiveSha256": {
+    "local_videoq.zip": "3838ae4e6ca471363081cad3a8eb2e9a6b67d83a7b88d25aa83e36c5797eef58",
+    "ltisource_videoq.zip": "76942b4ba7b15d5cb82179c07f15873bd7e07b14d4ab1619d655a2d7bc3154b4"
+  },
+  "baselineArchiveSha256": {
+    "local_videoq.zip": "d9adba7b793e8350020e9c4bc9ab03ec7c3bf4544340ca0c5bce5d609d249b9c",
+    "ltisource_videoq.zip": "071bae5d86ddb5436b5d2a8a7b6f009272397f3e9510625e60a2b9dd1591e900"
+  },
+  "databaseCharacterSet": "utf8mb4",
+  "databaseCollation": "utf8mb4_unicode_ci"
+}

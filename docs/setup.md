@@ -96,6 +96,20 @@ For platform-side trust revocation as well, disable/remove the registered VideoQ
 external tool in Moodle through its standard tool administration. The remote
 VideoQ disconnect does not delete Moodle's tool registration.
 
+## Uninstall
+
+Disconnect and revoke the tool's trust as described above before removing plugins.
+Use Moodle's plugin overview to uninstall `ltisource_videoq` first, then remove
+its `public/mod/lti/source/videoq` code directory. Only then uninstall
+`local_videoq` and remove `public/local/videoq`. Moodle can still block removal
+of the local plugin while dependent companion code remains on disk, even after
+its database uninstall succeeds.
+
+Uninstalling removes plugin configuration and synchronization tables. Source
+File activities and course videos remain in Moodle. It does not erase VideoQ's
+processed copies or question history; manage those separately in the owning
+VideoQ account. Reinstallation requires connecting and enabling questions again.
+
 ## Operations and troubleshooting
 
 Keep Moodle cron/ad-hoc tasks, the VideoQ processing worker and materials scheduler

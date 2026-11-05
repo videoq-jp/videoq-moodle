@@ -65,11 +65,11 @@ if ($phase === 'seed') {
         'synchronizationTablesSeeded' => 3]) . "\n";
     exit;
 }
-if ($phase !== 'verify' || !is_file($statefile)) {
+if (!in_array($phase, ['verify', 'verify-uninstalled', 'verify-reinstalled'], true) || !is_file($statefile)) {
     throw new RuntimeException('Expected seed or verify phase with a saved baseline');
 }
 $state = json_decode(file_get_contents($statefile), true, 16, JSON_THROW_ON_ERROR);
-if ((int)get_config('local_videoq', 'version') < 2026110503) {
+if ($phase !== 'verify-uninstalled' && (int)get_config('local_videoq', 'version') < 2026110503) {
     throw new RuntimeException('The candidate plugin upgrade has not been applied');
 }
 $course = $DB->get_record('course', ['id' => $state['courseId']], '*', MUST_EXIST);
@@ -77,9 +77,42 @@ $cm = get_coursemodule_from_id('resource', $state['cmid'], $course->id, false, M
 $file = get_file_storage()->get_file_by_id($state['fileId']);
 if ($course->shortname !== 'VIDEOQ-MARKETPLACE-UPGRADE' || $cm->name !== 'Preserved video'
         || !$file || $file->get_contenthash() !== $state['fileHash']
-        || hash('sha256', $file->get_content()) !== $state['fileBytesHash']
-        || hash('sha256', (string)get_config('local_videoq', 'accesssigningkey')) !== $state['keyHash']) {
-    throw new RuntimeException('Teaching data, video bytes or site access key changed during upgrade');
+        || hash('sha256', $file->get_content()) !== $state['fileBytesHash']) {
+    throw new RuntimeException('Teaching data or video bytes changed during lifecycle verification');
+}
+if ($phase === 'verify-reinstalled') {
+    $newkey = (string)get_config('local_videoq', 'accesssigningkey');
+    if (!preg_match('/^[a-f0-9]{64}$/D', $newkey) || hash('sha256', $newkey) === $state['keyHash']) {
+        throw new RuntimeException('Reinstallation must create a new access key after complete uninstall');
+    }
+    foreach (array_keys($state['rows']) as $table) {
+        if (!$DB->get_manager()->table_exists($table) || $DB->count_records($table) !== 0) {
+            throw new RuntimeException('Expected fresh synchronization tables after reinstall');
+        }
+    }
+    echo json_encode(['passed' => true, 'phase' => $phase, 'database' => $CFG->dbtype,
+        'coursePreserved' => true, 'sourceVideoBytesPreserved' => true,
+        'freshPluginTables' => true, 'accessKeyRenewed' => true], JSON_PRETTY_PRINT) . "\n";
+    exit;
+}
+if ($phase === 'verify-uninstalled') {
+    foreach (array_keys($state['rows']) as $table) {
+        if ($DB->get_manager()->table_exists($table)) {
+            throw new RuntimeException('Plugin table remains after uninstall');
+        }
+    }
+    foreach (['local_videoq', 'ltisource_videoq'] as $component) {
+        if ($DB->record_exists('config_plugins', ['plugin' => $component])) {
+            throw new RuntimeException('Plugin configuration remains after uninstall');
+        }
+    }
+    echo json_encode(['passed' => true, 'phase' => $phase, 'database' => $CFG->dbtype,
+        'coursePreserved' => true, 'sourceVideoBytesPreserved' => true,
+        'pluginTablesRemoved' => true, 'pluginSettingsRemoved' => true], JSON_PRETTY_PRINT) . "\n";
+    exit;
+}
+if (hash('sha256', (string)get_config('local_videoq', 'accesssigningkey')) !== $state['keyHash']) {
+    throw new RuntimeException('Site access key changed during upgrade');
 }
 foreach ($state['rows'] as $table => $expected) {
     $actual = (array)$DB->get_record($table, ['id' => $expected['id']], '*', MUST_EXIST);

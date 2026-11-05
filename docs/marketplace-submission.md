@@ -246,3 +246,31 @@ the next sequential test, pinned to image manifest
 `sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902`.
 No MySQL result is claimed yet. No publisher account or listing-model answer has
 been received, and those decisions remain required before submission.
+
+## MySQL installed lifecycle (2026-11-05)
+
+MySQL 8.4.13 was run on a separate internal Docker network using the recorded
+immutable digest, utf8mb4_unicode_ci and resource limits. The PostgreSQL fixture
+was stopped first. Installed Moodle 5.1.8+ with actual old-main component ZIPs,
+created a real course/File activity/video and seeded all synchronization tables.
+
+Candidate ZIP upgrade via Moodle CLI passed. A fresh process confirmed exact
+video bytes, course identity, all seeded records and access key were unchanged.
+Developer-debug Privacy API and canonical XMLDB inspection passed without stderr.
+Then uninstalled companion, removed its code, and uninstalled the local plugin.
+Verified all plugin tables/settings were removed and the original course and
+video bytes survived. Fresh candidate ZIP installation then passed: tables were
+empty, a new access key was generated and original teaching data remained.
+
+All seven JSON reports parsed and passed with empty stderr. The actual old-main
+baseline installation exposed the two known XMLDB default-repair diagnostics for
+`fingerprint` and `errorcode`. Candidate upgrade, uninstall and reinstall logs
+contain no PHP warning, exception or XMLDB-repair diagnostic.
+Sanitized evidence: [MySQL lifecycle report](evidence/marketplace-mysql-lifecycle.json).
+The added fixture modes are reusable for later PostgreSQL deletion/retention runs.
+These checks do not cover paid AI, external LTI interoperability, public directory
+installation, all Moodle versions or publisher approval.
+
+Both audit DB containers are now stopped with their fixture data retained.
+The MySQL report includes baseline/candidate archive hashes and the verified
+database charset/collation for reproducibility.
