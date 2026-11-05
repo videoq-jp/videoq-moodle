@@ -65,9 +65,9 @@ namespace {
             $SESSION->local_videoq_browser = $pending;
             \local_videoq\lti_connection_setup::$fail = true;
             rejects(fn() => Connection::finish($pending['state'], str_repeat('a', 64)), 'Interrupted exchange');
-            check(isset($SESSION->local_videoq_browser), 'Cannot recover interrupted exchange');
+            check(isset($SESSION->local_videoq_browser['code']), 'Cannot recover interrupted exchange without a browser code');
             \local_videoq\lti_connection_setup::$fail = false;
-            check(Connection::finish($pending['state'], str_repeat('a', 64)), 'Exchange failed');
+            check(Connection::retry(), 'Exchange retry failed');
             [$code, $proof] = end(\local_videoq\lti_connection_setup::$calls);
             check($code['origin'] === $origin && $code['secret'] === str_repeat('a', 64) && $proof === $pending['verifier'], 'Exchange binding lost');
             rejects(fn() => Connection::finish($pending['state'], str_repeat('a', 64)), 'Replayed callback');

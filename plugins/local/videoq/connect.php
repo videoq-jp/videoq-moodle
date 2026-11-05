@@ -27,6 +27,10 @@ if (data_submitted()) {
         if (optional_param('action', '', PARAM_ALPHA) === 'browser') {
             redirect(\local_videoq\browser_connection::start(required_param('videoqurl', PARAM_RAW_TRIMMED)));
         }
+        if (optional_param('action', '', PARAM_ALPHA) === 'retry') {
+            \local_videoq\browser_connection::retry();
+            redirect(new moodle_url('/local/videoq/connect.php'), get_string('connectionsuccess', 'local_videoq'));
+        }
         \local_videoq\connection_setup::connect(required_param('connectioncode', PARAM_RAW_TRIMMED));
         redirect(new moodle_url('/local/videoq/connect.php'), get_string('connectionsuccess', 'local_videoq'));
     } catch (\Throwable $e) {
@@ -37,6 +41,10 @@ if (data_submitted()) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('connecttitle', 'local_videoq'));
 if ($error) echo $OUTPUT->notification(get_string('connectionfailed', 'local_videoq'), 'error');
+if (!empty($SESSION->local_videoq_browser['code']) && $SESSION->local_videoq_browser['expires'] > time()) {
+    echo $OUTPUT->single_button(new moodle_url('/local/videoq/connect.php', ['action' => 'retry']),
+        get_string('retryconnection', 'local_videoq'), 'post');
+}
 if (get_config('local_videoq', 'synctoken') || get_config('local_videoq', 'servicemode') === 'lti') {
     try {
         if (get_config('local_videoq', 'servicemode') === 'lti') \local_videoq\service_auth::type();

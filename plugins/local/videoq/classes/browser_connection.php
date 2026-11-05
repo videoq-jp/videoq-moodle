@@ -43,9 +43,18 @@ final class browser_connection {
             return false;
         }
         if (!preg_match('/^[a-f0-9]{64}$/D', $code)) throw new \RuntimeException('Invalid authorization code');
+        // Retain an interrupted callback only in this administrator's expiring
+        // server session, so retry needs no code in the URL or copy/paste.
+        $SESSION->local_videoq_browser['code'] = $code;
         $connectioncode = 'VIDEOQ2.' . base64_encode(json_encode(['origin' => $pending['origin'], 'secret' => $code], JSON_THROW_ON_ERROR));
         lti_connection_setup::connect($connectioncode, $pending['verifier']);
         unset($SESSION->local_videoq_browser);
         return true;
+    }
+
+    public static function retry(): bool {
+        global $SESSION;
+        $pending = $SESSION->local_videoq_browser ?? [];
+        return self::finish($pending['state'] ?? '', $pending['code'] ?? '');
     }
 }
