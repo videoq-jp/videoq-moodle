@@ -1,7 +1,7 @@
 # Moodle Marketplace submission
 
 Preparation in progress. Neither component has been submitted, approved or
-published. Account access, commercial decisions and review are still required.
+published. Publisher account setup is complete; commercial decisions and review remain.
 Passing local/CI checks does not establish official approval.
 
 Current candidates: local_videoq **0.11.6 / 2026110603** and ltisource_videoq
@@ -22,16 +22,21 @@ Approval alone does not publish a listing. The old version-upload API is unavail
 
 ## Publisher decisions
 
-- **Account:** Marketplace requires a separate account; a Moodle.org login cannot
-  be used directly. The submitter becomes lead maintainer. Choose that identity
-  before using [Submit a plugin](https://marketplace.moodle.com/plugins/submit).
-  The form required sign-in when checked. No Marketplace sign-in is recorded in
-  connected browser profiles; this does not establish whether the owner has an account.
-- **Listing classification:** the quick guide treats provider-paid service tiers
-  as paid even if one tier is free. Retaining VideoQ's paid cloud offering needs
-  a paid-listing decision. Optional self-hosting must not be assumed to make the
-  entire integration eligible for free listing. A self-host-only scope needs
-  separate eligibility confirmation and must not silently replace cloud support.
+- **Account:** Publisher registration, email verification and initial account setup
+  are complete. The authenticated [submission form](https://marketplace.moodle.com/plugins/submit)
+  has been inspected. The submitter becomes lead maintainer. Authentication data
+  and private upload/session URLs are not included in this repository.
+- **Listing classification:** the intended offering keeps the GPL Moodle plugins
+  free of charge and supports both independently operated on-premises servers
+  and VideoQ's optional paid cloud service. The cloud service already has its own
+  Stripe billing. The guidelines require provider-paid service access to be
+  purchasable through Marketplace, and the quick guide treats provider-paid tiers
+  as paid even if one tier is free. Confirm with Moodle how these rules apply
+  when the full plugin functionality can instead use an independently operated
+  server. Free-listing eligibility is not established merely by a free plugin
+  download or an on-premises option. No paid submission has been sent. Preserve
+  existing billing and cloud support while resolving eligibility; do not silently
+  change the integration to self-host-only or create a second plugin charge.
 - **Fees and sales:** the published schedule states no listing fee. Sales carry a
   20% promotional platform fee in the first year after Marketplace launch, then
   25%, plus Stripe fees. Paid listings can offer free plugin downloads with paid
@@ -74,13 +79,23 @@ checked against the ZIP, and `source-exports.json` records provenance and hashes
 Repeated exports reproduce commit/tree/package identities. Symlinks and nonempty
 output targets are rejected. No remote is configured or pushed.
 
-The submission guide requires plugin files at the repository root and recommends
-`moodle-{plugintype}_{pluginname}` names. The canonical monorepo's default branch
-does not meet that layout. Publish the prepared root trees to accepted source
-locations before submission; whether publication branches are supported still
-requires confirmation in the authenticated workflow. Standalone mirrors are
-another option. For existing publication repositories, import the new tree as a
-new commit while preserving history. No new GitHub repository has been created.
+The authenticated submission form accepts a Git repository URL, a **Repository
+branch** and an optional **Repository tag**. The canonical monorepo's default
+branch does not have plugin files at its root. Use these publication branches:
+
+| Component | Git repository | Repository branch |
+| --- | --- | --- |
+| local_videoq | `https://github.com/videoq-jp/videoq-moodle.git` | `marketplace/local_videoq` |
+| ltisource_videoq | `https://github.com/videoq-jp/videoq-moodle.git` | `marketplace/ltisource_videoq` |
+
+Both branches have `version.php`, `LICENSE` and English language files at the
+repository root. Their Git tree identities match every file in the current
+Marketplace ZIPs. Each publication commit keeps the committed source candidate
+`d5a2663e9bb432fca9e73625905dacf0bc8369a9` as its parent, preserving development
+history. Only new publication branch refs were created; existing branches and historical
+releases were not rewritten. See the [publication evidence](evidence/marketplace-source-publication.json).
+The `moodle-{plugintype}_{pluginname}` repository name remains a recommendation;
+no standalone mirror repository was needed.
 
 The AMOS output is a flat 81-string Japanese import: 75 local and 6 LTI-source
 strings. It is **prepared, not submitted or accepted**. After component approval,
@@ -132,7 +147,7 @@ The documentation URL must contain the reviewed changes before publication.
 | PostgreSQL / MySQL | Actual old-main install/update, privacy requests, uninstall and current reinstall pass | Synthetic source-byte preservation; no decoding/paid-AI claim |
 | Browser installation | Both current ZIPs install through stock Moodle administration and open Connect to VideoQ | Loopback HTTP fixture, alpha warnings and core server recommendations recorded |
 | Privacy API | Six callbacks per component preserve shared course/file/sync/settings records | External VideoQ requests remain operator-managed |
-| Root source exports | Git blobs match all 39 local / 6 companion files; official structure validation passes | Local repositories only; source URLs not yet published/accepted |
+| Root source exports | Git blobs match all 39 local / 6 companion files; official structure validation passes | Matching root trees published on source branches; Marketplace review remains |
 | Package/source contracts | Timezone/mode reproducibility, provenance, unsafe-target and dependency/release checks pass | Historical releases preserved |
 | Browser assets | JS compiles in native Chrome; source copyright/license checks pass | Course/chat accessibility and full live-service review remain |
 
@@ -141,6 +156,7 @@ Current reports:
 - [DB matrix and hosted CI](evidence/marketplace-database-matrix.json)
 - [Browser installation](evidence/marketplace-web-installation.json)
 - [Root source exports](evidence/marketplace-root-sources.json)
+- [Published root source branches](evidence/marketplace-source-publication.json)
 - [Privacy notes and earlier request evidence](evidence/marketplace-privacy-requests.json)
 - [Connection screenshot](evidence/images/marketplace-connection.png)
 - [ZIP validation screenshot](evidence/images/marketplace-zip-validation.png)
@@ -180,8 +196,9 @@ particular unit-test framework requirement was found in the cited guidelines.
 
 ## Remaining publication work
 
-1. Settle publisher identity/classification, sign in, and configure any required
-   Stripe/prices/Terms of Sale. Confirm source publication locations and component names.
+1. Confirm listing classification and configure any required Stripe/prices/Terms
+   of Sale. Publisher account setup and root source publication are complete;
+   component-name acceptance still requires the submission workflow.
 2. Provide reviewer service access, verify external data-request/retention handling,
    and capture course/chat/citation screenshots with functionality/accessibility evidence.
 3. Reconcile documentation overlap with PR #3, finish PR #4, select maturity/support
