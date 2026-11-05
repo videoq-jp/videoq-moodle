@@ -8,7 +8,8 @@ if ($site !== '/site') {
 }
 require $site . '/config.php';
 require $CFG->dirroot . '/version.php';
-if ($CFG->wwwroot !== 'https://marketplace-audit.invalid' || $CFG->dbname !== 'moodleaudit') {
+if ($CFG->wwwroot !== 'https://marketplace-audit.invalid'
+        || !in_array($CFG->dbname, ['moodleaudit', 'moodleaudit_upgrade'], true) || $CFG->dbhost !== 'audit-db') {
     throw new RuntimeException('Refusing to inspect an unrelated Moodle site');
 }
 if ((int)$CFG->debug !== DEBUG_DEVELOPER || !$CFG->debugdisplay) {

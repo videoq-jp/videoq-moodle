@@ -1,0 +1,49 @@
+{
+  "scope": "Actual PostgreSQL upgrade from the old main plugin archive to the candidate archive",
+  "moodleSourceCommit": "a682566412e1d429b95ac8ef4351a518f61b94c5",
+  "moodleRelease": "5.1.8+ (Build 20261030)",
+  "baselinePluginCommit": "2d195b22a14a11365f256b3c5f0c9ca242b93827",
+  "candidatePluginCommit": "f0b12f6",
+  "seed": {
+    "passed": true,
+    "phase": "seed",
+    "database": "pgsql",
+    "baselineVersion": 2026110501,
+    "courseCreated": true,
+    "sourceVideoCreated": true,
+    "synchronizationTablesSeeded": 3
+  },
+  "upgradeVerification": {
+    "passed": true,
+    "phase": "verify",
+    "database": "pgsql",
+    "version": 2026110503,
+    "coursePreserved": true,
+    "sourceVideoBytesPreserved": true,
+    "accessKeyPreserved": true,
+    "allSynchronizationRecordsPreserved": true
+  },
+  "installedRuntime": {
+    "passed": true,
+    "database": "pgsql",
+    "moodle": "5.1.8+ (Build: 20261030)",
+    "developerDebugging": true,
+    "tables": [
+      "local_videoq_sync",
+      "local_videoq_exports",
+      "local_videoq_assertions"
+    ],
+    "versions": {
+      "local_videoq": 2026110503,
+      "ltisource_videoq": 2026110406
+    },
+    "privacyMetadata": true,
+    "schemaWithoutRepairs": true,
+    "accessKeyInitialized": true
+  },
+  "limits": [
+    "Does not exercise paid AI, chat or external LTI launch",
+    "Does not prove MySQL compatibility",
+    "Synchronized records were disabled fixtures; no production data used"
+  ]
+}

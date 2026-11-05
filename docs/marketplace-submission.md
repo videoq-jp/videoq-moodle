@@ -223,3 +223,26 @@ upgrade with preserved teaching data, web-installer operation, complete question
 flows or MySQL compatibility. Those tests remain required. The isolated,
 resource-limited PostgreSQL fixture is retained for the next upgrade test; no
 public ports or existing trial-site data are used.
+
+## Actual old-main upgrade on PostgreSQL (2026-11-05)
+
+A second isolated DB was installed using component ZIPs rebuilt from the actual
+old main commit `2d195b22a14a11365f256b3c5f0c9ca242b93827` (local version
+2026110501 / 0.11.0). Created a real Moodle course, File activity and original
+synthetic video, and seeded records in all three plugin tables. Stored only a
+hash of the local signing key for comparison.
+
+Replaced the baseline plugin directories with candidate ZIP contents and ran
+Moodle's standard noninteractive upgrade CLI. The update to 2026110503 / 0.11.2
+passed without warning/exception diagnostics. A fresh process verified course
+and source-file identity, exact video bytes, exact records in all three tables,
+and the access key were preserved. Runtime metadata and XMLDB checks also passed.
+All JSON evidence parsed successfully and stderr was empty.
+
+Sanitized evidence: [PostgreSQL upgrade report](evidence/marketplace-postgresql-upgrade.json).
+The DB container is stopped with its data retained for follow-up checks, not
+removed or left consuming database memory. MySQL 8.4.13 has been downloaded for
+the next sequential test, pinned to image manifest
+`sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902`.
+No MySQL result is claimed yet. No publisher account or listing-model answer has
+been received, and those decisions remain required before submission.
