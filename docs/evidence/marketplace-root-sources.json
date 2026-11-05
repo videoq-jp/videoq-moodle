@@ -1,7 +1,7 @@
 {
   "status": "local-only-no-remotes",
   "sourceRevision": "e9afc8f4002f1449088007900b1378983a5f517b",
-  "exporterRevision": "5734f8ba70b2e11de61f7da4d5b6984cde535e14",
+  "exporterRevision": "7645dc9",
   "builderSha256": "0e9e537ed3b735689e19d32a5e855916f7f76829359b37be2b946bb549305100",
   "components": {
     "local_videoq": {
@@ -36,5 +36,7 @@
   "limits": [
     "Only local repositories were created. No GitHub source publication or Marketplace submission occurred.",
     "Accepted source URLs/publication layout still require verification in the authenticated submission workflow."
-  ]
+  ],
+  "builderRevision": "7645dc9c1961206974a556b4955b113ca192d28f",
+  "dirtyBuildScriptExcludedByRegressionTest": true
 }

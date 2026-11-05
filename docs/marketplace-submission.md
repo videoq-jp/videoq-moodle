@@ -68,7 +68,8 @@ No Composer, Node.js or Python tooling is distributed or required on Moodle.
 
 The source export creates local Git repositories named `moodle-local_videoq` and
 `moodle-ltisource_videoq`, with version.php/classes/lang at their root. Committed
-Git blobs are used; dirty/untracked files are excluded. Every exported Git blob is
+Git blobs and the committed HEAD packager are used; dirty/untracked plugin files
+and dirty build scripts are excluded. Every exported Git blob is
 checked against the ZIP, and `source-exports.json` records provenance and hashes.
 Repeated exports reproduce commit/tree/package identities. Symlinks and nonempty
 output targets are rejected. No remote is configured or pushed.
