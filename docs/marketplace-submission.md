@@ -14,8 +14,8 @@ Checked 2026-11-05. The old directory contribution checklist is explicitly legac
 The official FAQ describes signing in, uploading a component ZIP, completing
 archive/CI checks, review through Jira Service Management, and manual publication
 after approval. Marketplace version upload by API is currently unavailable.
-The current Confluence guidelines must be reviewed in a browser before submission;
-the text could not be retrieved by the documentation client used for this audit.
+The current Confluence guidelines were subsequently read with a JavaScript-capable
+fetcher on 2026-11-05. Use that current document, rather than the legacy checklist.
 
 ## Two component submissions
 
@@ -101,3 +101,29 @@ alone. Approved listings and directory-based installation need direct evidence.
   developer-debug installation tests or verify export/deletion of service data.
 - `lab/check-privacy.php` includes the new feedback declaration for a subsequent
   full Moodle runtime run. That runtime run is still pending.
+
+## Current guideline findings and code-check baseline
+
+The current guidelines require English-only strings in distributed plugins,
+standard copyright/license headers, declared companion dependencies, working
+ZIP installation, Privacy API support and multi-database testing. Review must
+also cover service charges: provider-owned paid services cannot be required by
+a free listing through an external purchase flow. The publishing/payment model
+must be settled with the project owner before selecting free/paid listing status.
+The descriptions above are drafts, not a final classification or approval claim.
+Japanese translation delivery through AMOS remains to be planned before submission.
+
+An isolated PHP development toolchain was installed outside this repository:
+Composer 2.11.1 (official SHA256 verified), moodlehq/moodle-cs v3.7.0 and locked
+transitive dependencies. No installer/runtime dependency was added to the plugins.
+The initial full PHPCS run reported 578 errors and 102 warnings (386 fixable),
+mainly compact control structures, long lines, docblocks and license headers.
+Both Privacy API providers now pass the full Moodle standard with zero findings.
+The remaining plugin files have not yet been corrected. Do not describe the whole
+plugin as passing PHPCS based on those two files.
+
+Reproduce the isolated scan using PHPCS with the Moodle standard, registering
+phpcsstandards/phpcsextra and moodlehq/moodle-cs as installed standards. The exact
+Composer lock, JSON findings and installation log are kept in the working
+environment's private `videoq-marketplace-audit` directory. A portable checked-in
+PHP-only audit runner and official plugin-CI integration remain to be completed.
