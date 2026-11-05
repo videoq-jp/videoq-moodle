@@ -82,3 +82,22 @@ Documentation: https://github.com/videoq-jp/videoq-moodle/blob/main/docs/setup.m
 
 Do not mark this goal complete on ZIP generation, GitHub publication or submission
 alone. Approved listings and directory-based installation need direct evidence.
+
+## Privacy audit progress (2026-11-05)
+
+- The three local plugin tables contain material sync state, replay hashes and
+  export jobs; no learner conversation or user-ID column is declared there.
+- `course_access::launch()` sends an expiring user/course/activity-bound proof.
+  `ltisource_videoq` declares those identifiers as an external transfer.
+- `chat.js` transfers questions, answers and Good/Bad feedback through the
+  origin-checked bridge. Explicit feedback metadata and English/Japanese
+  descriptions have now been added; the service summary includes video transfer.
+- Moodle core owns login/admin session storage, and VideoQ owns AI history.
+  This is a storage-boundary observation, not a claim that no personal data is
+  processed. Video content, titles and conversation text can contain personal data.
+- `php tests/privacy.php /path/to/moodle` checks both providers with actual
+  Moodle 5.1 metadata classes and all shipped privacy language identifiers.
+  It runs without a DB and with core debugging disabled. It does not replace
+  developer-debug installation tests or verify export/deletion of service data.
+- `lab/check-privacy.php` includes the new feedback declaration for a subsequent
+  full Moodle runtime run. That runtime run is still pending.

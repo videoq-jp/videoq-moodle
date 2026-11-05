@@ -11,7 +11,7 @@ $string['questions'] = '教材に質問';
 $string['privacy:metadata'] = 'このプラグインは教材の紐付けと同期状態を保存し、受講者の情報は保存しません。質問機能を有効にした教材はVideoQへ転送されます。';
 $string['privacy:metadata:video'] = '管理者が紐付けたVideoQ動画の識別子。';
 $string['privacy:metadata:position'] = '取得できる場合に質問へ添えられる、現在の動画の再生位置。';
-$string['privacy:metadata:videoq'] = '紐付けたVideoQのLTIツールへ再生位置を送信します。このプラグインは受講者の記録をローカル保存しません。質問とセッションはLTIツールが管理します。';
+$string['privacy:metadata:videoq'] = '設定したVideoQと質問文・AI回答・回答評価・再生位置・教材の閲覧権限の証明を受け渡し、質問機能を有効にした動画ファイルと教材情報を転送します。プラグイン独自のテーブルには同期状態を保存し、受講者の会話は保存しません。ログインセッションはMoodle、質問履歴とAI処理はVideoQが管理します。';
 $string['apiurl'] = 'VideoQのAPIオリジン';
 $string['synctoken'] = '同期用接続キー';
 $string['typeid'] = '登録済みLTIツールのタイプID';
@@ -78,3 +78,5 @@ $string['browserconnect'] = 'VideoQに接続';
 $string['manualconnection'] = '接続コードで接続（従来の方法）';
 $string['connectioncancelled'] = '接続をキャンセルしました。';
 $string['retryconnection'] = '接続を再試行';
+
+$string['privacy:metadata:feedback'] = '回答を識別する情報とともにVideoQへ送信・保存する、受講者のGood/Bad評価または評価の解除。';

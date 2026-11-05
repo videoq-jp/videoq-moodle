@@ -11,7 +11,7 @@ $string['questions'] = 'Ask about this lesson';
 $string['privacy:metadata'] = 'This plugin stores lesson mappings and synchronization state, with no learner data. Video lessons with questions enabled are transferred to VideoQ.';
 $string['privacy:metadata:video'] = 'The administrator-associated VideoQ video identifier.';
 $string['privacy:metadata:position'] = 'The current playback position attached to a question when available.';
-$string['privacy:metadata:videoq'] = 'The companion sends playback hints to the associated VideoQ LTI tool. It stores no learner records locally. The LTI tool manages its own question and session data.';
+$string['privacy:metadata:videoq'] = 'The plugin exchanges questions, AI answers, answer feedback, playback position and course access proofs with the configured VideoQ service, and transfers enabled video files and lesson metadata. Its own database tables contain synchronization state rather than learner conversations. Moodle manages login sessions; VideoQ manages question history and AI processing.';
 $string['apiurl'] = 'VideoQ API origin';
 $string['synctoken'] = 'Synchronization key';
 $string['typeid'] = 'Registered LTI tool type ID';
@@ -78,3 +78,5 @@ $string['browserconnect'] = 'Connect to VideoQ';
 $string['manualconnection'] = 'Connect using a code (legacy method)';
 $string['connectioncancelled'] = 'Connection cancelled.';
 $string['retryconnection'] = 'Retry connection';
+
+$string['privacy:metadata:feedback'] = 'The learner’s Good/Bad rating or removal of a rating for an identified AI answer, sent to and stored by VideoQ.';

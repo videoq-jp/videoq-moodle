@@ -3,11 +3,12 @@
 namespace local_videoq\privacy;
 defined('MOODLE_INTERNAL') || die();
 
-/** No learner records are stored locally; position hints are sent to the LTI tool. */
+/** Declares data exchanged with VideoQ; plugin tables contain synchronization state. */
 final class provider implements \core_privacy\local\metadata\provider {
     public static function get_metadata(\core_privacy\local\metadata\collection $collection): \core_privacy\local\metadata\collection {
         $collection->add_external_location_link('videoq', [
             'conversation' => 'privacy:metadata:conversation',
+            'feedback' => 'privacy:metadata:feedback',
             'access' => 'privacy:metadata:access',
             'video' => 'privacy:metadata:video',
             'position' => 'privacy:metadata:position',
