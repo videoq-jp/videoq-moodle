@@ -1,6 +1,8 @@
 <?php
 /** Produce an AMOS import ZIP; this is not a Moodle plugin or language-pack installer. */
 declare(strict_types=1);
+putenv('TZ=UTC');
+date_default_timezone_set('UTC');
 if (PHP_SAPI !== 'cli' || $argc !== 2 || !class_exists(ZipArchive::class)) {
     throw new InvalidArgumentException('Usage: php scripts/package-translations.php OUTPUT_DIRECTORY');
 }
@@ -64,7 +66,9 @@ try {
     if ($zip->open($temporary, ZipArchive::OVERWRITE) !== true) throw new RuntimeException('Cannot create AMOS import');
     foreach ($sources as $component => [$english, $japanese]) {
         $name = $component . '.php';
-        if (!$zip->addFile($root . '/' . $japanese, $name) || !$zip->setMtimeName($name, 315532800)) {
+        if (!$zip->addFile($root . '/' . $japanese, $name) || !$zip->setMtimeName($name, 315532800)
+                || !$zip->setExternalAttributesName($name, ZipArchive::OPSYS_UNIX, 0100644 << 16)
+                || !$zip->setCompressionName($name, ZipArchive::CM_STORE)) {
             throw new RuntimeException('Cannot add translation');
         }
     }

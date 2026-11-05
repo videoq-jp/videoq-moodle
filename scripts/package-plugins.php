@@ -5,6 +5,9 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 if (!in_array($argc, [2, 3], true) || ($argc === 3 && $argv[2] !== '--marketplace') || !class_exists(ZipArchive::class)) {
     fwrite(STDERR, "Usage: php scripts/package-plugins.php OUTPUT_DIRECTORY [--marketplace] (PHP with ext-zip required)\n"); exit(1);
 }
+// ZIP timestamps use the process timezone; normalize it as well as PHP's date setting.
+putenv('TZ=UTC');
+date_default_timezone_set('UTC');
 $marketplace = ($argv[2] ?? '') === '--marketplace';
 $root = dirname(__DIR__);
 $destination = $argv[1];
@@ -40,7 +43,11 @@ foreach ($plugins as $component => $relative) {
     try {
         if ($archive->open($temporary, ZipArchive::OVERWRITE) !== true) throw new RuntimeException('Cannot open ZIP');
         foreach ($files as $name => $path) {
-            if (!$archive->addFile($path, $name) || !$archive->setMtimeName($name, 315532800)) throw new RuntimeException('Cannot add plugin file');
+            if (!$archive->addFile($path, $name) || !$archive->setMtimeName($name, 315532800)
+                    || !$archive->setExternalAttributesName($name, ZipArchive::OPSYS_UNIX, 0100644 << 16)
+                    || !$archive->setCompressionName($name, ZipArchive::CM_STORE)) {
+                throw new RuntimeException('Cannot add normalized plugin file');
+            }
         }
         if (!$archive->close()) throw new RuntimeException('Cannot finish ZIP');
         $name = $component . '.zip';

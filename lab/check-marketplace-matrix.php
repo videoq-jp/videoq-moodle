@@ -80,8 +80,10 @@ try {
     mkdir($work . '/data', 0700);
     mkdir($work . '/archives', 0700);
     mkdir($work . '/baseline-archives', 0700);
-    matrix_run([PHP_BINARY, $root . '/scripts/package-plugins.php', $work . '/archives', '--marketplace'], $work . '/candidate-packages.log');
-    matrix_run([PHP_BINARY, $work . '/baseline/scripts/package-plugins.php', $work . '/baseline-archives'], $work . '/baseline-packages.log');
+    $builder = [...$docker, 'run', '--rm', '--user', posix_geteuid() . ':' . posix_getegid(),
+        '--network', 'none', '--entrypoint', 'php', '-v', $root . ':/src:ro', '-v', $work . ':/audit', $images['php']];
+    matrix_run([...$builder, '/src/scripts/package-plugins.php', '/audit/archives', '--marketplace'], $work . '/candidate-packages.log');
+    matrix_run([...$builder, '/audit/baseline/scripts/package-plugins.php', '/audit/baseline-archives'], $work . '/baseline-packages.log');
     // Only deterministic synthetic fixture bytes, never teaching/learner data.
     file_put_contents($work . '/source-fixture.mp4', "VideoQ isolated byte-preservation fixture\n");
     $password = bin2hex(random_bytes(24));
