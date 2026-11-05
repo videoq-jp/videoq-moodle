@@ -72,3 +72,8 @@ $string['advancedsettings'] = 'VideoQ 詳細設定（手動接続）';
 $string['connectionconfigured'] = 'LTI接続が設定されています。接続状態はVideoQの設定画面で確認できます。';
 
 $string['updateconnection'] = 'VideoQの接続を更新・再接続する';
+$string['videoqurl'] = '接続先のVideoQ URL';
+$string['browserinstructions'] = 'クラウド版またはオンプレミス版のVideoQ URLを入力してください。VideoQでログインして接続を許可すると、この画面に戻ります。';
+$string['browserconnect'] = 'VideoQに接続';
+$string['manualconnection'] = '接続コードで接続（従来の方法）';
+$string['connectioncancelled'] = '接続をキャンセルしました。';

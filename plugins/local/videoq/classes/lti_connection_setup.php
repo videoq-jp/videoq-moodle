@@ -5,7 +5,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /** A single expiring pairing code registers LTI service access; no sync key is issued. */
 final class lti_connection_setup {
-    public static function connect(string $code): void {
+    public static function connect(string $code, ?string $codeverifier = null): void {
         global $CFG, $DB;
         require_capability('moodle/site:config', \context_system::instance());
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
@@ -36,10 +36,12 @@ final class lti_connection_setup {
             $type = $DB->get_record('lti_types', ['id' => $pending['typeid']], '*', MUST_EXIST);
             $curl = new \curl();
             $curl->setHeader(['Content-Type: application/json', 'Accept: application/json']);
-            $raw = $curl->post($value['origin'] . '/api/lms/pairing/exchange', json_encode([
+            $request = [
                 'secret' => $value['secret'], 'issuer' => $CFG->wwwroot, 'clientId' => $type->clientid,
                 'deploymentId' => (string)$type->id, 'mode' => 'materials',
-                'materialsService' => ['tokenEndpoint' => $CFG->wwwroot . '/local/videoq/token.php', 'endpoint' => $CFG->wwwroot . '/local/videoq/materials.php']], JSON_THROW_ON_ERROR),
+                'materialsService' => ['tokenEndpoint' => $CFG->wwwroot . '/local/videoq/token.php', 'endpoint' => $CFG->wwwroot . '/local/videoq/materials.php']];
+            if ($codeverifier !== null) $request['codeVerifier'] = $codeverifier;
+            $raw = $curl->post($value['origin'] . '/api/lms/pairing/exchange', json_encode($request, JSON_THROW_ON_ERROR),
                 client::http_options());
             if ($curl->get_errno() || (int)($curl->get_info()['http_code'] ?? 0) !== 200 || strlen($raw) > 16384) throw new \RuntimeException('Connection failed');
             $result = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);

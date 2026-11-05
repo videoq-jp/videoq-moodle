@@ -72,3 +72,8 @@ $string['advancedsettings'] = 'VideoQ advanced settings (manual connection)';
 $string['connectionconfigured'] = 'LTI connection is configured. Check the connection status in your VideoQ account settings.';
 
 $string['updateconnection'] = 'Update or reconnect VideoQ';
+$string['videoqurl'] = 'VideoQ URL';
+$string['browserinstructions'] = 'Enter your cloud or on-premises VideoQ URL. Sign in and allow the connection in VideoQ to return here.';
+$string['browserconnect'] = 'Connect to VideoQ';
+$string['manualconnection'] = 'Connect using a code (legacy method)';
+$string['connectioncancelled'] = 'Connection cancelled.';

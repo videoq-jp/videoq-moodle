@@ -24,7 +24,7 @@ try {
             verify(str_starts_with($name, 'videoq/') && !str_contains($name, '../'), 'Unsafe archive path');
             verify(!preg_match('/(?:node_modules|api\.env|compose\.env|\.mp4|\.pem|credential)/', $name), 'Non-plugin content in installer');
         }
-        if ($component === 'local_videoq') foreach (['connect.php','classes/lti_connection_setup.php','templates/chat.mustache','player.js','chat.js',
+        if ($component === 'local_videoq') foreach (['connect.php','classes/lti_connection_setup.php','classes/browser_connection.php','templates/chat.mustache','player.js','chat.js',
             'backup/moodle2/backup_local_videoq_plugin.class.php', 'backup/moodle2/restore_local_videoq_plugin.class.php',
             'classes/restoration.php', 'classes/task/restore_material.php'] as $file) {
             verify($zip->locateName('videoq/' . $file) !== false, 'Missing runtime asset: ' . $file);
