@@ -8,7 +8,7 @@ tested with the Boost theme.
 ## Installation
 
 1. Download `local_videoq.zip` and `ltisource_videoq.zip` from
-   [Releases](https://github.com/yukiharada1228/videoq-moodle/releases).
+   [Releases](https://github.com/videoq-jp/videoq-moodle/releases).
    Install them through Moodle's plugin installer, in that order.
 2. In VideoQ, open **Settings → Connect Moodle**, enter your Moodle URL,
    and generate a connection code.
