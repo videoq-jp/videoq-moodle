@@ -57,6 +57,18 @@ jobs:
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/dependencies.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/release.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/live-lock.php
+      - name: Check Privacy API against pinned Moodle classes
+        env:
+          MOODLE_REVISION: a682566412e1d429b95ac8ef4351a518f61b94c5
+        run: |
+          fixture="$RUNNER_TEMP/videoq-moodle-privacy"
+          git init "$fixture"
+          git -C "$fixture" sparse-checkout init --no-cone
+          git -C "$fixture" sparse-checkout set /public/privacy/classes/ /public/lib/setuplib.php /public/lib/weblib.php
+          git -C "$fixture" fetch --depth=1 --filter=blob:none https://github.com/moodle/moodle.git "$MOODLE_REVISION"
+          git -C "$fixture" checkout --detach FETCH_HEAD
+          test "$(git -C "$fixture" rev-parse HEAD)" = "$MOODLE_REVISION"
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" -v "$fixture:/moodle:ro" "$PHP_IMAGE" /src/tests/privacy.php /moodle
       - name: Download paired native browser executables
         run: php scripts/native-browser.php /tmp/videoq-native-browser >> "$GITHUB_ENV"
       - name: Compile browser assets through PHP WebDriver

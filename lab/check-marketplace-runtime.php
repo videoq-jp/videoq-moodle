@@ -62,6 +62,7 @@ foreach ($components as $component => $expected) {
     $class = '\\' . $component . '\\privacy\\provider';
     $collection = $class::get_metadata(new \core_privacy\local\metadata\collection($component));
     $entries = $collection->get_collection();
+    $entries = array_filter($entries, static fn($item) => $item instanceof \core_privacy\local\metadata\types\external_location);
     if (count($entries) !== 1) {
         throw new RuntimeException('Expected one external service declaration');
     }
