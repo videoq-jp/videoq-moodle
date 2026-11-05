@@ -8,22 +8,18 @@ separate organization model.
 
 For a new connection:
 
-1. Install both `local_videoq` and `ltisource_videoq` and finish Moodle's plugin upgrade.
-2. In the school account's VideoQ **Settings → Connect Moodle**, enter this Moodle's
-   base URL and generate a connection code.
-3. In Moodle **Site administration → Plugins → Local plugins → Connect to VideoQ**,
-   paste the code and click **Connect**. LTI registration and sync settings are automatic.
+1. Install `local_videoq` and `ltisource_videoq` and finish Moodle's plugin upgrade.
+2. In Moodle **Site administration → Plugins → Local plugins → Connect to VideoQ**,
+   enter the cloud or on-premises VideoQ HTTPS URL.
+3. Sign in to the owning VideoQ account, approve the connection and return to Moodle.
+   No connection-code copying, manual LTI registration or separate API key is needed.
 
-Codes last ten minutes and bind only the Moodle URL entered in VideoQ. After a
-network error, retry with the same code. Existing connections are preserved.
-Run Moodle cron every minute. The operator must first apply current VideoQ
-migrations, enable database LTI registrations, and run its worker/queue/storage
-and recovery scheduler. See the
-[materials-service setup guide](../../../docs/materials-service.md).
-A compatible server with tool signing keys issues `VIDEOQ2.` codes and uses LTI
-service authentication without a sync API key. Existing connections can update
-or reconnect from the collapsed section of the Moodle connection page. Legacy
-`VIDEOQ1.` setup and manual provisioning remain compatible.
+The cloud service at https://videoq.jp supports this flow. An on-premises deployment
+must include the compatible LTI materials backend, processing worker, storage and
+scheduler. A VideoQ account and processing allowance are required; the Moodle
+plugins are GPL software and do not include hosting or paid AI service usage.
+Run Moodle cron every minute. See the
+[setup guide](https://github.com/videoq-jp/videoq-moodle/blob/main/docs/setup.md).
 
 Teachers can then enable **VideoQ questions** in a video File activity's settings
 navigation. The plugin creates the question activity and combined lesson link,
@@ -48,7 +44,7 @@ Connection keys stay in administrator settings and are never sent to learner
 browsers or object storage. TLS and Moodle's outbound HTTP policy apply. Status
 messages do not expose credentials, signed upload URLs or provider diagnostics.
 
-The [synchronization lab](../../../lab/README.md#automatic-synchronization-acceptance-test)
+The [synchronization lab](https://github.com/videoq-jp/videoq-moodle/blob/main/lab/README.md#automatic-synchronization-acceptance-test)
 verifies the full lifecycle with real storage/queue/worker processing and
 deterministic inference providers on Moodle 5.1.8+.
 
@@ -153,7 +149,7 @@ position as part of the question text in its existing guest question logs.
 
 ## Reproducible verification
 
-See the [Moodle lab](../../../lab/README.md) and
+See the [Moodle lab](https://github.com/videoq-jp/videoq-moodle/blob/main/lab/README.md) and
 [verification coverage](../../../docs/verification.md). PHP validates the plugin and packages, and drives native Chrome to test
 streaming, feedback and seeking.
 The default chat test uses a browser-only held response and no paid provider.
