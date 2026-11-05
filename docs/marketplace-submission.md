@@ -5,9 +5,12 @@ published. Passing the checks below does not establish official approval.
 
 ## Current official guidance
 
-Checked on 2026-11-05:
+Checked again on 2026-11-06:
 
 - [Current submission guidelines](https://moodle.atlassian.net/wiki/external/ODRhYjAyNTY4NDVmNGJlNjljN2ViMzkwYzdmYmIwMGI)
+- [Quick listing guide](https://moodle.atlassian.net/wiki/external/MzFlM2RkYjM3ZDVhNDgyMGJmYjA2ZjIyMzQ1NDRlYmY)
+- [Submission workflow](https://moodle.atlassian.net/wiki/external/MTA2NzQ5NWI0YmVmNDMxMWEzZWEyZjBjM2JmYzcyMDY)
+- [Sales, payments and fees](https://moodle.atlassian.net/wiki/external/MDY5MDE4OGYwMzNmNDYzNjlhNGM3NmJmMzc2ZGJlN2U)
 - [Marketplace](https://marketplace.moodle.com/)
 - [Official contribution entry point](https://moodledev.io/general/community/plugincontribution/checklist)
 - [Official submission/API FAQ](https://docs.moodle.org/all/es/plugin)
@@ -17,17 +20,45 @@ were read with a JavaScript-capable fetcher. The official process requires an
 account, component ZIP upload, automated checks, review and explicit publication
 after approval. Version-upload automation through the old API is unavailable.
 
-## Decisions needed from the publisher
+## Publisher decisions and submission access
 
-- Marketplace account and publisher identity: not provided yet.
-- Free/paid listing classification: not selected yet. Current guidelines require
-  Marketplace purchase when provider-owned paid service access is mandatory.
-  Confirm whether the supported free self-hosted deployment qualifies, or arrange
-  Marketplace sales. Do not classify a mandatory externally purchased VideoQ
-  service as a free listing. The descriptions below remain drafts.
-- Reviewer access: prepare a public, isolated demonstration site and deliver
-  credentials privately through the review channel. Do not use production data,
-  billing credentials, AI-provider keys or private signing keys.
+Marketplace needs its own account; a Moodle.org account cannot be used directly.
+The submitting person becomes lead maintainer. Choose that identity before using
+[the submission form](https://marketplace.moodle.com/plugins/submit), which was
+confirmed to require sign-in. No Marketplace sign-in is recorded in the connected
+browser profiles. This does not establish whether the owner already has an account.
+
+The [quick guide](https://moodle.atlassian.net/wiki/external/MzFlM2RkYjM3ZDVhNDgyMGJmYjA2ZjIyMzQ1NDRlYmY)
+classifies provider-paid service tiers as paid, even where one tier is free.
+Retaining VideoQ's paid cloud offering therefore needs a paid-listing decision;
+do not assume that optional self-hosting makes the entire integration eligible
+for a free listing. A self-host-only scope would need separate eligibility
+confirmation and must not silently replace the intended cloud/on-premises scope.
+
+A paid listing is a sales classification, not an upfront listing charge.
+[The published schedule](https://moodle.atlassian.net/wiki/external/MDY5MDE4OGYwMzNmNDYzNjlhNGM3NmJmMzc2ZGJlN2U)
+states no listing fee. Sales incur a 20% promotional platform fee in the first
+year after Marketplace launch, then 25%, plus Stripe fees. A paid listing may have
+a free download option with paid cloud access. Prices, Stripe onboarding and
+Terms of Sale remain publisher decisions; none were configured or accepted.
+
+Reviewers need service access/instructions sufficient to test the integration.
+An isolated VideoQ account or test service may satisfy that need; the cited
+requirements do not mandate publicly hosting a separate Moodle demo. Any public
+Moodle demo is optional. Deliver review credentials privately, without production
+data, billing/AI-provider keys or signing keys.
+
+## Source repository layout
+
+The [submission workflow](https://moodle.atlassian.net/wiki/external/MTA2NzQ5NWI0YmVmNDMxMWEzZWEyZjBjM2JmYzcyMDY)
+asks for plugin files at the Git repository root, while the guidelines recommend
+`moodle-{plugintype}_{pluginname}` repository names. The canonical videoq-moodle
+repository is a paired-plugin monorepo and does not currently expose either
+component at its default-branch root. Resolve per-component root publication
+before submission; do not assume a subdirectory URL will be accepted. This does
+not require moving canonical development out of videoq-moodle. Whether publication
+branches are accepted must be checked in the authenticated submission workflow;
+standalone source mirrors are another option. No new repository was created.
 
 ## Component packages
 
@@ -39,7 +70,7 @@ after approval. Version-upload automation through the old API is unavailable.
 Confirm component-name availability during submission. Source and issue tracker:
 https://github.com/videoq-jp/videoq-moodle (public monorepo).
 
-Build with `php scripts/package-plugins.php <output-directory>`. Each archive has
+Build submission ZIPs with `php scripts/package-plugins.php <output-directory> --marketplace`. Each archive has
 a single `videoq/` root, its own license, version metadata and README. GitHub's
 whole-repository ZIP is not an installer. The release workflow publishes checked
 GitHub archives; it does not submit them to Marketplace. The candidate packaging now uses local_videoq 0.11.5 / 2026110602
@@ -284,8 +315,6 @@ Historical release verification remains unchanged. See [workflow](translations.m
 
 ## Remaining gates
 
-- Make the verified official plugin-CI checks repeatable in CI and run applicable
-  Moodle unit checks with both components available.
 - Verify the deployment-specific external data-request/retention process, and
   complete developer-debug functionality and video/chat accessibility checks.
 - Submit the prepared Japanese AMOS input after component availability, obtain
@@ -293,11 +322,18 @@ Historical release verification remains unchanged. See [workflow](translations.m
   packages and a checked 79-string import now build in CI; see [translation guide](translations.md).
 - Capture sanitized course assistant and citation screenshots; the current setup
   and ZIP-validation evidence is already available.
-- Set up reviewer access, settle publisher/listing decisions and final descriptions.
+- Set up reviewer service access, settle publisher/listing decisions and final descriptions.
+- Resolve the per-component repository-root requirement for the existing monorepo.
 - Reconcile documentation overlap with PR #3 before merging PR #4; select release
   maturity/support versions truthfully and publish reproducible archives.
 - Submit both components, address reviewer feedback, publish approved pages and
   verify installation from the actual official listing in a clean Moodle site.
+
+The guidelines recommend moodle-plugin-ci; automating the already passed manual
+subcommands is a maintenance follow-up, not a substitute for Marketplace's own
+mandatory automated checks and review. No separate requirement for a particular
+unit-test framework was found in the cited submission guidelines. Existing DB,
+privacy and browser checks remain the evidence for their actual tested scope.
 
 Do not mark the goal complete on ZIP creation, GitHub publication or submission
 alone. Approved listings and directory-based installation need direct evidence.
