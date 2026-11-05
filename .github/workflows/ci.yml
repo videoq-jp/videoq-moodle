@@ -16,8 +16,8 @@ on:
 permissions:
   contents: read
 jobs:
-  verify:
-    name: PHP-only tooling and native browser checks
+  tooling:
+    name: PHP tooling and native browser checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
     concurrency:
@@ -57,6 +57,7 @@ jobs:
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/dependencies.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/release.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/live-lock.php
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/matrix.php
       - name: Check Privacy API against pinned Moodle classes
         env:
           MOODLE_REVISION: a682566412e1d429b95ac8ef4351a518f61b94c5
@@ -88,6 +89,46 @@ jobs:
           mkdir -p dist/marketplace dist/translations
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" -v "$PWD/dist/marketplace:/output" "$PHP_IMAGE" /src/scripts/package-plugins.php /output --marketplace
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" -v "$PWD/dist/translations:/output" "$PHP_IMAGE" /src/scripts/package-translations.php /output
+  database:
+    name: Installed Moodle database (${{ matrix.database }})
+    needs: tooling
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [pg, mysql]
+    concurrency:
+      group: moodle-database-${{ github.event.pull_request.number || github.ref }}-${{ matrix.database }}
+      cancel-in-progress: true
+    steps:
+      - name: Fetch the exact event revision
+        run: |
+          git init .
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Run isolated installed-Moodle lifecycle
+        env:
+          MATRIX_DATABASE: ${{ matrix.database }}
+        run: php lab/check-marketplace-matrix.php "$MATRIX_DATABASE" "$RUNNER_TEMP/videoq-marketplace-matrix"
+      - name: Show sanitized lifecycle evidence
+        run: cat "$RUNNER_TEMP/videoq-marketplace-matrix/summary.json"
+  verify:
+    # Preserve the existing required-check context while including both DB results.
+    name: PHP-only tooling and native browser checks
+    if: always()
+    needs: [tooling, database]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require tooling and both database lifecycles
+        env:
+          TOOLING_RESULT: ${{ needs.tooling.result }}
+          DATABASE_RESULT: ${{ needs.database.result }}
+        run: |
+          test "$TOOLING_RESULT" = success
+          test "$DATABASE_RESULT" = success
   release:
     name: Publish or verify tagged ZIPs
     if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.release_tag != '')

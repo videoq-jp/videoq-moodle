@@ -13,6 +13,8 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: moodlehq/moodle-php-apache
         update-types: ["version-update:semver-minor"]
+      - dependency-name: mysql
+        update-types: ["version-update:semver-minor"]
     groups:
       lab-images:
         patterns: ["*"]
