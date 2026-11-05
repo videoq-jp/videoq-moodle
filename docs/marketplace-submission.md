@@ -43,7 +43,9 @@ Build with `php scripts/package-plugins.php <output-directory>`. Each archive ha
 a single `videoq/` root, its own license, version metadata and README. GitHub's
 whole-repository ZIP is not an installer. The release workflow publishes checked
 GitHub archives; it does not submit them to Marketplace. The candidate packaging now uses local_videoq 0.11.3 / 2026110504 for the
-ARIA-label whitespace fix; the linked DB evidence covers 0.11.2 / 2026110503.
+ARIA-label whitespace fix. The original lifecycle reports cover 0.11.2 /
+2026110503; the current-candidate report verifies updating both databases to the
+English-only 0.11.3 submission ZIPs.
 Release maturity remains alpha; support claims currently cover Moodle 5.1/Boost only.
 
 The additional official plugin-CI checks use release 4.5.11, whose downloaded
@@ -101,6 +103,7 @@ Sanitized reports:
 - [PostgreSQL upgrade](evidence/marketplace-postgresql-upgrade.json)
 - [MySQL lifecycle](evidence/marketplace-mysql-lifecycle.json)
 - [Stock ZIP validation](evidence/marketplace-archive-validation.json)
+- [Current English-only candidate on PostgreSQL and MySQL](evidence/marketplace-current-candidate.json)
 
 Both used Moodle source `a682566412e1d429b95ac8ef4351a518f61b94c5` (5.1.8+,
 Build 20261030), pinned PHP 8.3, developer debugging and isolated DBs. The baseline
@@ -120,6 +123,15 @@ preserve the original SQL bytes; redundant internal guards were removed only fro
 files individually flagged as definition-only by the official standard. Token
 rejection uses Moodle diagnostics with debug display suppressed for OAuth JSON.
 Its failure fixture verifies HTTP 401, JSON integrity and no exception disclosure.
+
+The current English-only ZIPs were subsequently installed over those 0.11.2
+fixtures on both PostgreSQL and MySQL. Runtime schema/privacy checks and original
+course/video preservation passed without developer diagnostics. PostgreSQL also
+retained the three original synchronization records and signing key. The MySQL
+fixture follows its earlier uninstall/reinstall, so its fresh tables and renewed
+key are checked against that lifecycle rather than claimed as original records.
+[Hosted CI for the same candidate](https://github.com/videoq-jp/videoq-moodle/actions/runs/42058956148)
+also passed. Both isolated DB containers were stopped after verification.
 
 ## Repeatable coding check
 
@@ -158,8 +170,8 @@ Historical release verification remains unchanged. See [workflow](translations.m
 
 ## Remaining gates
 
-- Run official plugin-CI structural/PHPDoc/savepoint and applicable unit checks
-  for each component with its companion available.
+- Make the verified official plugin-CI checks repeatable in CI and run applicable
+  Moodle unit checks with both components available.
 - Automate the installed-Moodle DB matrix in CI, and validate the ZIPs through
   Moodle's web installer rather than only extraction plus real CLI installation.
 - Complete external data/retention/privacy review, developer-debug functionality
