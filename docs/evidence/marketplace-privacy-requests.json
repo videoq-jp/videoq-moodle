@@ -1,0 +1,81 @@
+{
+  "scope": "Real Moodle Privacy API request callbacks and shared-data preservation",
+  "candidatePluginCommit": "fb6be9ae92b493cdb4e685573f92e43b011f8194",
+  "moodleSourceCommit": "a682566412e1d429b95ac8ef4351a518f61b94c5",
+  "ci": "https://github.com/videoq-jp/videoq-moodle/actions/runs/42063284963",
+  "archiveSha256": {
+    "local_videoq.zip": "e3ea02f1a1e9de2eb2ae46eb218a64df895994d67e55396ee562a5dd7d56ab6e",
+    "ltisource_videoq.zip": "d5a49ac5bdba5632e9edfbe810776db98a3b775e77413886bf6ac35967ace15f"
+  },
+  "reports": {
+    "requests": {
+      "passed": true,
+      "database": "pgsql",
+      "components": {
+        "local_videoq": {
+          "requestProvider": true,
+          "userlistProvider": true,
+          "localPersonalContexts": 0,
+          "localPersonalUsers": 0,
+          "requestMethodsExercised": 6,
+          "systemCourseModuleContextsExercised": true,
+          "sharedRecordsPreserved": true
+        },
+        "ltisource_videoq": {
+          "requestProvider": true,
+          "userlistProvider": true,
+          "localPersonalContexts": 0,
+          "localPersonalUsers": 0,
+          "requestMethodsExercised": 6,
+          "systemCourseModuleContextsExercised": true,
+          "sharedRecordsPreserved": true
+        }
+      },
+      "limits": [
+        "External VideoQ export/deletion is not invoked; operator handling is required.",
+        "Moodle core owns sessions/tasks/source activity data; no legal compliance certification is implied."
+      ]
+    },
+    "runtime": {
+      "passed": true,
+      "database": "pgsql",
+      "moodle": "5.1.8+ (Build: 20261030)",
+      "developerDebugging": true,
+      "tables": [
+        "local_videoq_sync",
+        "local_videoq_exports",
+        "local_videoq_assertions"
+      ],
+      "versions": {
+        "local_videoq": 2026110602,
+        "ltisource_videoq": 2026110601
+      },
+      "privacyMetadata": true,
+      "schemaWithoutRepairs": true,
+      "accessKeyInitialized": true
+    },
+    "oldMainTeachingDataPreservation": {
+      "passed": true,
+      "phase": "verify",
+      "database": "pgsql",
+      "version": 2026110602,
+      "coursePreserved": true,
+      "sourceVideoBytesPreserved": true,
+      "accessKeyPreserved": true,
+      "allSynchronizationRecordsPreserved": true
+    }
+  },
+  "limits": [
+    "Installed fixture is PostgreSQL only; final MySQL candidate still requires matrix verification.",
+    "The external VideoQ data-request process was documented but not executed or certified.",
+    "Prior browser-install evidence covers 0.11.4; these changes require final candidate browser verification before release."
+  ],
+  "officialPhpDoc": {
+    "tool": "moodle-plugin-ci 4.5.11",
+    "maxWarnings": 0,
+    "components": {
+      "local_videoq": "passed",
+      "ltisource_videoq": "passed"
+    }
+  }
+}

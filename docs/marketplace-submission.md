@@ -42,10 +42,13 @@ https://github.com/videoq-jp/videoq-moodle (public monorepo).
 Build with `php scripts/package-plugins.php <output-directory>`. Each archive has
 a single `videoq/` root, its own license, version metadata and README. GitHub's
 whole-repository ZIP is not an installer. The release workflow publishes checked
-GitHub archives; it does not submit them to Marketplace. The candidate packaging now uses local_videoq 0.11.4 / 2026110601. Fresh
+GitHub archives; it does not submit them to Marketplace. The candidate packaging now uses local_videoq 0.11.5 / 2026110602
+and ltisource_videoq 0.4.2 / 2026110601. Fresh
 installation initializes optional manual settings without asking administrators
 to configure a legacy connection. The original lifecycle reports cover 0.11.2;
 the DB-update report covers 0.11.3 and the browser-install report covers 0.11.4.
+The latest privacy report covers the new request interfaces on PostgreSQL; final
+MySQL/browser validation must use the final submission artifacts.
 Release maturity remains alpha; support claims currently cover Moodle 5.1/Boost only.
 
 The additional official plugin-CI checks use release 4.5.11, whose downloaded
@@ -95,7 +98,7 @@ Issues: https://github.com/videoq-jp/videoq-moodle/issues
 | Moodle ZIP validator | Both English-only archives accepted by the stock validator | Alpha maturity warnings remain |
 | Browser installation | Both ZIPs uploaded and installed through stock Moodle administration; actual versions/tables/key verified | Dedicated loopback PostgreSQL fixture; not official-directory installation |
 | PHP tooling and packages | Standalone PHP, installer/dependency/release, HTTP/SSE and RSA tests pass | No paid-AI claim |
-| Privacy metadata | Both actual Moodle metadata providers and language identifiers pass; feedback explicitly declared | Full external-data lifecycle review still required |
+| Privacy API | Actual metadata/request interfaces and language identifiers pass; six callbacks per component preserve shared records in real Moodle | External VideoQ request handling still requires deployment-specific verification |
 | PostgreSQL | Fresh lifecycle passes; old-main upgrade preserves teaching data, all three table records and access key | See scope in linked report |
 | MySQL 8.4.13 | Actual old-main upgrade, uninstall with source-data retention and fresh candidate reinstall pass | See scope in linked report |
 
@@ -106,6 +109,7 @@ Sanitized reports:
 - [Stock ZIP validation](evidence/marketplace-archive-validation.json)
 - [0.11.3 English-only candidate on PostgreSQL and MySQL](evidence/marketplace-current-candidate.json)
 - [0.11.4 browser installation](evidence/marketplace-web-installation.json)
+- [Current Privacy API requests and preservation](evidence/marketplace-privacy-requests.json)
 
 Both used Moodle source `a682566412e1d429b95ac8ef4351a518f61b94c5` (5.1.8+,
 Build 20261030), pinned PHP 8.3, developer debugging and isolated DBs. The baseline
@@ -134,6 +138,31 @@ fixture follows its earlier uninstall/reinstall, so its fresh tables and renewed
 key are checked against that lifecycle rather than claimed as original records.
 [Hosted CI for the same candidate](https://github.com/videoq-jp/videoq-moodle/actions/runs/42058956148)
 also passed. Both isolated DB containers were stopped after verification.
+
+## Privacy API audit
+
+The metadata-only providers lacked the request interfaces required for
+external-only components by the [current Moodle FAQ](https://moodledev.io/docs/5.1/apis/subsystems/privacy/faq).
+Both now implement plugin and userlist request providers. They report no local
+personal contexts/users and do not delete shared source material for an individual
+request. local_videoq also declares its link to Moodle core's administrator
+session, configuration audit and restore-task records. No external deletion is
+claimed. See [administrator data-handling notes](privacy.md).
+
+Actual installed-Moodle tests call all six request methods with system, course and
+module contexts and nonempty approved requests. Course, file, synchronization and
+settings records stay identical. Separate old-main preservation checks also
+confirm original source video bytes, signing key and all three synchronization
+records survive this candidate update. Schema/metadata inspection runs with
+developer debugging and produces no diagnostics.
+
+Normal CI now fetches only the needed real Moodle Privacy API classes at the
+pinned official commit and checks metadata, language keys, interface contracts,
+empty context results and nonempty export/deletion requests with networking disabled.
+The exact [hosted run](https://github.com/videoq-jp/videoq-moodle/actions/runs/42063284963)
+passed. Both current English-only components also passed the official plugin-CI
+PHPDoc check again with `--max-warnings=0`. Full DB Privacy API tests remain the
+separate isolated fixture check.
 
 ## Browser installer verification
 
@@ -188,7 +217,7 @@ manifests before tool execution. This is not a full moodle-plugin-ci run.
 `package-plugins.php --marketplace` builds English-only official submission
 archives; the ordinary development profile retains the existing Japanese UI.
 `scripts/package-translations.php` produces a flat, reproducible AMOS ZIP with
-72 local_videoq and 6 ltisource_videoq translations. Data-only parsing, exact key
+73 local_videoq and 6 ltisource_videoq translations. Data-only parsing, exact key
 coverage, placeholder checks and archive-content tests pass; bad placeholders
 and executable statements are rejected before evaluation. An English string's
 leading-space dependency was removed, with spacing supplied by the ARIA label.
@@ -200,11 +229,11 @@ Historical release verification remains unchanged. See [workflow](translations.m
 - Make the verified official plugin-CI checks repeatable in CI and run applicable
   Moodle unit checks with both components available.
 - Automate the installed-Moodle DB matrix in CI against the final release candidate.
-- Complete external data/retention/privacy review, developer-debug functionality
-  tests and accessibility checks for the video/chat interface.
+- Verify the deployment-specific external data-request/retention process, and
+  complete developer-debug functionality and video/chat accessibility checks.
 - Submit the prepared Japanese AMOS input after component availability, obtain
   acceptance and verify Japanese language-pack delivery. English-only submission
-  packages and a checked 78-string import now build in CI; see [translation guide](translations.md).
+  packages and a checked 79-string import now build in CI; see [translation guide](translations.md).
 - Capture sanitized setup, course assistant and citation screenshots.
 - Set up reviewer access, settle publisher/listing decisions and final descriptions.
 - Reconcile documentation overlap with PR #3 before merging PR #4; select release

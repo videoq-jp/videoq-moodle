@@ -78,6 +78,12 @@ the connection form. The [materials-service guide](materials-service.md)
 describes operator configuration and migration from legacy `VIDEOQ1.` connections.
 Normal setup requires no separate synchronization credential or connector server.
 
+## Data requests and retention
+
+Review [data handling](privacy.md) before enabling the service. Moodle privacy
+requests do not automatically export/delete external VideoQ history; arrange the
+external request and retention process with the configured deployment operator.
+
 ## Responsibilities and access
 
 Moodle stores and plays the original File activity. Enabled videos are exported
