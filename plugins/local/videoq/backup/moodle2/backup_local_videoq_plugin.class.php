@@ -15,9 +15,19 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Backs up source bindings with Moodle activities.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
-/** Portable opt-in/layout markers only: no remote IDs, credentials or conversations. */
+/**
+ * Portable opt-in/layout markers only: no remote IDs, credentials or conversations.
+ */
 class backup_local_videoq_plugin extends backup_local_plugin {
     protected function define_module_plugin_structure() {
         $cmid = (int)$this->task->get_moduleid();

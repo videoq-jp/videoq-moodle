@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Produces and verifies user-bound course material access proofs.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
-/** Stateless, expiring proof bound to one Moodle user, course and LTI activity. */
+/**
+ * Stateless, expiring proof bound to one Moodle user, course and LTI activity.
+ */
 final class course_access {
     private static function secret(): string {
         $key = (string)get_config('local_videoq', 'accesssigningkey');

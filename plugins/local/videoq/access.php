@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
+
+/**
+ * Checks course material access for VideoQ service requests.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 // A server-to-server permission check; never opens media or creates a Moodle session.
 
 define('NO_MOODLE_COOKIES', true);

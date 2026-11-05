@@ -15,8 +15,19 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Recovers pending synchronization jobs using the scheduler.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq\task;
 defined('MOODLE_INTERNAL') || die();
+/**
+ * Recovers pending synchronization jobs using the scheduler.
+ */
 final class synchronize extends \core\task\scheduled_task {
     public function get_name() {
         return get_string('synchronize', 'local_videoq');

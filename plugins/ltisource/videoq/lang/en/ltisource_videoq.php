@@ -15,6 +15,14 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Defines language strings for the VideoQ LTI source integration.
+ *
+ * @package ltisource_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['pluginname'] = 'VideoQ course access';
 $string['privacy:metadata'] = 'This plugin adds a short-lived access proof to VideoQ LTI launches and stores no learner records.';
 $string['privacy:metadata:videoq'] = 'A short-lived signed access proof is sent to VideoQ through the LTI launch. No learner records are stored by this plugin.';

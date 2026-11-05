@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Registers the approved LTI tool and materials service.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
-/** A single expiring pairing code registers LTI service access; no sync key is issued. */
+/**
+ * A single expiring pairing code registers LTI service access; no sync key is issued.
+ */
 final class lti_connection_setup {
     public static function connect(string $code, ?string $codeverifier = null): void {
         global $CFG, $DB;

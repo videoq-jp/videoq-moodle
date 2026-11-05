@@ -15,8 +15,18 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Provides Moodle callbacks for the VideoQ integration.
+ *
+ * @package ltisource_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
-/** Moodle signs this custom claim as part of the normal LTI 1.3 launch. */
+/**
+ * Moodle signs this custom claim as part of the normal LTI 1.3 launch.
+ */
 function ltisource_videoq_before_launch($instance, $endpoint, $params) {
     global $USER;
     try {

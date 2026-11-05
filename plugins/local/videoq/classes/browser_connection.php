@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Binds browser connection approval to the administrator session.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
-/** Administrator-selected VideoQ host, session state and S256 proof binding. */
+/**
+ * Administrator-selected VideoQ host, session state and S256 proof binding.
+ */
 final class browser_connection {
     public static function start(string $url): string {
         global $CFG, $SESSION, $USER;
@@ -56,7 +66,9 @@ final class browser_connection {
             'code_challenge' => rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=')], '', '&', PHP_QUERY_RFC3986);
     }
 
-    /** No credentials from the browser are used until its admin session matches. */
+    /**
+     * No credentials from the browser are used until its admin session matches.
+     */
     public static function finish(string $state, string $code, string $error = ''): bool {
         global $SESSION, $USER;
         require_capability('moodle/site:config', \context_system::instance());

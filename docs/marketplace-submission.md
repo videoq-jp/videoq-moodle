@@ -143,3 +143,21 @@ long lines and unneeded internal guards. One forbidden-function finding flags
 `error_log()` in token.php and requires individual review. Full official code
 compliance, installed-Moodle developer-debug tests, database compatibility,
 listing classification, reviewer access and approval are still incomplete.
+
+## Header and endpoint diagnostics pass (2026-11-05)
+
+All previously missing file-level copyright/license annotations and single-line
+PHPDoc descriptions were corrected. An AST comparison before the diagnostics
+change confirmed those edits changed comments only.
+
+The token endpoint now uses Moodle developer diagnostics instead of direct
+`error_log()`. `NO_DEBUG_DISPLAY` is set before bootstrapping Moodle to preserve
+the OAuth JSON response. A standalone test exercises the real endpoint file with
+an isolated authentication failure and a diagnostic-display fixture: response
+remains JSON with HTTP 401, diagnostics are recorded and exception details are
+not exposed. The test is included in normal PHP-only CI. A full installed-Moodle
+developer-debug exercise is still required; the fixture is not that exercise.
+
+Full standalone PHP tests passed after the change. Official PHPCS now reports
+**60 errors and 80 warnings**, mainly missing method documentation and long lines.
+The earlier forbidden `error_log()` finding is resolved. No suppressions were added.

@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Validates and exchanges legacy VideoQ connection codes.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
-/** Administrator-only, recoverable pairing. Existing synchronized courses are never rebound. */
+/**
+ * Administrator-only, recoverable pairing. Existing synchronized courses are never rebound.
+ */
 final class connection_setup {
     public static function decode(string $code): array {
         $code = trim($code);
@@ -105,7 +115,9 @@ final class connection_setup {
             $lock->release();
         }
     }
-    /** Abandon only unused local setup; preserve configured or activity-bound identities. */
+    /**
+     * Abandon only unused local setup; preserve configured or activity-bound identities.
+     */
     public static function cancel_pending(): void {
         global $CFG, $DB;
         require_capability('moodle/site:config', \context_system::instance());

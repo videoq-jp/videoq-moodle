@@ -15,6 +15,14 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Handles authenticated materials service requests.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 define('NO_MOODLE_COOKIES', true);
 require(__DIR__ . '/../../config.php');
 header('Cache-Control: no-store');

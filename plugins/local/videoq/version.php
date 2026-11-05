@@ -15,6 +15,14 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // VideoQ Moodle companion view. SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Declares plugin identity, compatibility and release metadata.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'local_videoq';
 $plugin->version = 2026110502;

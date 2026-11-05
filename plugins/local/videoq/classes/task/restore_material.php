@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Recreates restored material bindings in an asynchronous task.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq\task;
 defined('MOODLE_INTERNAL') || die();
 
-/** Retire copied transports and initialize sources after Moodle finishes restoring. */
+/**
+ * Retire copied transports and initialize sources after Moodle finishes restoring.
+ */
 final class restore_material extends \core\task\adhoc_task {
     public function execute() {
         global $CFG, $DB;

@@ -15,10 +15,23 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Synchronizes source videos and their assistant activities.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
+/**
+ * Synchronizes source videos and their assistant activities.
+ */
 final class synchronizer {
-    /** One stable, course-wide entry, independent of any source activity's lifetime. */
+    /**
+     * One stable, course-wide entry, independent of any source activity's lifetime.
+     */
     public static function ensure_course_entry(int $courseid): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/modlib.php');
@@ -41,7 +54,9 @@ final class synchronizer {
             $lock->release();
         }
     }
-    /** Keep the transport and per-video shortcuts out of the course activity list. */
+    /**
+     * Keep the transport and per-video shortcuts out of the course activity list.
+     */
     private static function hide_transport_entries(int $courseid, array $cmids): void {
         global $CFG;
         if (empty($CFG->allowstealth)) {
@@ -89,7 +104,9 @@ final class synchronizer {
     public static function enable(int $cmid): void {
         self::configure($cmid, false);
     }
-    /** Internal restore task preserves a teacher's explicit disable and any completed initialization. */
+    /**
+     * Internal restore task preserves a teacher's explicit disable and any completed initialization.
+     */
     public static function restore_source(int $cmid): void {
         self::configure($cmid, true);
     }
@@ -111,7 +128,9 @@ final class synchronizer {
             $lock->release();
         }
     }
-    /** Repair only mappings still enabled; never override an explicit teacher disable. */
+    /**
+     * Repair only mappings still enabled; never override an explicit teacher disable.
+     */
     private static function configure(int $cmid, bool $repair): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/modlib.php');

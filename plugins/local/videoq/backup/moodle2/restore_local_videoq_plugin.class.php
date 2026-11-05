@@ -15,9 +15,19 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Restores source bindings without reusing connection credentials.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
-/** Restore against the destination site's connection, never the source site's binding. */
+/**
+ * Restore against the destination site's connection, never the source site's binding.
+ */
 class restore_local_videoq_plugin extends restore_local_plugin {
     protected function define_module_plugin_structure() {
         return [new restore_path_element('videoq_binding', $this->get_pathfor('/binding'))];

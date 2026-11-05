@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Rebuilds material bindings after Moodle course restore.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
-/** Moodle backup markers and destination-only restoration of source opt-ins. */
+/**
+ * Moodle backup markers and destination-only restoration of source opt-ins.
+ */
 final class restoration {
     public static function describe(int $cmid): ?array {
         global $CFG, $DB;
@@ -47,7 +57,9 @@ final class restoration {
         }
         return null;
     }
-    /** Called after all module data/files/mappings have been restored, once per restore/course. */
+    /**
+     * Called after all module data/files/mappings have been restored, once per restore/course.
+     */
     public static function finish(string $restoreid, int $courseid): void {
         global $CFG, $DB, $USER;
         require_once($CFG->dirroot . '/course/lib.php');

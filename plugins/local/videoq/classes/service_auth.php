@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Authenticates VideoQ service assertions and bearer tokens.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
-/** LTI tool-key service authentication. No separately configured bearer credential. */
+/**
+ * LTI tool-key service authentication. No separately configured bearer credential.
+ */
 final class service_auth {
     public const SCOPE = 'https://videoq.org/spec/lti-materials/v1';
     public static function type(): \stdClass {

@@ -15,12 +15,24 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Resolves permitted source videos and LTI activities for a course.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
-/** Administrator-owned associations; browser parameters cannot choose modules. */
+/**
+ * Administrator-owned associations; browser parameters cannot choose modules.
+ */
 final class lesson {
-    /** Resolve the shared course entry afresh; it must survive removal of a video. */
+    /**
+     * Resolve the shared course entry afresh; it must survive removal of a video.
+     */
     public static function for_course(int $courseid): ?array {
         global $USER, $DB;
         $info = get_fast_modinfo($courseid, $USER->id);

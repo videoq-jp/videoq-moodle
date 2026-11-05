@@ -15,7 +15,17 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Issues scoped OAuth tokens to the registered VideoQ service.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 define('NO_MOODLE_COOKIES', true);
+// Keep developer diagnostics out of OAuth JSON responses.
+define('NO_DEBUG_DISPLAY', true);
 require(__DIR__ . '/../../config.php');
 header('Cache-Control: no-store');
 header('Content-Type: application/json');
@@ -27,7 +37,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || (int)($_SERVER['CONTENT_LEN
 try {
     echo json_encode(\local_videoq\service_auth::issue($_POST), JSON_THROW_ON_ERROR);
 } catch (\Throwable $error) {
-    error_log(json_encode(['event' => 'videoq_service_token_rejected', 'type' => get_class($error), 'file' => basename($error->getFile()), 'line' => $error->getLine()]));
+    debugging('VideoQ service token request rejected.', DEBUG_DEVELOPER);
     http_response_code(401);
     echo json_encode(['error' => 'invalid_client']);
 }

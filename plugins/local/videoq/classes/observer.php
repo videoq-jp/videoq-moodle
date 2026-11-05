@@ -15,8 +15,19 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Queues synchronization after source activity changes.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
+/**
+ * Queues synchronization after source activity changes.
+ */
 final class observer {
     public static function changed(\core\event\base $event): void {
         global $DB;

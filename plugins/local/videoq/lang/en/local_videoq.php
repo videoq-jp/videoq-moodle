@@ -15,6 +15,14 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Defines language strings for the VideoQ course assistant.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['pluginname'] = 'VideoQ companion';
 $string['lessons'] = 'Video and question tool associations';
 $string['lessons_desc'] = 'JSON list. Each entry requires id, title, videoCmid (a File activity containing an MP4), and ltiCmid (a VideoQ LTI 1.3 activity in the same course). Example: [{"id":"lesson-1","title":"Lesson 1","videoCmid":10,"ltiCmid":11}]. Open /local/videoq/view.php?lesson=lesson-1. Access restrictions on both activities still apply.';

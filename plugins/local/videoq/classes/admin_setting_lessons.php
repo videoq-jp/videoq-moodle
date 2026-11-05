@@ -15,9 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Validates legacy video activity associations.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Validates legacy video activity associations.
+ */
 final class admin_setting_lessons extends \admin_setting_configtextarea {
     public function validate($data) {
         try {

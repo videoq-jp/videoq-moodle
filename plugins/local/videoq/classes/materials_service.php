@@ -15,10 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
+/**
+ * Implements the LTI materials service for course videos.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
-/** Opted-in materials only. Missing manifest entries are never deletion instructions. */
+/**
+ * Opted-in materials only. Missing manifest entries are never deletion instructions.
+ */
 final class materials_service {
     public static function course(int $courseid, int $typeid): array {
         global $DB;
