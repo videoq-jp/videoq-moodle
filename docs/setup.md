@@ -24,13 +24,18 @@ their package build, this repository's lab or CI.
    contains Moodle's expected `videoq/` root. For a manual installation, put the
    folders under `public/local/videoq` and `public/mod/lti/source/videoq` on
    Moodle 5.1, then run Moodle's normal CLI upgrade.
-3. In the owning VideoQ account, open **Settings → Connect Moodle**, enter the
-   exact Moodle HTTPS base URL, and generate a connection code.
-4. As Moodle administrator, open **Site administration → Plugins → Local plugins
-   → Connect to VideoQ** (or `/local/videoq/connect.php`), paste the code, and
-   connect. Use the code before its ten-minute expiry. A materials-capable
-   VideoQ server issues a `VIDEOQ2.` code and configures the LTI registration,
-   public key discovery and materials endpoints automatically.
+3. As Moodle administrator, open **Site administration → Plugins → Local plugins
+   → Connect to VideoQ** (or `/local/videoq/connect.php`). Enter your **VideoQ
+   HTTPS URL**: use `https://videoq.jp` for the compatible cloud release or your
+   own on-premises URL, including its custom HTTPS port if needed.
+4. Choose **Connect to VideoQ**. Sign in to the owning VideoQ account, confirm
+   the displayed Moodle URL and account quota permissions, then allow the
+   connection. You return to Moodle automatically. Complete the flow within ten
+   minutes; no code copying or manual LTI/key registration is needed. This flow
+   requires the compatible backend in [VideoQ PR #1319](https://github.com/videoq-jp/videoq/pull/1319),
+   which is not yet deployed to the public service. An older compatible backend
+   can still use **Connect using a code**: issue a code in VideoQ settings and
+   paste it into that collapsed section.
 5. Add a video through Moodle's ordinary **File** activity. Enable **VideoQ
    questions** in its settings. Wait for background processing to finish.
 6. Open the course-wide VideoQ assistant. Moodle plays the selected video and
@@ -73,7 +78,7 @@ In the owning VideoQ account, open its connection settings, select the Moodle
 connection and choose **Disconnect**. Confirm the displayed connection. Subsequent
 launches, questions and synchronization are denied. Existing learning data is
 retained. Removing local Moodle settings alone does not revoke server access.
-Generate a new code to reconnect through the supported workflow.
+Repeat **Connect to VideoQ** to reconnect through the supported workflow.
 For platform-side trust revocation as well, disable/remove the registered VideoQ
 external tool in Moodle through its standard tool administration. The remote
 VideoQ disconnect does not delete Moodle's tool registration.
@@ -85,6 +90,16 @@ running. Configure PHP/web upload and request limits, storage capacity and Moodl
 File limits for your expected video sizes. Use publicly trusted HTTPS or install
 your organization's CA through Moodle's standard trust configuration. Keep peer
 and hostname verification enabled. Do not expose signed upload URLs in logs.
+Moodle must reach the selected VideoQ server and VideoQ must reach Moodle. For
+deployments with a separate API hostname, enter the public origin serving
+VideoQ's `/api` routes; discovery opens its configured web UI automatically.
+For
+private on-premises endpoints, configure Moodle's normal outbound-network and CA
+trust policies. No URL is hardcoded to the cloud service; redirects are disabled
+on discovery and exchange requests. The administrator's Moodle session and an
+S256 verifier protect the temporary callback code, including response recovery.
+If the exchange is interrupted, use **Retry connection** on the Moodle page
+within the original ten-minute session. After expiry, start the connection again.
 
 If processing stalls, inspect Moodle's VideoQ status, scoped task logs and the
 external VideoQ worker/queue health. Check AI credentials on the VideoQ service;

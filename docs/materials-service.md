@@ -46,12 +46,13 @@ the deployment overlap. The key ring accepts at most three retired public keys.
 
 1. Install/update `local_videoq` 0.9.1 and `ltisource_videoq`. Finish Moodle's
    plugin upgrade and keep normal Moodle cron/ad-hoc task execution enabled.
-2. In the owning VideoQ account, open Settings → Connect Moodle. Enter the exact
-   HTTPS Moodle base URL and generate a connection code. A materials-capable
-   server issues a `VIDEOQ2.` code.
-3. Open Moodle's `/local/videoq/connect.php` as its administrator. Paste the code
-   and connect. The plugin registers its service endpoints and configures the
-   tool JWKS automatically.
+2. Open Moodle's `/local/videoq/connect.php` as its administrator and enter the
+   cloud or on-premises VideoQ HTTPS URL. Continue to VideoQ, sign in and allow
+   the displayed Moodle connection, then return automatically. This needs the
+   compatible discovery/approval backend in PR #1319 above.
+3. For an older materials-capable backend, use the collapsed code method: issue
+   a `VIDEOQ2.` code in VideoQ settings and paste it into Moodle. Both methods
+   register service endpoints and configure tool JWKS automatically.
 4. Add ordinary video File activities and enable VideoQ questions. Processing runs
    in the background; the existing course assistant becomes available when ready.
 
