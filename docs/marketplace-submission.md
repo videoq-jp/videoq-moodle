@@ -46,9 +46,11 @@ GitHub archives; it does not submit them to Marketplace. The candidate packaging
 and ltisource_videoq 0.4.2 / 2026110601. Fresh
 installation initializes optional manual settings without asking administrators
 to configure a legacy connection. The original lifecycle reports cover 0.11.2;
-the DB-update report covers 0.11.3 and the browser-install report covers 0.11.4.
-The latest privacy report covers the new request interfaces on PostgreSQL; final
-MySQL/browser validation must use the final submission artifacts.
+the earlier DB-update report covers 0.11.3; the current browser report covers
+0.11.5 / 0.4.2 with normalized ZIPs.
+The automated DB matrix now covers both current English-only candidates through
+upgrade, uninstall and reinstall on PostgreSQL and MySQL. Native browser
+installation was also repeated with the current normalized candidate ZIPs.
 Release maturity remains alpha; support claims currently cover Moodle 5.1/Boost only.
 
 The additional official plugin-CI checks use release 4.5.11, whose downloaded
@@ -99,19 +101,19 @@ Issues: https://github.com/videoq-jp/videoq-moodle/issues
 | Browser installation | Both ZIPs uploaded and installed through stock Moodle administration; actual versions/tables/key verified | Dedicated loopback PostgreSQL fixture; not official-directory installation |
 | PHP tooling and packages | Standalone PHP, installer/dependency/release, HTTP/SSE and RSA tests pass | No paid-AI claim |
 | Privacy API | Actual metadata/request interfaces and language identifiers pass; six callbacks per component preserve shared records in real Moodle | External VideoQ request handling still requires deployment-specific verification |
-| PostgreSQL | Fresh lifecycle passes; old-main upgrade preserves teaching data, all three table records and access key | See scope in linked report |
-| MySQL 8.4.13 | Actual old-main upgrade, uninstall with source-data retention and fresh candidate reinstall pass | See scope in linked report |
+| PostgreSQL / MySQL 8.4.13 | Current English-only ZIPs pass actual old-main upgrade, privacy requests, uninstall and fresh reinstall | Synthetic source-byte fixture; no playback or external-AI claim |
 
 Sanitized reports:
 
-- [PostgreSQL upgrade](evidence/marketplace-postgresql-upgrade.json)
+- [Current repeatable PostgreSQL/MySQL matrix](evidence/marketplace-database-matrix.json)
+- [Earlier PostgreSQL upgrade](evidence/marketplace-postgresql-upgrade.json)
 - [MySQL lifecycle](evidence/marketplace-mysql-lifecycle.json)
 - [Stock ZIP validation](evidence/marketplace-archive-validation.json)
 - [0.11.3 English-only candidate on PostgreSQL and MySQL](evidence/marketplace-current-candidate.json)
-- [0.11.4 browser installation](evidence/marketplace-web-installation.json)
+- [Current 0.11.5 / 0.4.2 browser installation](evidence/marketplace-web-installation.json)
 - [Current Privacy API requests and preservation](evidence/marketplace-privacy-requests.json)
 
-Both used Moodle source `a682566412e1d429b95ac8ef4351a518f61b94c5` (5.1.8+,
+The earlier manual DB reports used Moodle source `a682566412e1d429b95ac8ef4351a518f61b94c5` (5.1.8+,
 Build 20261030), pinned PHP 8.3, developer debugging and isolated DBs. The baseline
 was rebuilt from actual old-main `2d195b22a14a11365f256b3c5f0c9ca242b93827`
 (0.11.0); candidate runtime version is 2026110503 / 0.11.2. Video byte hashes,
@@ -130,7 +132,7 @@ files individually flagged as definition-only by the official standard. Token
 rejection uses Moodle diagnostics with debug display suppressed for OAuth JSON.
 Its failure fixture verifies HTTP 401, JSON integrity and no exception disclosure.
 
-The current English-only ZIPs were subsequently installed over those 0.11.2
+The 0.11.3 English-only ZIPs were subsequently installed over those 0.11.2
 fixtures on both PostgreSQL and MySQL. Runtime schema/privacy checks and original
 course/video preservation passed without developer diagnostics. PostgreSQL also
 retained the three original synchronization records and signing key. The MySQL
@@ -138,6 +140,44 @@ fixture follows its earlier uninstall/reinstall, so its fresh tables and renewed
 key are checked against that lifecycle rather than claimed as original records.
 [Hosted CI for the same candidate](https://github.com/videoq-jp/videoq-moodle/actions/runs/42058956148)
 also passed. Both isolated DB containers were stopped after verification.
+
+## Repeatable installed-Moodle matrix
+
+```sh
+php lab/check-marketplace-matrix.php pg /tmp/videoq-marketplace-pg
+php lab/check-marketplace-matrix.php mysql /tmp/videoq-marketplace-mysql
+```
+
+Requires PHP CLI with ZipArchive/POSIX, Docker, Git and tar on the development/CI
+host. Use fresh, empty directories outside the checkout. `MATRIX_DOCKER_SUDO=1`
+selects `sudo -n docker` where needed. Optional `MATRIX_MOODLE_GIT_SOURCE` and
+`MATRIX_BASELINE_GIT_SOURCE` reuse local Git objects: committed archives are used,
+never uncommitted files. Otherwise the pinned official repositories are fetched.
+These are development requirements, not plugin runtime requirements.
+
+Source revisions are fixed in `.github/moodle-matrix.json`; PHP, PostgreSQL and
+MySQL image digests are in the shared Dependabot manifest. Each run creates a
+separate internal network and random-password DB with no published ports. Only
+its labelled resources are removed afterward. Unsafe/nonempty targets are
+rejected before orchestration. `summary.json` is sanitized; the whole work
+directory also holds private environment files and raw logs and must not be shared.
+
+The runner installs actual old-main code, seeds shared course/file/sync state,
+updates to current English-only ZIPs, executes schema/privacy/preservation checks,
+uninstalls the companion before local, and reinstalls fresh plugin state. Both
+local DB runs passed at local_videoq 2026110602 and ltisource_videoq 2026110601.
+Synthetic file bytes exercise preservation, not video decoding/playback. The old
+baseline's known XMLDB repairs are distinct from candidate diagnostics, which are
+checked and absent. Reports recorded before ZIP normalization retain earlier hashes. Use the current
+matrix/browser reports for canonical archive hashes; runtime file contents are unchanged.
+
+CI runs both DB jobs after tooling. The existing required-check name aggregates
+all three results with `if: always()` and fails when tooling or either DB fails
+or is skipped. Release publishing depends on that gate. Historical three-image
+release manifests remain supported; the current manifest also pins MySQL 8.4.
+The [hosted matrix run](https://github.com/videoq-jp/videoq-moodle/actions/runs/42068103034)
+passed both DB jobs and the required gate. Both printed ZIP hashes match the
+locally generated archives from native PHP and the pinned image exactly.
 
 ## Privacy API audit
 
@@ -189,6 +229,24 @@ Captured evidence, with only synthetic audit identity and no credentials:
 These are evidence screenshots; course/citation images for the final listing and
 actual reviewer access remain to be prepared.
 
+## Reproducible ZIPs
+
+Cross-environment matrix checks exposed different ZIP hashes despite identical
+runtime files. Builders now normalize process timezone (UTC), the 1980 timestamp,
+Unix file permissions (0644) and stored compression. The small uncompressed
+archives avoid compressor-version differences. Both plugin and AMOS builders are
+covered by regression tests with three process timezones and source file modes.
+
+Native PHP and the pinned PHP image now produce identical current plugin ZIP
+hashes. All 39 local-plugin and 6 LTI-source file contents match the earlier
+candidate byte for byte. The matrix builds archives in that same pinned image;
+only extraction uses host PHP. The current normalized ZIPs were uploaded and
+installed again through Moodle's browser installer, including version/table/key
+and optional-setting checks.
+
+Historical tagged builders/assets are unchanged. Earlier evidence preserves its
+original ZIP hashes; it must not be mistaken for the new normalized artifact.
+
 ## Repeatable coding check
 
 Development only: no Composer tooling is distributed in Moodle installers.
@@ -228,13 +286,13 @@ Historical release verification remains unchanged. See [workflow](translations.m
 
 - Make the verified official plugin-CI checks repeatable in CI and run applicable
   Moodle unit checks with both components available.
-- Automate the installed-Moodle DB matrix in CI against the final release candidate.
 - Verify the deployment-specific external data-request/retention process, and
   complete developer-debug functionality and video/chat accessibility checks.
 - Submit the prepared Japanese AMOS input after component availability, obtain
   acceptance and verify Japanese language-pack delivery. English-only submission
   packages and a checked 79-string import now build in CI; see [translation guide](translations.md).
-- Capture sanitized setup, course assistant and citation screenshots.
+- Capture sanitized course assistant and citation screenshots; the current setup
+  and ZIP-validation evidence is already available.
 - Set up reviewer access, settle publisher/listing decisions and final descriptions.
 - Reconcile documentation overlap with PR #3 before merging PR #4; select release
   maturity/support versions truthfully and publish reproducible archives.

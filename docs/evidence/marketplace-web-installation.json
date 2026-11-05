@@ -4,7 +4,7 @@
   "components": {
     "local_videoq": {
       "component": "local_videoq",
-      "archiveSha256": "3abe2a349b642a590ed83fd23967d3bcfe1ce6b7bf05a33b55d7a037ef1c926e",
+      "archiveSha256": "c3680903f20fa3361da98999447af6fa911212246bc4c4c56ddc823b7c9734c2",
       "validationPassed": true,
       "alphaWarning": true,
       "manualSetupPrompted": false,
@@ -58,7 +58,7 @@
     },
     "ltisource_videoq": {
       "component": "ltisource_videoq",
-      "archiveSha256": "f90412451078f09033bf16acb95db127878ae248f138d2ec43d6874f600311e0",
+      "archiveSha256": "92cbb616311b548d4f67acb5318a219449822babb2af9ff37c7d3762bf6b5815",
       "validationPassed": true,
       "alphaWarning": true,
       "manualSetupPrompted": false,
@@ -143,14 +143,14 @@
   "installedRuntime": {
     "database": "pgsql",
     "versions": {
-      "local_videoq": 2026110601,
-      "ltisource_videoq": 2026110406
+      "local_videoq": 2026110602,
+      "ltisource_videoq": 2026110601
     },
     "manualDefaultsInitialized": true,
     "accessKeyInitialized": true,
     "tablesCreated": 3
   },
-  "candidatePluginCommit": "24147bd",
+  "candidatePluginCommit": "814f3fbc84d57bf81e4f6753c857d5bcef1dcedf",
   "moodleSourceCommit": "a682566412e1d429b95ac8ef4351a518f61b94c5",
   "moodleVersion": "5.1.8+ (Build 20261030)",
   "browserRunner": "lab/check-marketplace-web-install.php",

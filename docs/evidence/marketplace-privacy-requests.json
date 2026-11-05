@@ -66,9 +66,9 @@
     }
   },
   "limits": [
-    "Installed fixture is PostgreSQL only; final MySQL candidate still requires matrix verification.",
+    "This standalone privacy report uses PostgreSQL; the current MySQL lifecycle is covered in marketplace-database-matrix.json.",
     "The external VideoQ data-request process was documented but not executed or certified.",
-    "Prior browser-install evidence covers 0.11.4; these changes require final candidate browser verification before release."
+    "This earlier report predates ZIP metadata normalization; current archive hashes and browser checks are in the matrix and web-installation reports."
   ],
   "officialPhpDoc": {
     "tool": "moodle-plugin-ci 4.5.11",

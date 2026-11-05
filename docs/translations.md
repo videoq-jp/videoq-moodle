@@ -42,3 +42,8 @@ Existing local Japanese strings remain the source for local_videoq;
 Both must stay in sync with the English component files. No translation has been
 submitted or approved in AMOS yet. Publisher/translator account access and the
 actual contribution/verification remain required.
+
+Plugin and AMOS ZIP builders normalize UTC timestamps, Unix permissions and stored
+compression so source permissions and process timezones do not change checksums.
+Use the pinned PHP image for release/submission builds. Historical tagged assets
+are preserved; earlier candidate hashes may predate this normalization.
