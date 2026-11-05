@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
 /**
- * Initializes the local access-proof signing key.
+ * Initializes the local access-proof signing key and optional manual settings.
  *
  * @package local_videoq
  * @copyright 2026 VideoQ contributors
@@ -24,10 +24,14 @@
  */
 
 /**
- * Initializes a private site key for learner access proofs.
+ * Initializes learner access proofs and empty defaults for optional manual setup.
  *
  * @return void
  */
 function xmldb_local_videoq_install() {
     set_config('accesssigningkey', bin2hex(random_bytes(32)), 'local_videoq');
+    // Manual connection is optional; do not prompt for it during initial installation.
+    foreach (['apiurl' => '', 'synctoken' => '', 'typeid' => '', 'lessons' => '[]'] as $name => $value) {
+        set_config($name, $value, 'local_videoq');
+    }
 }
