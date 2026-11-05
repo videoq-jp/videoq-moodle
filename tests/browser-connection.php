@@ -75,6 +75,8 @@ namespace {
             check(!Connection::finish($SESSION->local_videoq_browser['state'], '', 'access_denied') && !isset($SESSION->local_videoq_browser), 'Cancel retained credentials');
         }
         foreach (['http://private.example', 'https://user:password@example.invalid', 'https://example.invalid/path', 'https://example.invalid?query=1'] as $invalid) rejects(fn() => Connection::start($invalid), 'Invalid selected URL');
+        curl::$metadata = ['toolOrigin' => 'https://videoq.jp', 'authorizationUrl' => 'https://videoq.jp/moodle/connect'];
+        check(str_starts_with(Connection::start('https://VideoQ.jp:443/'), 'https://videoq.jp/moodle/connect?'), 'Default HTTPS port and hostname case');
         curl::$metadata = ['toolOrigin' => 'https://api.private.example:8443', 'authorizationUrl' => 'https://web.private.example:9443/moodle/connect'];
         check(str_starts_with(Connection::start('https://web.private.example:9443'), curl::$metadata['authorizationUrl']), 'Separate frontend/API discovery');
         foreach (['http://example.invalid/moodle/connect', 'https://example.invalid/moodle/connect?redirect=evil', 'https://example.invalid/elsewhere'] as $invalid) {

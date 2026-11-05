@@ -10,8 +10,10 @@ final class browser_connection {
         require_capability('moodle/site:config', \context_system::instance());
         require_once($CFG->libdir . '/filelib.php');
         if (strlen($url) > 2048) throw new \InvalidArgumentException('Invalid VideoQ URL');
-        $origin = client::origin(rtrim(trim($url), '/'));
-        if ($origin !== rtrim(trim($url), '/')) throw new \InvalidArgumentException('Expected a VideoQ origin');
+        $url = trim($url);
+        $origin = client::origin($url);
+        $parts = parse_url($url);
+        if (!in_array($parts['path'] ?? '', ['', '/'], true) || isset($parts['query'])) throw new \InvalidArgumentException('Expected a VideoQ origin');
         $curl = new \curl();
         $curl->setHeader(['Accept: application/json']);
         $raw = $curl->get($origin . '/api/lms/pairing/discovery', [], client::http_options(15));
