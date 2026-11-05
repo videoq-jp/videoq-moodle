@@ -128,7 +128,8 @@ php scripts/check-moodle-code.php scan /tmp/videoq-moodle-codecheck
 
 Normal CI prepares tools with network access, then scans with `--network none`
 and read-only source mounts. Any error or warning fails the scan. Local execution
-of these exact stages passed; hosted confirmation follows the PR push. Offline
+and [hosted CI](https://github.com/videoq-jp/videoq-moodle/actions/runs/42041868560)
+of these exact stages passed. Both prepare and offline scan steps were confirmed. Offline
 failure tests reject unrelated directories, corrupted cached binaries and stale
 manifests before tool execution. This is not a full moodle-plugin-ci run.
 
