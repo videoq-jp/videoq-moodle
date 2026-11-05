@@ -95,6 +95,8 @@ private on-premises endpoints, configure Moodle's normal outbound-network and CA
 trust policies. No URL is hardcoded to the cloud service; redirects are disabled
 on discovery and exchange requests. The administrator's Moodle session and an
 S256 verifier protect the temporary callback code, including response recovery.
+If the exchange is interrupted, use **Retry connection** on the Moodle page
+within the original ten-minute session. After expiry, start the connection again.
 
 If processing stalls, inspect Moodle's VideoQ status, scoped task logs and the
 external VideoQ worker/queue health. Check AI credentials on the VideoQ service;

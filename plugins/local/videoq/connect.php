@@ -22,6 +22,7 @@ if (data_submitted()) {
     try {
         if (optional_param('action', '', PARAM_ALPHA) === 'cancel') {
             \local_videoq\connection_setup::cancel_pending();
+            unset($SESSION->local_videoq_browser);
             redirect(new moodle_url('/local/videoq/connect.php'));
         }
         if (optional_param('action', '', PARAM_ALPHA) === 'browser') {
