@@ -25,6 +25,11 @@
 
 /**
  * Moodle signs this custom claim as part of the normal LTI 1.3 launch.
+ *
+ * @param stdClass $instance LTI activity instance.
+ * @param string $endpoint Tool launch URL.
+ * @param array $params Existing launch parameters.
+ * @return array Additional launch parameters.
  */
 function ltisource_videoq_before_launch($instance, $endpoint, $params) {
     global $USER;

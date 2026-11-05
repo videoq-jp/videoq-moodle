@@ -64,6 +64,10 @@ final class restoration {
     }
     /**
      * Called after all module data/files/mappings have been restored, once per restore/course.
+     *
+     * @param string $restoreid Restore operation identifier.
+     * @param int $courseid Restored course identifier.
+     * @return void
      */
     public static function finish(string $restoreid, int $courseid): void {
         global $CFG, $DB, $USER;

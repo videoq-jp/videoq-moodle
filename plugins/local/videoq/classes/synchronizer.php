@@ -30,6 +30,9 @@ namespace local_videoq;
 final class synchronizer {
     /**
      * One stable, course-wide entry, independent of any source activity's lifetime.
+     *
+     * @param int $courseid Course identifier.
+     * @return void
      */
     public static function ensure_course_entry(int $courseid): void {
         global $CFG, $DB;
@@ -55,6 +58,10 @@ final class synchronizer {
     }
     /**
      * Keep the transport and per-video shortcuts out of the course activity list.
+     *
+     * @param int $courseid Course identifier.
+     * @param array $cmids Course-module identifiers to hide.
+     * @return void
      */
     private static function hide_transport_entries(int $courseid, array $cmids): void {
         global $CFG;
@@ -134,6 +141,9 @@ final class synchronizer {
     }
     /**
      * Internal restore task preserves a teacher's explicit disable and any completed initialization.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return void
      */
     public static function restore_source(int $cmid): void {
         self::configure($cmid, true);
@@ -165,6 +175,10 @@ final class synchronizer {
     }
     /**
      * Repair only mappings still enabled; never override an explicit teacher disable.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @param bool $repair Whether to preserve existing disabled mappings.
+     * @return void
      */
     private static function configure(int $cmid, bool $repair): void {
         global $CFG, $DB;

@@ -31,6 +31,9 @@ namespace local_videoq;
 final class lesson {
     /**
      * Resolve the shared course entry afresh; it must survive removal of a video.
+     *
+     * @param int $courseid Course identifier.
+     * @return array|null Accessible course entry, or null when none is available.
      */
     public static function for_course(int $courseid): ?array {
         global $USER, $DB;

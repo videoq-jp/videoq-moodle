@@ -46,6 +46,13 @@ GitHub archives; it does not submit them to Marketplace. The candidate packaging
 ARIA-label whitespace fix; the linked DB evidence covers 0.11.2 / 2026110503.
 Release maturity remains alpha; support claims currently cover Moodle 5.1/Boost only.
 
+The additional official plugin-CI checks use release 4.5.11, whose downloaded
+PHAR was verified against the published SHA-256
+`39b5d0d71f5ab88fac1c3f5fc1166b8673bc0a488b29cd8c56a8bca56a8f8bca`.
+PHPDoc was checked with `--max-warnings=0` against the packaged English-only
+components in writable isolated copies of Moodle and plugin code. Eight missing
+method parameter contracts were corrected without changing executable behavior.
+
 ## Proposed listing descriptions
 
 ### local_videoq — VideoQ course video assistant
@@ -82,6 +89,8 @@ Issues: https://github.com/videoq-jp/videoq-moodle/issues
 | Check | Current evidence | Limits |
 | --- | --- | --- |
 | Official Moodle coding standard | moodlehq/moodle-cs 3.7.0, PHPCS 3.13.6: 0 errors, 0 warnings | Not the entire moodle-plugin-ci suite |
+| Official plugin CI 4.5.11 | Both components pass structure and PHPDoc checks; local upgrade savepoints pass | Companion has no upgrade file; other suite commands are not implied |
+| Moodle ZIP validator | Both English-only archives accepted by the stock validator | CLI with scratch destination; alpha maturity warnings remain |
 | PHP tooling and packages | Standalone PHP, installer/dependency/release, HTTP/SSE and RSA tests pass | No paid-AI claim |
 | Privacy metadata | Both actual Moodle metadata providers and language identifiers pass; feedback explicitly declared | Full external-data lifecycle review still required |
 | PostgreSQL | Fresh lifecycle passes; old-main upgrade preserves teaching data, all three table records and access key | See scope in linked report |
@@ -91,6 +100,7 @@ Sanitized reports:
 
 - [PostgreSQL upgrade](evidence/marketplace-postgresql-upgrade.json)
 - [MySQL lifecycle](evidence/marketplace-mysql-lifecycle.json)
+- [Stock ZIP validation](evidence/marketplace-archive-validation.json)
 
 Both used Moodle source `a682566412e1d429b95ac8ef4351a518f61b94c5` (5.1.8+,
 Build 20261030), pinned PHP 8.3, developer debugging and isolated DBs. The baseline

@@ -89,6 +89,11 @@ final class browser_connection {
 
     /**
      * No credentials from the browser are used until its admin session matches.
+     *
+     * @param string $state Administrator session state returned by VideoQ.
+     * @param string $code One-time authorization code.
+     * @param string $error Authorization error returned by VideoQ, if any.
+     * @return bool Whether the connection was completed.
      */
     public static function finish(string $state, string $code, string $error = ''): bool {
         global $SESSION, $USER;
