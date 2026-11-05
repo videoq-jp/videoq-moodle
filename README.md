@@ -11,10 +11,10 @@ Marketplace submission is being prepared. These plugins are not yet listed or
 approved. The manual steps below are for development and evaluation; the target
 is installation from the official listing once review and publication complete.
 
-1. Clone this repository and place `plugins/local/videoq` in Moodle's
-   `public/local/videoq` and `plugins/ltisource/videoq` in
-   `public/mod/lti/source/videoq` (Moodle 5.1). Run Moodle's database upgrade.
-   See the [Git installation commands](docs/setup.md#install-from-git).
+1. Install both VideoQ components through Moodle's **Install plugins** screen.
+   The target is the official directory after approval. During evaluation, upload
+   the matching component ZIPs provided for that build (local plugin first).
+   See the [installation guide](docs/setup.md); Git is an optional operator method.
 2. In Moodle, open **Site administration → Plugins → Local plugins → Connect to
    VideoQ** and enter your cloud or on-premises VideoQ HTTPS URL.
 3. Sign in to VideoQ and allow the connection to return to Moodle automatically

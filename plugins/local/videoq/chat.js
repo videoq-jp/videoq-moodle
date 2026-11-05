@@ -92,7 +92,7 @@
             element.textContent = validTime ? '(' + value.split(/[.,]/)[0].replace(/^00:/, '').replace(/^0(\d:)/, '$1') + ')' : source.title;
             if (element.tagName === 'BUTTON') {
                 element.type = 'button'; element.className = 'btn btn-link p-0 align-baseline citation';
-                element.setAttribute('aria-label', label + root.dataset.seekSuffix);
+                element.setAttribute('aria-label', label + ' ' + root.dataset.seekSuffix);
                 element.dataset.videoId = String(source.video_id);
                 element.addEventListener('click', () => {
                     const target = bridge.videos?.find(video => video.videoId === source.video_id);

@@ -2,9 +2,10 @@
 /** Build standard Moodle installers with PHP + ext-zip only. */
 declare(strict_types=1);
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
-if ($argc !== 2 || !class_exists(ZipArchive::class)) {
-    fwrite(STDERR, "Usage: php scripts/package-plugins.php OUTPUT_DIRECTORY (PHP with ext-zip required)\n"); exit(1);
+if (!in_array($argc, [2, 3], true) || ($argc === 3 && $argv[2] !== '--marketplace') || !class_exists(ZipArchive::class)) {
+    fwrite(STDERR, "Usage: php scripts/package-plugins.php OUTPUT_DIRECTORY [--marketplace] (PHP with ext-zip required)\n"); exit(1);
 }
+$marketplace = ($argv[2] ?? '') === '--marketplace';
 $root = dirname(__DIR__);
 $destination = $argv[1];
 if (!is_dir($destination) && !mkdir($destination, 0755, true)) throw new RuntimeException('Cannot create output directory');
@@ -16,11 +17,13 @@ foreach ($plugins as $component => $relative) {
     if (is_link($base) || !is_dir($base)) throw new RuntimeException('Invalid plugin directory');
     if ($destination === realpath($base) || str_starts_with($destination . '/', realpath($base) . '/')) throw new RuntimeException('Output must be outside plugin sources');
     $files = [];
-    $walk = function(string $directory, string $prefix = '') use (&$walk, &$files): void {
+    $walk = function(string $directory, string $prefix = '') use (&$walk, &$files, $marketplace): void {
         foreach (scandir($directory) as $name) {
             if (str_starts_with($name, '.')) continue;
             $path = $directory . '/' . $name;
             if (is_link($path)) throw new RuntimeException('Plugin symlinks are not distributable');
+            // Official distributions obtain non-English translations through AMOS.
+            if ($marketplace && $prefix === 'lang/' && $name !== 'en') continue;
             if (is_dir($path)) $walk($path, $prefix . $name . '/');
             else if (is_file($path) && ($name === 'LICENSE' || in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['php','js','css','mustache','md','xml'], true))) {
                 $files['videoq/' . $prefix . $name] = $path;

@@ -71,7 +71,7 @@ $string['chatempty'] = 'Ask questions across the videos in this course.';
 $string['chatconnecting'] = 'Connecting to VideoQ…';
 $string['chathint'] = 'Enter to send · Shift+Enter for a new line. Check AI answers against the lesson.';
 $string['chatconnectionerror'] = 'Unable to connect. Reload this page.';
-$string['chatseek'] = ' — jump to this point';
+$string['chatseek'] = '— jump to this point';
 
 $string['privacy:metadata:conversation'] = 'Question text and the displayed AI answer exchanged between the native Moodle interface and the registered VideoQ tool. Question records remain in VideoQ.';
 

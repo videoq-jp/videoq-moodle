@@ -42,8 +42,9 @@ https://github.com/videoq-jp/videoq-moodle (public monorepo).
 Build with `php scripts/package-plugins.php <output-directory>`. Each archive has
 a single `videoq/` root, its own license, version metadata and README. GitHub's
 whole-repository ZIP is not an installer. The release workflow publishes checked
-GitHub archives; it does not submit them to Marketplace. Release maturity remains
-alpha; support claims currently cover Moodle 5.1/Boost only.
+GitHub archives; it does not submit them to Marketplace. The candidate packaging now uses local_videoq 0.11.3 / 2026110504 for the
+ARIA-label whitespace fix; the linked DB evidence covers 0.11.2 / 2026110503.
+Release maturity remains alpha; support claims currently cover Moodle 5.1/Boost only.
 
 ## Proposed listing descriptions
 
@@ -133,6 +134,18 @@ of these exact stages passed. Both prepare and offline scan steps were confirmed
 failure tests reject unrelated directories, corrupted cached binaries and stale
 manifests before tool execution. This is not a full moodle-plugin-ci run.
 
+## Translation preparation
+
+`package-plugins.php --marketplace` builds English-only official submission
+archives; the ordinary development profile retains the existing Japanese UI.
+`scripts/package-translations.php` produces a flat, reproducible AMOS ZIP with
+72 local_videoq and 6 ltisource_videoq translations. Data-only parsing, exact key
+coverage, placeholder checks and archive-content tests pass; bad placeholders
+and executable statements are rejected before evaluation. An English string's
+leading-space dependency was removed, with spacing supplied by the ARIA label.
+No translation contribution, new release or Marketplace upload was performed.
+Historical release verification remains unchanged. See [workflow](translations.md).
+
 ## Remaining gates
 
 - Run official plugin-CI structural/PHPDoc/savepoint and applicable unit checks
@@ -141,8 +154,9 @@ manifests before tool execution. This is not a full moodle-plugin-ci run.
   Moodle's web installer rather than only extraction plus real CLI installation.
 - Complete external data/retention/privacy review, developer-debug functionality
   tests and accessibility checks for the video/chat interface.
-- Prepare English-only submission archives and Japanese AMOS translation input;
-  the current development packages still include Japanese strings.
+- Submit the prepared Japanese AMOS input after component availability, obtain
+  acceptance and verify Japanese language-pack delivery. English-only submission
+  packages and a checked 78-string import now build in CI; see [translation guide](translations.md).
 - Capture sanitized setup, course assistant and citation screenshots.
 - Set up reviewer access, settle publisher/listing decisions and final descriptions.
 - Reconcile documentation overlap with PR #3 before merging PR #4; select release
