@@ -7,24 +7,29 @@ final class Browser {
     private string $endpoint; private ?string $session=null; private $process=null;
     private const ELEMENT='element-6066-11e4-a52e-4f735466cecf';
     public function __construct(private string $init='') {
+        $firefox = getenv('BROWSER') === 'firefox';
         $this->endpoint = rtrim(getenv('WEBDRIVER_URL') ?: '', '/');
         try {
             if (!$this->endpoint) {
                 $socket=stream_socket_server('tcp://127.0.0.1:0',$error,$message);ensure($socket!==false,'No loopback port available');
                 $address=stream_socket_get_name($socket,false);fclose($socket);$port=substr($address,strrpos($address,':')+1);
                 $this->endpoint='http://127.0.0.1:'.$port;
-                $this->process=proc_open([getenv('CHROMEDRIVER') ?: 'chromedriver','--port='.$port,'--allowed-ips=127.0.0.1'],[0=>['file','/dev/null','r'],1=>['file','/dev/null','w'],2=>['file','/dev/null','w']],$pipes);
+                $args = $firefox ? [getenv('GECKODRIVER') ?: 'geckodriver', '--host', '127.0.0.1', '--port', $port] : [getenv('CHROMEDRIVER') ?: 'chromedriver','--port='.$port,'--allowed-ips=127.0.0.1'];
+                $this->process=proc_open($args,[0=>['file','/dev/null','r'],1=>['file','/dev/null','w'],2=>['file','/dev/null','w']],$pipes);
                 ensure(is_resource($this->process),'Cannot start native ChromeDriver');
                 wait(function(){try{return $this->send('GET','/status',null,false);}catch(\Throwable){return false;}},15);
             }
             $chrome=['args'=>['--headless=new','--no-sandbox','--disable-dev-shm-usage','--no-proxy-server','--window-size=1440,1100']];
             if (getenv('CHROME_BINARY')) $chrome['binary']=getenv('CHROME_BINARY');
             $local=str_ends_with((string)parse_url(moodle(),PHP_URL_HOST),'.localhost')&&str_ends_with((string)parse_url(videoq(),PHP_URL_HOST),'.localhost');
-            $value=$this->send('POST','/session',['capabilities'=>['alwaysMatch'=>['browserName'=>'chrome','pageLoadStrategy'=>'eager','acceptInsecureCerts'=>$local,'goog:chromeOptions'=>$chrome]]],false);
+            $options = ['browserName'=>'chrome','pageLoadStrategy'=>'eager','acceptInsecureCerts'=>$local,'goog:chromeOptions'=>$chrome];
+            if ($firefox) $options = ['browserName'=>'firefox','pageLoadStrategy'=>'eager','acceptInsecureCerts'=>$local,
+                'moz:firefoxOptions'=>['binary'=>getenv('FIREFOX_BINARY') ?: '/usr/bin/firefox','args'=>['-headless'], 'prefs'=>['network.proxy.type'=>0]]];
+            $value=$this->send('POST','/session',['capabilities'=>['alwaysMatch'=>$options]],false);
             $this->session=$value['sessionId'];$this->send('POST','/timeouts',['script'=>150000,'pageLoad'=>45000,'implicit'=>0]);
             $capture=file_get_contents(__DIR__.'/capture.js');
             $capture=str_replace(['VIDEOQ_ORIGIN','MOODLE_ORIGIN'],[json_encode(videoq()),json_encode(moodle())],$capture);
-            $this->cdp('Page.addScriptToEvaluateOnNewDocument',['source'=>$capture]);
+            if (!$firefox) $this->cdp('Page.addScriptToEvaluateOnNewDocument',['source'=>$capture]);
         } catch (\Throwable $error) { $this->close(); throw $error; }
     }
     private function send(string $method,string $path,?array $body=null,bool $session=true): mixed {
@@ -51,7 +56,11 @@ final class Browser {
     public function fill(string $selector,string $value): void {
         wait(function()use($selector,$value){try{$element=$this->element($selector);$id=$element[self::ELEMENT];$this->send('POST','/element/'.$id.'/clear',[]);$this->send('POST','/element/'.$id.'/value',['text'=>$value]);return true;}catch(\Throwable){return false;}},30);
     }
-    public function click(string $selector): void { $element=$this->element($selector);$this->send('POST','/element/'.$element[self::ELEMENT].'/click',[]); }
+    public function click(string $selector): void {
+        $this->js("document.querySelector(arguments[0]).scrollIntoView({block:'center',inline:'center'})", [$selector]);
+        $this->wait("const el=document.querySelector(arguments[0]),r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return hit===el||el.contains(hit)", 30, [$selector]);
+        $element=$this->element($selector);$this->send('POST','/element/'.$element[self::ELEMENT].'/click',[]);
+    }
     public function text(string $selector): string { return (string)$this->js('return document.querySelector(arguments[0]).textContent',[$selector]); }
     public function value(string $selector): string { return (string)$this->js('return document.querySelector(arguments[0]).value',[$selector]); }
     public function tool(callable $callback): mixed {
@@ -59,17 +68,33 @@ final class Browser {
         try { return $callback($this); } finally { $this->send('POST','/frame',['id'=>null]); }
     }
     public function login(string $username='admin',?string $target=null): void {
-        $target??=moodle();$this->go($target.($target===moodle()?'/login/index.php':'/login'));
-        $this->fill('#username',$username);if($target===moodle())$this->element('.toggle-sensitive-wrapper #password');
-        $this->fill('#password',getenv('LAB_PASSWORD') ?: 'Lti-lab-only-123!');$this->click($target===moodle()?'#loginbtn':'form button[type=submit]');
+        try {
+        $target??=moodle();$isMoodle=$target!==videoq();$this->go($target.($isMoodle?'/login/index.php':'/login'));
+        $this->fill('#username',$username);if($isMoodle)$this->element('.toggle-sensitive-wrapper #password');
+        $this->fill('#password',getenv('LAB_PASSWORD') ?: 'Lti-lab-only-123!');$this->click($isMoodle?'#loginbtn':'form button[type=submit]');
         $this->wait("return !location.pathname.includes('/login')");
+        } catch (\Throwable $error) {
+            if ($target === moodle()) $this->screenshot(data() . '/acceptance/php-login-failure-' . (getenv('BROWSER') ?: 'chrome') . '.png');
+            throw $error;
+        }
     }
-    public function course(int $course=5): void {
-        $this->go(moodle().'/local/videoq/view.php?course='.$course.'&lang=ja');$this->ready();
-        $capture=str_replace(['VIDEOQ_ORIGIN','MOODLE_ORIGIN'],[json_encode(videoq()),json_encode(moodle())],file_get_contents(__DIR__.'/capture.js'));
+    public function course(int $course=5, ?string $root=null): void {
+        $root??=moodle();
+        $this->go($root.'/local/videoq/view.php?course='.$course.'&lang=ja' . (getenv('MOODLE_THEME') ? '&theme=' . rawurlencode(getenv('MOODLE_THEME')) : ''));
+        $capture=str_replace(['VIDEOQ_ORIGIN','MOODLE_ORIGIN'],[json_encode(videoq()),json_encode($root)],file_get_contents(__DIR__.'/capture.js'));
+        $observe=getenv('BROWSER')==='firefox'||$root!==moodle();
+        if ($observe) $this->js($capture);
+        $this->ready();
         $this->tool(fn($b)=>$b->js($capture.$this->init));
+        if ($observe) $this->tool(fn($b)=>$b->js('if(typeof announceReady==="function")announceReady()'));
     }
-    public function ready(): void { $this->wait("return document.querySelector('#videoq-native-controls')?.disabled===false",150); }
+    public function ready(): void {
+        try { $this->wait("return document.querySelector('#videoq-native-controls')?.disabled===false",150); }
+        catch (\Throwable $error) {
+            try { $this->screenshot(data().'/acceptance/php-ready-failure-'.(getenv('BROWSER')?:'chrome').'.png'); } catch (\Throwable) {}
+            throw $error;
+        }
+    }
     public function ask(string $text): void { $this->fill('#videoq-native-question',$text);$this->click('#videoq-native-send'); }
     public function resize(int $width,int $height=1100): void { $this->send('POST','/window/rect',['width'=>$width,'height'=>$height]); }
     public function screenshot(string $file): void { file_put_contents($file,base64_decode($this->send('GET','/screenshot'))); }

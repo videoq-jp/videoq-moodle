@@ -12,6 +12,10 @@ $CFG->dbpass = 'lti-lab-only';
 $CFG->prefix = 'mdl_';
 $CFG->wwwroot = 'https://moodle.localhost:18443';
 $CFG->dataroot = '/var/www/moodledata';
+if (getenv('MOODLE_MEDIA_OFFLOAD') === '1') {
+    $CFG->xsendfile = 'X-Accel-Redirect';
+    $CFG->xsendfilealiases = ['/protected_moodle/' => $CFG->dataroot . '/filedir'];
+}
 $CFG->admin = 'admin';
 $CFG->directorypermissions = 0777;
 $CFG->sslproxy = true;

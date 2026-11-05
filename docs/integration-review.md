@@ -1,8 +1,8 @@
-# Moodle integration review — 2026-11-04
+# Moodle integration review — 2026-11-05
 
 Scope: `videoq-moodle`, its HTTPS contract with the deployed VideoQ trial,
 Moodle 5.1.8+ / Boost, installation, access control, synchronization, UI, privacy,
-PHP-only tooling and release publication. Candidate: local_videoq 0.10.0 and
+PHP-only tooling and release publication. Candidate: local_videoq 0.10.1 and
 ltisource_videoq 0.4.1. README remains a short installation entry point.
 
 ## Conclusion
@@ -29,6 +29,7 @@ and is explicit in the [architecture decision](design/decision-lti-materials-han
 | Concurrent live tests could invalidate each other's preservation snapshots | Serialize live checks with a PHP lock and test exclusion/cleanup |
 | Course copies retained source-specific internal links and lacked portable opt-ins | Back up source opt-ins only; remap to restored Moodle IDs and rebuild transports using the current site's connection |
 | Deleting copied transports during restore invoked recycle-bin backups and removed the active restore's temporary ID table | Hide copied transports immediately; delete/rebuild in a separate post-restore task; hold synchronization until restore succeeds |
+| Importing into an existing course duplicated its course assistant entry | Retain the destination's existing entry; retire only this backup's redundant restored link after restore completes |
 
 Privacy metadata follows Moodle's
 [external-location declaration API](https://moodledev.io/docs/4.5/apis/subsystems/privacy).
@@ -64,8 +65,9 @@ private-history separation and source-preserving deletion with normal schedulers
 - Portable opt-in markers require a backup made with local_videoq 0.10.0 or later.
   The destination must have both plugins and a configured connection; Moodle cron
   performs initialization and transfer. Same-site full-course copy and `.mbz`
-  restoration are the verified scope. Cross-site restoration, partial backups and
-  import into an existing course still need dedicated deployment checks.
+  restoration, partial activity backups and import into an existing course are
+  verified paths. Cross-site restoration remains incomplete: independent video
+  synchronization/indexing passed, but native chat readiness timed out in Chrome.
 - Remote disconnect is enforced by VideoQ. Platform-side trust revocation also
   requires disabling/removing the registered external tool in Moodle. The plugin
   does not claim that a remote disconnect deletes that Moodle registration.
@@ -77,3 +79,47 @@ private-history separation and source-preserving deletion with normal schedulers
   before production sign-off.
 
 These limits prevent treating the trial as a complete production sign-off.
+
+## Follow-up findings
+
+The [full-duration trial](evidence/sustained-100.json) **failed**: all 100
+authenticated media responses returned 206, but only 31 complete 281,054,258-byte
+files matched the original content hash. Total received was 15,494,199,822 bytes
+over approximately 29.5 minutes. HTTP success alone is not full-video success.
+The native observer advanced 1,766.9 seconds over 1,767.8 seconds, with one waiting
+event, 12 dropped frames and no playback errors. It is one decoder, not 100 devices.
+
+Three real questions during this run succeeded. First text took 9.763, 4.865 and
+6.254 seconds; completion took 10.931, 6.114 and 7.839 seconds. The user has not
+set a latency target. Three sequential probes are not a new 100-question burst.
+
+The [earlier sustained attempt](evidence/sustained-baseline-aborted.json) was
+stopped after this shared 3,909 MiB host exhausted memory/swap. The revised trial
+used independent HTTP/1.1 transfers, authenticated core X-Sendfile delivery and a
+memory guard. It stayed above 265 MiB available memory, but incomplete transfers
+remain unresolved. The client and servers share the host; these results do not
+isolate a Moodle server defect or establish production capacity. The revised
+checker now also records cURL completion codes for further diagnosis; those codes
+were not captured for the reported failed run.
+
+[Firefox / Boost](evidence/firefox-boost.json) passed the held-stream UI suite,
+including feedback, citation seeking and responsive widths. This is UI/protocol
+verification rather than a real AI answer for that specific run.
+
+One real AI answer during partial-restore verification ended with an SSE error.
+The deployed API logged the sanitized reason `tool_after_answer`: the model
+requested another tool call after answer output had begun. Moodle-side changes
+do not fix this VideoQ/model failure. A later retry must not erase this finding.
+The deployed VideoQ source/services were left unchanged.
+
+The [portability follow-up](evidence/portability-followup.json) passed real scoped
+answers, Good/Bad/reset, timestamp seeking and private-history separation for a
+partial activity archive and import into an existing course. Import retained the
+pre-existing course assistant entry. The second site used a separate database,
+files, issuer, client ID and signing key, and successfully indexed its own video.
+Its Classic-configured Chrome page reached login, the assistant and LTI launch,
+but native chat readiness timed out before a question. The cause is unresolved;
+Firefox/Classic was therefore not reached. This is not a cross-site UI pass.
+All owned test courses, processed videos and physical video files were removed;
+the disposable registration was revoked/removed and its containers stopped.
+The original video, physical file and active keyless connection were preserved.

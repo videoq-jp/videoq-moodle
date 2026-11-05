@@ -2,7 +2,10 @@
 // Public certificates only. Never copy Caddy's private signing key or weaken TLS verification.
 define('CLI_SCRIPT', true);
 require('/var/www/html/config.php');
-if ($CFG->wwwroot !== 'https://moodle.localhost:18443' || $CFG->dbhost !== 'db') throw new \RuntimeException('Isolated lab only');
+if ($CFG->dbhost !== 'db' || !(
+        ($CFG->wwwroot === 'https://moodle.localhost:18443' && $CFG->dbname === 'moodle') ||
+        ($CFG->wwwroot === 'https://restore.moodle.localhost:18444' && $CFG->dbname === 'moodle_restore_check')
+    )) throw new \RuntimeException('Isolated lab only');
 $source = '/certificates/caddy/pki/authorities/local/root.crt';
 $system = '/etc/ssl/certs/ca-certificates.crt';
 if (!is_readable($source) || !is_readable($system)) throw new \RuntimeException('Lab CA is not ready');

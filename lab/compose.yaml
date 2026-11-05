@@ -13,6 +13,10 @@ services:
       retries: 30
   moodle:
     image: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
+    entrypoint: [sh, /lab/start-moodle.sh]
+    command: [apache2-foreground]
+    environment:
+      MOODLE_MEDIA_OFFLOAD: ${MOODLE_MEDIA_OFFLOAD:-1}
     depends_on:
       db:
         condition: service_healthy
@@ -20,6 +24,7 @@ services:
       - ${MOODLE_SOURCE:?Set MOODLE_SOURCE}:/var/www/html
       - ./moodle-config.php:/var/www/html/config.php:ro
       - ./apache.conf:/etc/apache2/sites-enabled/000-default.conf:ro
+      - ./mpm-prefork.conf:/etc/apache2/mods-enabled/mpm_prefork.conf:ro
       - .:/lab:ro
       - ${MOODLE_INTEGRATION_ROOT:-..}/plugins/local/videoq:/var/www/html/public/local/videoq:ro
       - ${MOODLE_INTEGRATION_ROOT:-..}/plugins/ltisource/videoq:/var/www/html/public/mod/lti/source/videoq:ro
@@ -38,6 +43,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - certificates:/data
+      - moodledata:/moodledata:ro
     networks:
       default:
         aliases: [moodle.localhost, videoq.localhost, storage.videoq.localhost]

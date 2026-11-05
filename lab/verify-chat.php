@@ -59,6 +59,8 @@ try {
         ensure($b->value('#videoq-native-question')==='途中切断の確認','Retry input lost');
         ensure($b->js("return [...document.querySelectorAll('$new')].at(-1).querySelectorAll('[data-feedback]').length")===0,'Interrupted answer has feedback');
     }
-    $name=$live?'php-chat-live':'php-chat-browser';report($name,['passed'=>true,'realProvider'=>$live,'streaming'=>true,'nativeMoodleChat'=>true,'feedbackGoodBadReset'=>true,'timestampSeek'=>true,'responsiveWidths'=>[390,768,1280,1440],'sourceVideoIds'=>$videos]);
+    $name=$live?'php-chat-live':'php-chat-browser';
+    if(getenv('BROWSER')==='firefox')$name.='-firefox';if(getenv('MOODLE_THEME'))$name.='-'.getenv('MOODLE_THEME');
+    report($name,['passed'=>true,'browserUserAgent'=>$b->js('return navigator.userAgent'),'themeStylesheet'=>$b->js("return [...document.querySelectorAll('link[rel=stylesheet]')].map(el=>el.href).find(url=>url.includes('/theme/styles.php/'))"),'realProvider'=>$live,'streaming'=>true,'nativeMoodleChat'=>true,'feedbackGoodBadReset'=>true,'timestampSeek'=>true,'responsiveWidths'=>[390,768,1280,1440],'sourceVideoIds'=>$videos]);
     $b->screenshot(data().'/acceptance/'.$name.'.png');
-}finally{$b->close();}
+}catch(Throwable $error){$b->screenshot(data().'/acceptance/php-chat-failure-'.(getenv('BROWSER')?:'chrome').'.png');throw $error;}finally{$b->close();}

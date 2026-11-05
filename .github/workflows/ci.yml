@@ -43,7 +43,9 @@ jobs:
       - name: Compile browser assets through PHP WebDriver
         run: php lab/check-browser.php
       - name: Check Moodle Compose configuration
-        run: docker compose --env-file lab/compose.env.example -f lab/compose.yaml --profile mock config --quiet
+        run: |
+          docker compose --env-file lab/compose.env.example -f lab/compose.yaml --profile mock config --quiet
+          docker compose --env-file lab/compose.env.example -f lab/compose.restore.yaml config --quiet
       - name: Build installers
         run: |
           mkdir -p dist

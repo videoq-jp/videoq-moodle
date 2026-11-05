@@ -1,0 +1,38 @@
+# Disposable second Moodle installation for cross-site backup checks.
+services:
+  moodle-restore:
+    image: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
+    volumes:
+      - ${MOODLE_SOURCE:?Set MOODLE_SOURCE}:/var/www/html
+      - ./restore-moodle-config.php:/var/www/html/config.php:ro
+      - ./apache.conf:/etc/apache2/sites-enabled/000-default.conf:ro
+      - .:/lab:ro
+      - ${MOODLE_INTEGRATION_ROOT:-..}/plugins/local/videoq:/var/www/html/public/local/videoq:ro
+      - ${MOODLE_INTEGRATION_ROOT:-..}/plugins/ltisource/videoq:/var/www/html/public/mod/lti/source/videoq:ro
+      - moodledata:/var/www/moodledata
+      - certificates:/certificates:ro
+    networks: [trial]
+  restore-proxy:
+    image: caddy:2-alpine
+    ports: [127.0.0.1:18444:18444]
+    volumes:
+      - ./restore-Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificates:/data
+    networks:
+      trial:
+        aliases: [restore.moodle.localhost]
+  restore-sync:
+    extends:
+      service: moodle-restore
+    entrypoint: [sh, /lab/run-sync.sh]
+    command: []
+    restart: unless-stopped
+networks:
+  trial:
+    external: true
+    name: videoq-lti-lab_default
+volumes:
+  moodledata:
+  certificates:
+    external: true
+    name: videoq-lti-lab_certificates

@@ -73,7 +73,10 @@ In the owning VideoQ account, open its connection settings, select the Moodle
 connection and choose **Disconnect**. Confirm the displayed connection. Subsequent
 launches, questions and synchronization are denied. Existing learning data is
 retained. Removing local Moodle settings alone does not revoke server access.
-Generate a new code to reconnect through the supported workflow.\nFor platform-side trust revocation as well, disable/remove the registered VideoQ\nexternal tool in Moodle through its standard tool administration. The remote\nVideoQ disconnect does not delete Moodle's tool registration.
+Generate a new code to reconnect through the supported workflow.
+For platform-side trust revocation as well, disable/remove the registered VideoQ
+external tool in Moodle through its standard tool administration. The remote
+VideoQ disconnect does not delete Moodle's tool registration.
 
 ## Operations and troubleshooting
 
@@ -115,12 +118,15 @@ claim to revoke the remote registration.
 
 For materials-service connections, local_videoq 0.10.0 course backups retain each File's VideoQ opt-in and
 rebuild managed activities and links using the destination course and site's
-connection. Upgrade the destination local plugin to 0.10.0 or later, install the
+connection. Upgrade the destination local plugin to 0.10.1 or later, install the
 launch companion, and configure the destination connection
 before restoring; normal Moodle cron initializes and synchronizes restored
 materials asynchronously. A restored course has its own VideoQ course/videos;
 private questions, answers and connection credentials are not copied by this
 plugin. The restoring user must be allowed to manage the source activities.
+Version 0.10.1 also preserves the existing assistant entry when importing into an
+existing course. Same-site full and partial restoration are verified; cross-site
+native chat still has an unresolved startup timeout in the trial.
 
 Backups made before 0.10.0 have no portable opt-in markers: remove their obsolete
 generated VideoQ activities/links, then enable **VideoQ questions** on the restored

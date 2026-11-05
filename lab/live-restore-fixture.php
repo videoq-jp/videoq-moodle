@@ -50,12 +50,34 @@ if ($action === 'create') {
         'introformat' => FORMAT_HTML, 'externalurl' => 'https://example.org/learning', 'display' => 0, 'printintro' => 0], $course);
 }
 if (!$state) throw new RuntimeException('No live restore fixture');
-if (in_array($action, ['copy', 'restore'], true)) {
+if ($action === 'archive') {
+    require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+    $bc = new backup_controller(backup::TYPE_1COURSE, $state['courses']['source'], backup::FORMAT_MOODLE,
+        backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id);
+    $bc->get_plan()->get_setting('users')->set_value(false);
+    $base = $bc->get_plan()->get_basepath(); $bc->execute_plan();
+    $file = $bc->get_results()['backup_destination']; $bc->destroy();
+    $path = '/tmp/videoq-cross-' . $state['run'] . '.mbz';
+    if (file_exists($path)) throw new RuntimeException('Archive already exists');
+    if (!$file->copy_content_to($path)) throw new RuntimeException('Archive copy failed');
+    chmod($path, 0600); $file->delete(); fulldelete($base);
+    $state['archive'] = $path; $save();
+}
+if (in_array($action, ['copy', 'restore', 'partial', 'import'], true)) {
     if (isset($state['courses'][$action])) throw new RuntimeException('Destination already exists');
     require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
     require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
     $shortname = 'vq-' . $action . '-' . $state['run'];
-    if ($action === 'copy') {
+    if ($action === 'import') {
+        $target = create_course((object)['fullname' => 'Import acceptance ' . $state['run'], 'shortname' => $shortname, 'category' => 1]);
+        $destination = (int)$target->id; $state['courses'][$action] = $destination; $save();
+        \local_videoq\synchronizer::ensure_course_entry($destination);
+        $state['existingentry'] = (int)$DB->get_field('url', 'id', ['course' => $destination,
+            'externalurl' => $CFG->wwwroot . '/local/videoq/view.php?course=' . $destination], MUST_EXIST); $save();
+        require_once($CFG->dirroot . '/course/externallib.php');
+        core_course_external::import_course($state['courses']['source'], $destination, 0);
+        if (!$DB->record_exists('url', ['id' => $state['existingentry'], 'course' => $destination])) throw new RuntimeException('Existing target entry removed');
+    } else if ($action === 'copy') {
         require_once($CFG->dirroot . '/course/externallib.php');
         $existing = array_keys($DB->get_records('course', null, '', 'id'));
         try {
@@ -75,7 +97,8 @@ if (in_array($action, ['copy', 'restore'], true)) {
         $destination = (int)$copy['id'];
         $state['courses'][$action] = $destination; $save();
     } else {
-        $bc = new backup_controller(backup::TYPE_1COURSE, $state['courses']['source'], backup::FORMAT_MOODLE,
+        $bc = new backup_controller($action === 'partial' ? backup::TYPE_1ACTIVITY : backup::TYPE_1COURSE,
+            $action === 'partial' ? $state['sources']['source'] : $state['courses']['source'], backup::FORMAT_MOODLE,
             backup::INTERACTIVE_NO, backup::MODE_GENERAL, $USER->id);
         $bc->get_plan()->get_setting('users')->set_value(false);
         $bc->execute_plan(); $file = $bc->get_results()['backup_destination']; $bc->destroy();
@@ -89,8 +112,9 @@ if (in_array($action, ['copy', 'restore'], true)) {
         if (!$marker || array_keys((array)$marker[0]) !== ['@attributes', 'role', 'enabled']) throw new RuntimeException('Unexpected portable metadata');
         $destination = restore_dbops::create_new_course('Archive acceptance ' . $state['run'], $shortname, 1);
         $state['courses'][$action] = (int)$destination; $save();
+        if ($action === 'partial') update_course((object)['id' => $destination, 'visible' => 1]);
         $rc = new restore_controller($directory, $destination, backup::INTERACTIVE_NO,
-            backup::MODE_GENERAL, $USER->id, backup::TARGET_NEW_COURSE);
+            backup::MODE_GENERAL, $USER->id, $action === 'partial' ? backup::TARGET_EXISTING_ADDING : backup::TARGET_NEW_COURSE);
         $rc->get_plan()->get_setting('users')->set_value(false);
         if (!$rc->execute_precheck() && !empty($rc->get_precheck_results()['errors'])) throw new RuntimeException('Restore precheck failed');
         $rc->execute_plan(); $rc->destroy(); $file->delete(); fulldelete($path);
@@ -106,7 +130,7 @@ if (in_array($action, ['copy', 'restore'], true)) {
         if ($url->externalurl === 'https://example.org/learning') $unrelated++;
         if (str_contains($url->externalurl, 'course=' . $state['courses']['source'])) throw new RuntimeException('Source link survived restoration');
     }
-    if ($entry !== 1 || $unrelated !== 1) throw new RuntimeException('Restored links invalid');
+    if ($entry !== 1 || $unrelated !== ($action === 'partial' ? 0 : 1)) throw new RuntimeException('Restored links invalid');
 }
 if ($action === 'delete') {
     $name = $argv[2] ?? '';
@@ -114,7 +138,7 @@ if ($action === 'delete') {
     $id = $state['courses'][$name];
     $course = $DB->get_record('course', ['id' => $id]);
     if ($course) {
-        if (!preg_match('/^vq-(source|copy|restore)-' . preg_quote($state['run'], '/') . '(?:_\d+)?$/D', $course->shortname)) throw new RuntimeException('Unexpected course identity');
+        if (!preg_match('/^vq-(source|copy|restore|partial|import)-' . preg_quote($state['run'], '/') . '(?:_\d+)?$/D', $course->shortname)) throw new RuntimeException('Unexpected course identity');
         delete_course($id, false);
     }
 }
@@ -126,6 +150,7 @@ if ($action === 'cleanup') {
         $DB->delete_records('local_videoq_sync', ['courseid' => $id]);
     }
     unset_all_config_for_plugin($component);
+    if (!empty($state['archive']) && $state['archive'] === '/tmp/videoq-cross-' . $state['run'] . '.mbz' && is_file($state['archive'])) unlink($state['archive']);
 }
 $state['sync'] = [];
 foreach ($state['sources'] as $name => $cmid) {

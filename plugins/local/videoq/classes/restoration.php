@@ -43,7 +43,20 @@ final class restoration {
                     if ($metadata['enabled'] && has_capability('moodle/course:manageactivities', \context_module::instance($cm->id))) $sources[] = $cm;
                 } else if ($metadata['role'] === 'entry') {
                     if ($cm->modname !== 'url') throw new \RuntimeException('Restored entry is not a URL');
-                    $DB->set_field('url', 'externalurl', $CFG->wwwroot . '/local/videoq/view.php?course=' . $courseid, ['id' => $cm->instance]);
+                    $target = $CFG->wwwroot . '/local/videoq/view.php?course=' . $courseid;
+                    $existing = $DB->get_records_sql("SELECT cm.id FROM {course_modules} cm
+                        JOIN {modules} m ON m.id = cm.module JOIN {url} u ON u.id = cm.instance
+                        WHERE m.name = 'url' AND u.course = ? AND u.externalurl = ? AND u.id <> ?",
+                        [$courseid, $target, $cm->instance]);
+                    $existing = array_diff(array_map('intval', array_keys($existing)), array_column($retired, 'cmid'));
+                    if ($existing) {
+                        // Keep the destination's existing course assistant. Delete
+                        // only this backup's redundant entry after restore finishes.
+                        $DB->update_record('course_modules', (object)['id' => $cm->id,
+                            'visible' => 0, 'visibleold' => 0, 'visibleoncoursepage' => 0]);
+                        $retired[] = ['cmid' => (int)$cm->id, 'module' => 'url'];
+                    }
+                    $DB->set_field('url', 'externalurl', $target, ['id' => $cm->instance]);
                 } else {
                     $expected = $metadata['role'] === 'transport' ? 'lti' : 'url';
                     if ($cm->modname !== $expected || $DB->record_exists_select('local_videoq_sync',

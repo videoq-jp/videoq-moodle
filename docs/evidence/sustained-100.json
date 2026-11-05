@@ -1,0 +1,761 @@
+{
+    "passed": false,
+    "verifiedAt": "2026-11-05T03:12:40+00:00",
+    "realMoodleLogins": 100,
+    "realAi": true,
+    "questionsStartedConcurrently": false,
+    "questionSchedule": [
+        "start",
+        "midpoint",
+        "end-minus-60-seconds"
+    ],
+    "questionCount": 3,
+    "fullVideo": true,
+    "concurrentAuthenticatedVideoRanges": 100,
+    "videoBytesPerLearner": 281054258,
+    "videoReceiveLimitBytesPerSecond": 158874,
+    "browserPlaybackObservers": 1,
+    "playbackDuringLoad": {
+        "advancedSeconds": 1766.905,
+        "droppedFrames": 12,
+        "errors": 0,
+        "totalFrames": 44226,
+        "waitingEvents": 1,
+        "observedSeconds": 1767.813,
+        "ok": true
+    },
+    "additionalVideoqAccounts": 0,
+    "questionP50Milliseconds": 7839,
+    "questionP95Milliseconds": 10931,
+    "videoRangeP95Milliseconds": 1767176,
+    "minimumAvailableMemoryKiB": 271672,
+    "peakGeneratorResidentKiB": 99836,
+    "mediaTransport": "HTTP/1.1 independent viewer connections",
+    "results": [
+        {
+            "ok": true,
+            "httpStatus": 200,
+            "firstTextMilliseconds": 9763,
+            "milliseconds": 10931,
+            "firstByteMilliseconds": 6298
+        },
+        {
+            "ok": true,
+            "httpStatus": 200,
+            "firstTextMilliseconds": 4865,
+            "milliseconds": 6114,
+            "firstByteMilliseconds": 1837
+        },
+        {
+            "ok": true,
+            "httpStatus": 200,
+            "firstTextMilliseconds": 6254,
+            "milliseconds": 7839,
+            "firstByteMilliseconds": 2593
+        }
+    ],
+    "videoResults": [
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 35078144,
+            "milliseconds": 291158,
+            "firstByteMilliseconds": 2757
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 77135872,
+            "milliseconds": 501549,
+            "firstByteMilliseconds": 2742
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1766999,
+            "firstByteMilliseconds": 2741
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 82853888,
+            "milliseconds": 540972,
+            "firstByteMilliseconds": 2581
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1767765,
+            "firstByteMilliseconds": 2749
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 14745600,
+            "milliseconds": 91064,
+            "firstByteMilliseconds": 2745
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 19120128,
+            "milliseconds": 132920,
+            "firstByteMilliseconds": 2743
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 101924864,
+            "milliseconds": 655657,
+            "firstByteMilliseconds": 3092
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 150913024,
+            "milliseconds": 962556,
+            "firstByteMilliseconds": 3170
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 115458048,
+            "milliseconds": 719797,
+            "firstByteMilliseconds": 3094
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 99303424,
+            "milliseconds": 686889,
+            "firstByteMilliseconds": 3227
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1763355,
+            "firstByteMilliseconds": 3077
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 94502912,
+            "milliseconds": 618795,
+            "firstByteMilliseconds": 3105
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 91373568,
+            "milliseconds": 596266,
+            "firstByteMilliseconds": 3678
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1766871,
+            "firstByteMilliseconds": 3758
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 36651008,
+            "milliseconds": 308012,
+            "firstByteMilliseconds": 3602
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765703,
+            "firstByteMilliseconds": 3708
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1767764,
+            "firstByteMilliseconds": 3578
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 13778944,
+            "milliseconds": 97069,
+            "firstByteMilliseconds": 3443
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 89767936,
+            "milliseconds": 586537,
+            "firstByteMilliseconds": 3409
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 14925824,
+            "milliseconds": 91948,
+            "firstByteMilliseconds": 3418
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1766542,
+            "firstByteMilliseconds": 3294
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1761549,
+            "firstByteMilliseconds": 3393
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 225984512,
+            "milliseconds": 1433891,
+            "firstByteMilliseconds": 3410
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 95617024,
+            "milliseconds": 666918,
+            "firstByteMilliseconds": 4046
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 93290496,
+            "milliseconds": 631593,
+            "firstByteMilliseconds": 3743
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 140574720,
+            "milliseconds": 900085,
+            "firstByteMilliseconds": 3993
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 134922240,
+            "milliseconds": 866617,
+            "firstByteMilliseconds": 4009
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1767176,
+            "firstByteMilliseconds": 4011
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 107528192,
+            "milliseconds": 692517,
+            "firstByteMilliseconds": 3861
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 116965376,
+            "milliseconds": 756520,
+            "firstByteMilliseconds": 3935
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1766959,
+            "firstByteMilliseconds": 3842
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 88768512,
+            "milliseconds": 577320,
+            "firstByteMilliseconds": 4194
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 102678528,
+            "milliseconds": 642107,
+            "firstByteMilliseconds": 4115
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 34930688,
+            "milliseconds": 291114,
+            "firstByteMilliseconds": 4147
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 53149696,
+            "milliseconds": 389931,
+            "firstByteMilliseconds": 4232
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765299,
+            "firstByteMilliseconds": 4093
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 98729984,
+            "milliseconds": 629546,
+            "firstByteMilliseconds": 4249
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765380,
+            "firstByteMilliseconds": 4400
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765602,
+            "firstByteMilliseconds": 4249
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 123027456,
+            "milliseconds": 783752,
+            "firstByteMilliseconds": 4308
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765701,
+            "firstByteMilliseconds": 4341
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 71254016,
+            "milliseconds": 525094,
+            "firstByteMilliseconds": 4381
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 142852096,
+            "milliseconds": 913189,
+            "firstByteMilliseconds": 4333
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 96813056,
+            "milliseconds": 657700,
+            "firstByteMilliseconds": 4587
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1766405,
+            "firstByteMilliseconds": 4573
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1767761,
+            "firstByteMilliseconds": 4430
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 122978304,
+            "milliseconds": 783659,
+            "firstByteMilliseconds": 4441
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765066,
+            "firstByteMilliseconds": 4926
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 45137920,
+            "milliseconds": 314870,
+            "firstByteMilliseconds": 4589
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 35241984,
+            "milliseconds": 291625,
+            "firstByteMilliseconds": 4569
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1766097,
+            "firstByteMilliseconds": 4701
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 87588864,
+            "milliseconds": 561447,
+            "firstByteMilliseconds": 4757
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 141721600,
+            "milliseconds": 889636,
+            "firstByteMilliseconds": 4670
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 122093568,
+            "milliseconds": 787448,
+            "firstByteMilliseconds": 4618
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765701,
+            "firstByteMilliseconds": 4606
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765669,
+            "firstByteMilliseconds": 4827
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1766248,
+            "firstByteMilliseconds": 4990
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 164675584,
+            "milliseconds": 1051939,
+            "firstByteMilliseconds": 4778
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1763638,
+            "firstByteMilliseconds": 4865
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1767760,
+            "firstByteMilliseconds": 4931
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 124977152,
+            "milliseconds": 804650,
+            "firstByteMilliseconds": 4578
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 92651520,
+            "milliseconds": 595748,
+            "firstByteMilliseconds": 4473
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 97828864,
+            "milliseconds": 630567,
+            "firstByteMilliseconds": 4781
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1764530,
+            "firstByteMilliseconds": 4833
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1765411,
+            "firstByteMilliseconds": 4864
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1764443,
+            "firstByteMilliseconds": 4950
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 96403456,
+            "milliseconds": 654627,
+            "firstByteMilliseconds": 4727
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 136888320,
+            "milliseconds": 912160,
+            "firstByteMilliseconds": 5010
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 139476992,
+            "milliseconds": 889127,
+            "firstByteMilliseconds": 5012
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 131907584,
+            "milliseconds": 830284,
+            "firstByteMilliseconds": 5334
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 74252288,
+            "milliseconds": 525604,
+            "firstByteMilliseconds": 4750
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 103104512,
+            "milliseconds": 642042,
+            "firstByteMilliseconds": 5311
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 73465856,
+            "milliseconds": 509733,
+            "firstByteMilliseconds": 4725
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 44105728,
+            "milliseconds": 280869,
+            "firstByteMilliseconds": 5284
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1766729,
+            "firstByteMilliseconds": 5162
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 148504576,
+            "milliseconds": 942367,
+            "firstByteMilliseconds": 5228
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 73891840,
+            "milliseconds": 524068,
+            "firstByteMilliseconds": 5298
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 78331904,
+            "milliseconds": 514034,
+            "firstByteMilliseconds": 5265
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 22528000,
+            "milliseconds": 154428,
+            "firstByteMilliseconds": 5245
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 59654144,
+            "milliseconds": 435496,
+            "firstByteMilliseconds": 5094
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 146718720,
+            "milliseconds": 929056,
+            "firstByteMilliseconds": 5146
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 50364416,
+            "milliseconds": 327676,
+            "firstByteMilliseconds": 5011
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1764637,
+            "firstByteMilliseconds": 5449
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 35536896,
+            "milliseconds": 267050,
+            "firstByteMilliseconds": 5423
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 149536768,
+            "milliseconds": 960798,
+            "firstByteMilliseconds": 5501
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 144900096,
+            "milliseconds": 931615,
+            "firstByteMilliseconds": 5475
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 179879936,
+            "milliseconds": 1152286,
+            "firstByteMilliseconds": 5072
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 102105088,
+            "milliseconds": 701729,
+            "firstByteMilliseconds": 5405
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 114065408,
+            "milliseconds": 736035,
+            "firstByteMilliseconds": 5022
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 66748416,
+            "milliseconds": 486697,
+            "firstByteMilliseconds": 5626
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1764932,
+            "firstByteMilliseconds": 5658
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 65912832,
+            "milliseconds": 449316,
+            "firstByteMilliseconds": 5513
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 141295616,
+            "milliseconds": 890143,
+            "firstByteMilliseconds": 5678
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 179961856,
+            "milliseconds": 1150750,
+            "firstByteMilliseconds": 5583
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 111722496,
+            "milliseconds": 743715,
+            "firstByteMilliseconds": 5573
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1760283,
+            "firstByteMilliseconds": 5604
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 173441024,
+            "milliseconds": 1098529,
+            "firstByteMilliseconds": 5555
+        },
+        {
+            "ok": false,
+            "httpStatus": 206,
+            "bytes": 137297920,
+            "milliseconds": 866083,
+            "firstByteMilliseconds": 5628
+        },
+        {
+            "ok": true,
+            "httpStatus": 206,
+            "bytes": 281054258,
+            "milliseconds": 1767611,
+            "firstByteMilliseconds": 5610
+        }
+    ],
+    "testQuestionsRemoved": true,
+    "existingCourseQuestionsPreserved": true
+}

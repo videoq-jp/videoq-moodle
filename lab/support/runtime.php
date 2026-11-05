@@ -82,7 +82,7 @@ function report(string $name, array $values): void {
     ensure((bool)preg_match('/^[a-z0-9-]+$/D',$name),'Invalid report name');
     $directory = data().'/acceptance'; if (!is_dir($directory)) mkdir($directory,0700,true);
     file_put_contents($directory.'/'.$name.'.json',json_encode($values,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR)."\n");
-    echo $name . ": passed\n";
+    echo $name . ((($values['passed'] ?? true) === false) ? ": failed\n" : ": passed\n");
 }
 function request(string $url, ?array $body = null, array $headers = [], bool $verified = true): array {
     $curl = curl_init($url); $list = [];

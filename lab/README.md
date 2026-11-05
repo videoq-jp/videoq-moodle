@@ -42,6 +42,14 @@ An already-managed WebDriver endpoint can be selected with `WEBDRIVER_URL` inste
 No Selenium server, Java service, package manager or JavaScript interpreter is used
 by the automation harness. Never expose the WebDriver endpoint publicly.
 
+Firefox checks use native GeckoDriver through the same PHP W3C client:
+
+```sh
+php scripts/native-firefox.php /private/native-firefox
+# Set FIREFOX_BINARY and GECKODRIVER from the output, then:
+BROWSER=firefox php lab/verify-chat.php
+```
+
 ## Start Moodle
 
 1. Obtain Moodle 5.1 source with its `public/` directory and prepare a private
@@ -110,6 +118,19 @@ range delivery while one native browser decodes/plays the course video. It does
 not emulate 100 physical devices or certify a production deployment. Only this
 run's tagged test questions are removed afterward; existing course logs remain,
 and real inference usage stays metered.
+
+`--count 100 --media-only --full-video` requests the entire source video for each
+learner, checks each SHA-1 against Moodle's original, and issues three real
+questions at the start, midpoint and near the end. It records first text and
+completion separately. These are 100 authenticated transfers and one decoder,
+not 100 physical playback devices. Allow time for 100 individual logins before
+the timed media phase; a request timeout or incomplete hash is a failed result.
+
+The trial proxy can serve authenticated files using Moodle's core X-Sendfile
+support (`MOODLE_MEDIA_OFFLOAD=1`, the lab default). Moodle still authorizes the
+request; Caddy serves only a validated upstream private-file redirect. Test this
+with `php lab/verify-media-delivery.php`. This is lab infrastructure configuration,
+not a setting installed or required by the plugins on an existing Moodle server.
 The background check preserves existing videos, creates one uniquely tagged File,
 waits for normal cron/export/processing, verifies two-video citation switching
 without resetting the conversation, replaces its own File and verifies a new

@@ -2,9 +2,9 @@
 
 All executable tooling maintained here is PHP or the small scoped shell cron
 runner. The two plugin scripts and browser test fixtures are JavaScript executed
-inside Chrome, with no server-side JavaScript runtime or build step. There are no
+inside the browser, with no server-side JavaScript runtime or build step. There are no
 Node/Python manifests, package installations, Selenium bindings or hidden runtime
-GitHub actions. PHP communicates with native ChromeDriver over HTTP and uses
+GitHub actions. PHP communicates with native ChromeDriver or GeckoDriver over HTTP and uses
 cURL, OpenSSL, pgsql and ZipArchive directly.
 
 VideoQ remains an independently deployed application. Its implementation and
@@ -26,10 +26,15 @@ its source nor starts its API, frontend, scheduler or processing workers.
 | `php lab/verify-course-restore.php` | Actual Moodle `.mbz` backup/restore, disabled-source opt-in and destination links, preserved source and existing videos |
 | `php lab/verify-live-restore.php` | Actual same-site course copy and fresh archive extraction/restore; independent indexing, real scoped AI answers, private history separation, current-site connection, isolated deletion and physical media cleanup |
 | `php lab/verify-load.php --count 100 --live` | 100 distinct real Moodle/LTI logins, simultaneous real questions and authenticated video ranges, native browser playback observer; test questions/users removed, existing logs preserved |
+| `php lab/verify-load.php --count 100 --media-only --full-video` | Full-file authenticated transfers and content hashes, one native decoder, three scheduled real questions, first text/completion timings and host-memory guard; incomplete transfers fail |
+| `php lab/verify-media-delivery.php` | Core X-Sendfile authorization, matching media bytes/MIME, anonymous/unenrolled/direct-path/forged-header rejection |
 | `php lab/verify-backup.php` | Consistent database snapshots restored to scratch DBs, matching counts/foreign keys; scratch DBs removed |
 | `php lab/verify-media-backup.php` | Moodle filedir restore/content hashes and disposable S3 upload/download restore; actual Moodle/VideoQ media bytes match |
 | `php lab/verify-readiness.php` | Bounded DB outage/readiness recovery without restarting the API |
 | Web-user `lab/check-materials-tls.php` | Untrusted TLS rejected and readable public CA accepted |
+
+`BROWSER=firefox php lab/verify-chat.php` selects native Firefox/GeckoDriver.
+Browser receipts record the actual user agent and Moodle stylesheet.
 
 These integration checks require the isolated trial and an independently deployed
 compatible VideoQ service. The offline PHP checks need neither that service nor

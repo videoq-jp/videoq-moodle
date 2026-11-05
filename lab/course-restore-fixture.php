@@ -44,8 +44,14 @@ try {
     }
     $destination = restore_dbops::create_new_course('Restored acceptance ' . $run, 'vqrestored-' . $run, 1);
     $remember((int)$destination);
+    $import = in_array('--merge', $argv, true);
+    if ($import) {
+        \local_videoq\synchronizer::ensure_course_entry((int)$destination);
+        $originalentry = $DB->get_field('url', 'id', ['course' => $destination,
+            'externalurl' => $CFG->wwwroot . '/local/videoq/view.php?course=' . $destination], MUST_EXIST);
+    }
     $rc = new restore_controller($backupid, $destination, backup::INTERACTIVE_NO,
-        backup::MODE_GENERAL, $USER->id, backup::TARGET_NEW_COURSE);
+        backup::MODE_GENERAL, $USER->id, $import ? backup::TARGET_EXISTING_ADDING : backup::TARGET_NEW_COURSE);
     $rc->get_plan()->get_setting('users')->set_value(false);
     if (!$rc->execute_precheck()) {
         $results = $rc->get_precheck_results();
@@ -53,9 +59,11 @@ try {
     }
     $rc->execute_plan(); $rc->destroy();
     $urls = $DB->get_records('url', ['course' => $destination]);
-    if (count($urls) !== 1 || reset($urls)->externalurl !== $CFG->wwwroot . '/local/videoq/view.php?course=' . $destination) {
+    $visibleurls = array_filter($urls, static fn($url) => get_coursemodule_from_instance('url', $url->id, $destination)->visible);
+    if (count($visibleurls) !== 1 || reset($visibleurls)->externalurl !== $CFG->wwwroot . '/local/videoq/view.php?course=' . $destination) {
         throw new RuntimeException('Restored course entry points to wrong course');
     }
+    if ($import && !$DB->record_exists('url', ['id' => $originalentry, 'course' => $destination])) throw new RuntimeException('Existing course entry removed');
     if ($DB->record_exists('local_videoq_sync', ['courseid' => $destination])) throw new RuntimeException('Disabled source unexpectedly enabled');
     if (!$DB->record_exists('local_videoq_sync', ['cmid' => $source->coursemodule, 'enabled' => 0])) throw new RuntimeException('Source changed');
     echo json_encode(['passed' => true, 'actualMoodleBackupRestore' => true, 'disabledSourceStaysOff' => true,

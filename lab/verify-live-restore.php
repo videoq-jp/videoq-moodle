@@ -5,42 +5,10 @@ require __DIR__ . '/support/stream.php';
 require __DIR__ . '/support/s3.php';
 use VideoQLab\{Browser, Storage};
 use function VideoQLab\{guard, ready, rows, docker, container, data, ensure, wait, report, answer};
-function restore_fixture(string $action, ?string $name = null): array {
-    $output = docker(['exec', container(), 'php', '/lab/live-restore-fixture.php', $action, ...($name ? [$name] : [])]);
-    $offset = strpos($output, '{"run":');
-    ensure($offset !== false, 'Missing restore fixture result');
-    return json_decode(substr($output, $offset), true, 32, JSON_THROW_ON_ERROR);
-}
-function restore_resource(int $cmid): ?array {
-    return rows("SELECT r.video_id,r.course_id,v.file,v.status,length(v.transcript) AS transcript_chars,
-        (SELECT count(*) FROM scene_embeddings e WHERE e.video_id=r.video_id) AS scenes FROM lms_resources r
-        LEFT JOIN videos v ON v.id=r.video_id WHERE r.installation_id='moodle-sync-lab' AND r.external_id=$1", [(string)$cmid])[0] ?? null;
-}
-function restored_indexed(int $cmid): array {
-    return wait(static function() use ($cmid) {
-        $row = restore_resource($cmid);
-        ensure(!$row || $row['status'] !== 'error', 'Restored video processing failed');
-        $local = rows('SELECT status FROM mdl_local_videoq_sync WHERE cmid=$1', [$cmid], 'moodle')[0] ?? null;
-        return $row && $row['status'] === 'completed' && $row['transcript_chars'] && $row['scenes'] &&
-            ($local['status'] ?? '') === 'completed' ? $row : null;
-    }, 420, 2000);
-}
-function restored_deleted(int $cmid): bool {
-    $resource = restore_resource($cmid);
-    $local = rows('SELECT status FROM mdl_local_videoq_sync WHERE cmid=$1', [$cmid], 'moodle')[0] ?? null;
-    return (!$resource || $resource['video_id'] === null) && (!$local || $local['status'] === 'disabled');
-}
-function restore_question(Browser $browser, int $videoid): void {
-    $browser->ask('この講座で説明している画像の標本化と量子化の違いを短く教えてください。');
-    $response = $browser->tool(fn($f) => $f->wait("return window.vqEvidence.findLast(event=>event.path.endsWith('/messages/stream'))", 150));
-    ensure($response['status'] === 200, 'Restored course real question failed');
-    $reply = answer($response['text']);
-    ensure((bool)$reply['sources'], 'Real retrieval sources required');
-    foreach ($reply['sources'] as $source) ensure($source['video_id'] === $videoid, 'Answer escaped the destination course');
-    $browser->ready();
-    ensure($browser->js('return window.vqUpdates') > 1, 'Real answer did not update native Moodle chat incrementally');
-}
+require __DIR__ . '/support/restore.php';
 guard(); ready();
+$options = getopt('', ['modes:']); $modes = explode(',', $options['modes'] ?? 'copy,restore');
+ensure(count($modes) > 0 && !array_diff($modes, ['copy', 'restore', 'partial', 'import']) && count(array_unique($modes)) === count($modes), 'Invalid restore modes');
 $before = rows('SELECT id,file,status FROM videos ORDER BY id');
 $existingCourses = array_column(rows('SELECT id FROM video_courses'), 'id');
 $state = null; $videos = []; $files = []; $storage = new Storage();
@@ -57,7 +25,7 @@ try {
     } finally { $b->close(); }
     $history = rows('SELECT * FROM chat_logs WHERE course_id=$1 ORDER BY id', [$videos['source']['course_id']]);
     ensure(count($history) > 0, 'Nonempty source history required');
-    foreach (['copy', 'restore'] as $mode) {
+    foreach ($modes as $mode) {
         $state = restore_fixture($mode);
         echo "Moodle {$mode} finished; waiting for independent indexing.\n";
         $videos[$mode] = restored_indexed($state['sources'][$mode]); $files[] = $videos[$mode]['file'];
@@ -83,7 +51,8 @@ try {
         ensure(rows('SELECT * FROM chat_logs WHERE course_id=$1 ORDER BY id', [$videos['source']['course_id']]) === $history, 'Deleting destination changed source history');
         echo "Independent {$mode} playback, history and deletion verified.\n";
     }
-    ensure($videos['copy']['course_id'] !== $videos['restore']['course_id'], 'Destinations share a VideoQ course');
+    $ids = array_column($videos, 'course_id');
+    ensure(count(array_unique($ids)) === count($ids), 'Destinations share a VideoQ course');
 } finally {
     // Persistent fixture state also permits safe recovery after a stopped test process.
     if ($state) {
@@ -109,7 +78,8 @@ try {
     docker(['exec', container(), 'php', '-r', "if(is_file('/tmp/videoq-restore-acceptance.mp4'))unlink('/tmp/videoq-restore-acceptance.mp4');"]);
 }
 foreach ($files as $file) wait(fn() => !$storage->exists($file), 180, 2000);
-report('php-live-course-restore', ['passed' => true, 'sameSiteCopy' => true, 'archiveRestore' => true,
+report(isset($options['modes']) ? 'php-live-course-restore-extended' : 'php-live-course-restore', ['passed' => true, 'modes' => $modes,
+    'sameSiteCopy' => in_array('copy', $modes, true), 'archiveRestore' => in_array('restore', $modes, true),
     'newCourseAndVideoIdentities' => true, 'destinationUsesCurrentConnection' => true, 'disabledSourceStaysOff' => true,
     'unrelatedUrlsPreserved' => true, 'courseLinksRewritten' => true, 'privateHistoryNotCopied' => true,
     'sourceHistoryPreserved' => true, 'destinationDeletionIsolated' => true, 'retiredMediaDeleted' => true,
