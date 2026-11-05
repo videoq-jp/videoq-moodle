@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 /**
  * Synchronizes source videos and their assistant activities.
  */
@@ -97,7 +96,19 @@ final class synchronizer {
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
         $type = $DB->get_record('lti_types', ['id' => (int)get_config('local_videoq', 'typeid')], '*', MUST_EXIST);
         if (get_config('local_videoq', 'servicemode') === 'lti') {
-            if ($type->ltiversion !== LTI_VERSION_1P3 || rtrim($type->baseurl, '/') !== rtrim((string)get_config('local_videoq', 'apiurl'), '/') . '/api/lti/launch') {
+            if (
+                $type->ltiversion !== LTI_VERSION_1P3
+                || rtrim(
+                    $type->baseurl,
+                    '/'
+                ) !== rtrim(
+                    (string)get_config(
+                        'local_videoq',
+                        'apiurl'
+                    ),
+                    '/'
+                ) . '/api/lti/launch'
+            ) {
                 throw new \RuntimeException('Invalid LTI connection');
             }
             return $type;
@@ -144,7 +155,8 @@ final class synchronizer {
             // Serialize with repair so a teacher's disable cannot be overwritten
             // by a repair that was already creating replacement activities.
             $DB->execute(
-                'UPDATE {local_videoq_sync} SET enabled = 0, generation = generation + 1, status = ?, timemodified = ? WHERE cmid = ?',
+                'UPDATE {local_videoq_sync} SET enabled = 0, generation = generation + 1, status = ?, timemodified = ?'
+                    . ' WHERE cmid = ?',
                 ['queued', time(), $cmid]
             );
         } finally {
@@ -185,7 +197,9 @@ final class synchronizer {
                     return;
                 }
                 $DB->execute(
-                    'UPDATE {local_videoq_sync} SET enabled = 1, typeid = ?, generation = generation + 1, status = ?, timemodified = ? WHERE id = ?',
+                    'UPDATE {local_videoq_sync}'
+                        . ' SET enabled = 1, typeid = ?, generation = generation + 1, status = ?, timemodified = ?'
+                        . ' WHERE id = ?',
                     [(int)$type->id, 'queued', time(), $row->id]
                 );
                 self::hide_transport_entries((int)$course->id, [(int)$row->lticmid, (int)$row->linkcmid]);
@@ -207,8 +221,16 @@ final class synchronizer {
                 'externalurl' => $CFG->wwwroot . '/local/videoq/view.php?course=' . $course->id . '&video=' . $cmid,
                 'display' => 0, 'printintro' => 0, 'parameters' => [],
             ]), $course);
-            $values = (object)['typeid' => (int)$type->id, 'cmid' => $cmid, 'courseid' => $course->id, 'lticmid' => $lti->coursemodule,
-                'ltiinstance' => $lti->instance, 'linkcmid' => $link->coursemodule, 'enabled' => 1, 'status' => 'queued', 'timemodified' => time()];
+            $values = (object)['typeid' => (int)$type->id,
+                 'cmid' => $cmid,
+                 'courseid' => $course->id,
+                 'lticmid' => $lti->coursemodule,
+
+                'ltiinstance' => $lti->instance,
+                     'linkcmid' => $link->coursemodule,
+                     'enabled' => 1,
+                     'status' => 'queued',
+                     'timemodified' => time()];
             if ($row) {
                 $values->id = $row->id;
                 $values->generation = $row->generation + 1;
@@ -332,7 +354,10 @@ final class synchronizer {
                 && $link && (int)$link->course === (int)$row->courseid
                 && !$cm->deletioninprogress && $lti && $lti->visible && !$lti->deletioninprogress
                 && $link && $link->visible && !$link->deletioninprogress);
-            $manifest = ['contextId' => (string)$row->courseid, 'courseTitle' => $course ? $course->fullname : 'Moodle', 'resourceLinkId' => (string)$row->ltiinstance,
+            $manifest = ['contextId' => (string)$row->courseid,
+                 'courseTitle' => $course ? $course->fullname : 'Moodle',
+                 'resourceLinkId' => (string)$row->ltiinstance,
+
                 'deleted' => (bool)(!$row->enabled || !$file || !$cm || $cm->deletioninprogress || !$course
                     || !$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress),
                 'enabled' => $enabled, 'title' => $cm ? \core_text::substr(strip_tags($cm->name), 0, 255) : 'Deleted video'];
@@ -340,9 +365,20 @@ final class synchronizer {
                 $manifest['file'] = ['filename' => $file->get_filename(), 'contentType' => $file->get_mimetype(),
                 'size' => (int)$file->get_filesize(), 'contentHash' => $file->get_contenthash()];
             }
-            $fingerprint = hash('sha256', json_encode([$manifest, $cm->availability ?? null, $lti->availability ?? null, $link->availability ?? null]));
+            $fingerprint = hash(
+                'sha256',
+                json_encode([$manifest,
+                 $cm->availability ?? null,
+                 $lti->availability ?? null,
+                $link->availability ?? null])
+            );
             if ($row->fingerprint !== $fingerprint) {
-                $DB->execute('UPDATE {local_videoq_sync} SET generation = generation + 1, fingerprint = ?, status = ? WHERE id = ?', [$fingerprint, 'queued', $id]);
+                $DB->execute(
+                    'UPDATE {local_videoq_sync} SET generation = generation + 1, fingerprint = ?, status = ? WHERE id = ?',
+                    [$fingerprint,
+                     'queued',
+                    $id]
+                );
                 $row = $DB->get_record('local_videoq_sync', ['id' => $id], '*', MUST_EXIST);
             } else if (!$snapshot && in_array($row->status, ['completed', 'disabled'], true)) {
                 return null;
@@ -366,7 +402,12 @@ final class synchronizer {
                 ['disabled', 'uploading', 'pending', 'processing', 'indexing', 'completed', 'error', 'blocked', 'awaiting_upload'],
                 true
             ) ? $result['status'] : 'error';
-            $error = in_array($result['error'] ?? '', ['STORAGE_LIMIT_EXCEEDED', 'MONTHLY_UPLOAD_LIMIT_EXCEEDED'], true) ? $result['error'] : '';
+            $error = in_array(
+                $result['error'] ?? '',
+                ['STORAGE_LIMIT_EXCEEDED',
+                 'MONTHLY_UPLOAD_LIMIT_EXCEEDED'],
+                true
+            ) ? $result['error'] : '';
             $DB->execute(
                 'UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE id = ? AND generation = ?',
                 [$status, $error, time(), $id, $row->generation]

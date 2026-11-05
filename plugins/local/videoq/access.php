@@ -37,7 +37,15 @@ try {
         throw new RuntimeException('Invalid access');
     }
     $input = json_decode($raw, true, 8, JSON_THROW_ON_ERROR);
-    echo json_encode(\local_videoq\course_access::resolve($input['token'], $input['subject'], $input['contextId'], $input['resourceLinkId']), JSON_THROW_ON_ERROR);
+    echo json_encode(
+        \local_videoq\course_access::resolve(
+            $input['token'],
+            $input['subject'],
+            $input['contextId'],
+            $input['resourceLinkId']
+        ),
+        JSON_THROW_ON_ERROR
+    );
 } catch (Throwable $error) {
     http_response_code(403);
     echo '{"error":"ACCESS_DENIED"}';

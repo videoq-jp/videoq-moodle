@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Administrator-owned associations; browser parameters cannot choose modules.
@@ -103,7 +102,11 @@ final class lesson {
             }
             $resource = $DB->get_record('course_modules', ['id' => $row->cmid, 'deletioninprogress' => 0], '*', MUST_EXIST);
             $title = $DB->get_field('resource', 'name', ['id' => $resource->instance], MUST_EXIST);
-            return ['id' => $id, 'title' => $title, 'videoCmid' => (int)$row->cmid, 'ltiCmid' => (int)$row->lticmid, 'syncStatus' => $row->status];
+            return ['id' => $id,
+                 'title' => $title,
+                 'videoCmid' => (int)$row->cmid,
+                 'ltiCmid' => (int)$row->lticmid,
+                 'syncStatus' => $row->status];
         }
         try {
             $lessons = self::parse(get_config('local_videoq', 'lessons') ?: '[]');

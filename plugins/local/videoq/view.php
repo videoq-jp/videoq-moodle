@@ -114,7 +114,8 @@ if (
 ) {
     throw new moodle_exception('invalidmodules', 'local_videoq');
 }
-$toolorigin = 'https://' . strtolower($toolparts['host']) . (isset($toolparts['port']) && $toolparts['port'] !== 443 ? ':' . $toolparts['port'] : '');
+$toolorigin = 'https://' . strtolower($toolparts['host']) . (isset($toolparts['port'])
+    && $toolparts['port'] !== 443 ? ':' . $toolparts['port'] : '');
 header('Cache-Control: private, no-store');
 echo $OUTPUT->header();
 
@@ -122,7 +123,12 @@ echo $OUTPUT->header();
 $scope = ['resources' => [['lesson' => $lessonid, 'title' => $lesson['title']]]];
 if (!isset($lesson['syncStatus']) || $lesson['syncStatus'] === 'completed') {
     $launchproof = \local_videoq\course_access::launch((int)$lti->id, (int)$USER->id);
-    $scope = \local_videoq\course_access::resolve($launchproof['custom_videoq_access'], (string)$USER->id, (string)$course->id, (string)$lti->id);
+    $scope = \local_videoq\course_access::resolve(
+        $launchproof['custom_videoq_access'],
+        (string)$USER->id,
+        (string)$course->id,
+        (string)$lti->id
+    );
 }
 $catalog = [];
 foreach ($scope['resources'] as $allowed) {
@@ -134,7 +140,14 @@ foreach ($scope['resources'] as $allowed) {
 }
 echo html_writer::start_div('local-videoq-workspace', ['data-videoq-origin' => $toolorigin,
     'data-videoq-lessons' => json_encode($catalog, JSON_THROW_ON_ERROR), 'data-videoq-lesson' => $lessonid]);
-echo html_writer::start_tag('section', ['class' => 'local-videoq-panel local-videoq-video card', 'aria-label' => get_string('video', 'local_videoq')]);
+echo html_writer::start_tag(
+    'section',
+    ['class' => 'local-videoq-panel local-videoq-video card',
+     'aria-label' => get_string(
+         'video',
+         'local_videoq'
+     )]
+);
 echo html_writer::start_div('card-body py-3');
 echo html_writer::tag('label', get_string('video', 'local_videoq'), ['for' => 'videoq-lesson', 'class' => 'form-label']);
 $options = [];
@@ -145,7 +158,14 @@ echo html_writer::select($options, 'videoq-lesson', $lessonid, false, ['id' => '
 echo html_writer::end_div();
 echo html_writer::start_div('local-videoq-media mediaplugin mediaplugin_videojs');
 $sourcefile = \local_videoq\synchronizer::video_file((int)$videocm->id);
-echo html_writer::tag('video', html_writer::empty_tag('source', ['src' => $videourl->out(false), 'type' => $sourcefile ? $sourcefile->get_mimetype() : 'video/mp4']), [
+echo html_writer::tag(
+    'video',
+    html_writer::empty_tag(
+        'source',
+        ['src' => $videourl->out(false),
+        'type' => $sourcefile ? $sourcefile->get_mimetype() : 'video/mp4']
+    ),
+    [
     'id' => 'videoq-player', 'class' => get_config('media_videojs', 'videocssclass') ?: 'video-js',
     'controls' => 'controls', 'playsinline' => 'playsinline', 'preload' => 'metadata',
     'data-setup-lazy' => json_encode([
@@ -153,10 +173,18 @@ echo html_writer::tag('video', html_writer::empty_tag('source', ['src' => $video
         'userActions' => ['hotkeys' => true], 'language' => current_language(),
     ]),
     'aria-label' => get_string('video', 'local_videoq'),
-]);
+    ]
+);
 echo html_writer::end_div();
 echo html_writer::end_tag('section');
-echo html_writer::start_tag('section', ['class' => 'local-videoq-panel local-videoq-questions card', 'aria-label' => get_string('questions', 'local_videoq')]);
+echo html_writer::start_tag(
+    'section',
+    ['class' => 'local-videoq-panel local-videoq-questions card',
+     'aria-label' => get_string(
+         'questions',
+         'local_videoq'
+     )]
+);
 echo html_writer::tag('h2', get_string('questions', 'local_videoq'), ['class' => 'visually-hidden']);
 if (isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'completed') {
     echo html_writer::tag('p', get_string('state_' . $lesson['syncStatus'], 'local_videoq'), ['role' => 'status']);
@@ -173,11 +201,27 @@ if (isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'completed') {
     'messagemaxlength' => 4000, 'showemojipicker' => false,
     'questionmessage' => $message + ['fromloggedinuser' => true],
     'answermessage' => $message + ['fromloggedinuser' => false, 'userfrom' => [
-        'fullname' => get_string('assistant', 'local_videoq'), 'profileimageurl' => $OUTPUT->image_url('i/course', 'core')->out(false),
+        'fullname' => get_string(
+            'assistant',
+            'local_videoq'
+        ),
+             'profileimageurl' => $OUTPUT->image_url(
+                 'i/course',
+                 'core'
+             )->out(false),
+
     ]],
     ]);
     echo html_writer::tag('iframe', '', [
-    'id' => 'videoq-questions', 'class' => 'local-videoq-transport', 'tabindex' => '-1', 'aria-hidden' => 'true', 'title' => get_string('questions', 'local_videoq'),
+    'id' => 'videoq-questions',
+         'class' => 'local-videoq-transport',
+         'tabindex' => '-1',
+         'aria-hidden' => 'true',
+         'title' => get_string(
+             'questions',
+             'local_videoq'
+         ),
+
     'src' => $launchurl->out(false), 'allow' => 'clipboard-write',
     'referrerpolicy' => 'strict-origin-when-cross-origin',
     ]);

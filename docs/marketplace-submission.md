@@ -174,3 +174,21 @@ when source positions and comments are excluded. Full standalone PHP tests,
 including real Moodle metadata classes, endpoint rejection, packaging and real
 RSA signing, passed. Installed-Moodle developer debugging, cross-database tests,
 AMOS translation preparation and the publication/payment decision remain open.
+
+## Clean official coding-standard scan (2026-11-05)
+
+Full PHPCS with moodlehq/moodle-cs v3.7.0 now reports **0 errors and 0 warnings**
+across both component directories, without ignored rules. Long expressions were
+wrapped; four SQL literals were split by concatenation without changing their
+byte values. Internal guards were removed only in the 21 definition-only files
+flagged by the official standard.
+
+An AST comparison of all 27 changed PHP files matches the preceding commit after
+folding literal-string concatenations and accounting only for those individually
+verified redundant guards. All other expression and statement nodes match. The
+entire standalone PHP suite and metadata, installer and diagnostic tests passed.
+
+This does not establish full moodle-plugin-ci, runtime installation/upgrade,
+MySQL/PostgreSQL, accessibility or approval compliance. A repeatable CI coding
+check, independent Moodle installations, screenshot evidence, translation
+submission, reviewer access, listing model and Marketplace submission remain.

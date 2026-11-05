@@ -33,7 +33,15 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_videoq', get_string('advancedsettings', 'local_videoq'));
     $settings->add(new admin_setting_configtext('local_videoq/apiurl', get_string('apiurl', 'local_videoq'), '', '', PARAM_URL));
     if (get_config('local_videoq', 'servicemode') !== 'lti') {
-        $settings->add(new admin_setting_configpasswordunmask('local_videoq/synctoken', get_string('synctoken', 'local_videoq'), '', ''));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_videoq/synctoken',
+            get_string(
+                'synctoken',
+                'local_videoq'
+            ),
+            '',
+            ''
+        ));
     }
     $settings->add(new admin_setting_configtext('local_videoq/typeid', get_string('typeid', 'local_videoq'), '', '', PARAM_INT));
     if (get_config('local_videoq', 'servicemode') !== 'lti') {

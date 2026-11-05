@@ -36,7 +36,13 @@ if (optional_param('state', '', PARAM_RAW) !== '') {
             optional_param('code', '', PARAM_RAW),
             optional_param('error', '', PARAM_RAW)
         );
-        redirect(new moodle_url('/local/videoq/connect.php'), get_string($connected ? 'connectionsuccess' : 'connectioncancelled', 'local_videoq'));
+        redirect(
+            new moodle_url('/local/videoq/connect.php'),
+            get_string(
+                $connected ? 'connectionsuccess' : 'connectioncancelled',
+                'local_videoq'
+            )
+        );
     } catch (\Throwable $e) {
         // Drop callback credentials from the address bar before rendering errors.
         redirect(new moodle_url('/local/videoq/connect.php', ['failed' => 1]));
@@ -84,7 +90,16 @@ if (get_config('local_videoq', 'synctoken') || get_config('local_videoq', 'servi
         } else {
             (new \local_videoq\client())->request('GET', 'connection');
         }
-        echo $OUTPUT->notification(get_string(get_config('local_videoq', 'servicemode') === 'lti' ? 'connectionconfigured' : 'connectionready', 'local_videoq'), 'success');
+        echo $OUTPUT->notification(
+            get_string(
+                get_config(
+                    'local_videoq',
+                    'servicemode'
+                ) === 'lti' ? 'connectionconfigured' : 'connectionready',
+                'local_videoq'
+            ),
+            'success'
+        );
     } catch (\Throwable $e) {
         echo $OUTPUT->notification(get_string('connectionunavailable', 'local_videoq'), 'warning');
     }
@@ -101,8 +116,20 @@ echo html_writer::start_tag('form', ['method' => 'post', 'action' => new moodle_
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'browser']);
 echo html_writer::tag('label', get_string('videoqurl', 'local_videoq'), ['for' => 'videoq-url', 'class' => 'form-label']);
-echo html_writer::empty_tag('input', ['type' => 'url', 'name' => 'videoqurl', 'id' => 'videoq-url', 'value' => get_config('local_videoq', 'apiurl') ?: 'https://videoq.jp',
-    'maxlength' => 2048, 'required' => 'required', 'class' => 'form-control mb-3']);
+echo html_writer::empty_tag(
+    'input',
+    ['type' => 'url',
+     'name' => 'videoqurl',
+     'id' => 'videoq-url',
+     'value' => get_config(
+         'local_videoq',
+         'apiurl'
+     ) ?: 'https://videoq.jp',
+
+    'maxlength' => 2048,
+    'required' => 'required',
+    'class' => 'form-control mb-3']
+);
 echo html_writer::tag('button', get_string('browserconnect', 'local_videoq'), ['type' => 'submit', 'class' => 'btn btn-primary']);
 echo html_writer::end_tag('form');
 echo html_writer::start_tag('details', ['class' => 'mt-3']);
@@ -110,15 +137,39 @@ echo html_writer::tag('summary', get_string('manualconnection', 'local_videoq'))
 echo html_writer::tag('p', get_string('connectioninstructions', 'local_videoq'));
 echo html_writer::start_tag('form', ['method' => 'post', 'action' => new moodle_url('/local/videoq/connect.php')]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-echo html_writer::tag('label', get_string('connectioncode', 'local_videoq'), ['for' => 'videoq-connectioncode', 'class' => 'form-label']);
+echo html_writer::tag(
+    'label',
+    get_string(
+        'connectioncode',
+        'local_videoq'
+    ),
+    ['for' => 'videoq-connectioncode',
+    'class' => 'form-label']
+);
 echo html_writer::tag('textarea', '', ['id' => 'videoq-connectioncode', 'name' => 'connectioncode', 'rows' => 5,
-    'maxlength' => 8192, 'required' => 'required', 'autocomplete' => 'off', 'spellcheck' => 'false', 'class' => 'form-control mb-3']);
+    'maxlength' => 8192,
+         'required' => 'required',
+         'autocomplete' => 'off',
+         'spellcheck' => 'false',
+         'class' => 'form-control mb-3']);
 echo html_writer::tag('button', get_string('connectbutton', 'local_videoq'), ['type' => 'submit', 'class' => 'btn btn-primary']);
 echo html_writer::end_tag('form');
 echo html_writer::end_tag('details');
 if (
-    (get_config('local_videoq', 'pendingconnection') || get_config('local_videoq', 'pendinglticonnection')) &&
-        !get_config('local_videoq', 'typeid') && !get_config('local_videoq', 'synctoken') && get_config('local_videoq', 'servicemode') !== 'lti'
+    (get_config('local_videoq', 'pendingconnection') ||
+    get_config('local_videoq', 'pendinglticonnection')) &&
+        !get_config(
+            'local_videoq',
+            'typeid'
+        ) &&
+            !get_config(
+                'local_videoq',
+                'synctoken'
+            ) &&
+            get_config(
+                'local_videoq',
+                'servicemode'
+            ) !== 'lti'
 ) {
     echo html_writer::tag('p', get_string('cancelconnectionhint', 'local_videoq'));
     echo $OUTPUT->single_button(

@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Administrator-selected VideoQ host, session state and S256 proof binding.
@@ -68,8 +67,24 @@ final class browser_connection {
         $verifier = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
         $SESSION->local_videoq_browser = ['state' => $state, 'verifier' => $verifier, 'origin' => $api,
             'userid' => (int)$USER->id, 'expires' => time() + 600];
-        return $authorization . '?' . http_build_query(['moodle_url' => rtrim($CFG->wwwroot, '/'), 'state' => $state,
-            'code_challenge' => rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=')], '', '&', PHP_QUERY_RFC3986);
+        return $authorization . '?' . http_build_query(
+            ['moodle_url' => rtrim($CFG->wwwroot, '/'), 'state' => $state,
+            'code_challenge' => rtrim(
+                strtr(
+                    base64_encode(hash(
+                        'sha256',
+                        $verifier,
+                        true
+                    )),
+                    '+/',
+                    '-_'
+                ),
+                '='
+            )],
+            '',
+            '&',
+            PHP_QUERY_RFC3986
+        );
     }
 
     /**
@@ -95,7 +110,11 @@ final class browser_connection {
         // Retain an interrupted callback only in this administrator's expiring
         // server session, so retry needs no code in the URL or copy/paste.
         $SESSION->local_videoq_browser['code'] = $code;
-        $connectioncode = 'VIDEOQ2.' . base64_encode(json_encode(['origin' => $pending['origin'], 'secret' => $code], JSON_THROW_ON_ERROR));
+        $connectioncode = 'VIDEOQ2.' . base64_encode(json_encode(
+            ['origin' => $pending['origin'],
+             'secret' => $code],
+            JSON_THROW_ON_ERROR
+        ));
         lti_connection_setup::connect($connectioncode, $pending['verifier']);
         unset($SESSION->local_videoq_browser);
         return true;

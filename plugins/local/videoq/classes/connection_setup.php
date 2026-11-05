@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Administrator-only, recoverable pairing. Existing synchronized courses are never rebound.
@@ -139,7 +138,20 @@ final class connection_setup {
             throw new \RuntimeException('Setup is busy');
         }
         try {
-            if (get_config('local_videoq', 'synctoken') || get_config('local_videoq', 'typeid') || get_config('local_videoq', 'servicemode') === 'lti') {
+            if (
+                get_config(
+                    'local_videoq',
+                    'synctoken'
+                )
+                || get_config(
+                    'local_videoq',
+                    'typeid'
+                )
+                || get_config(
+                    'local_videoq',
+                    'servicemode'
+                ) === 'lti'
+            ) {
                 throw new \RuntimeException('Already configured');
             }
             $pendinglti = json_decode((string)get_config('local_videoq', 'pendinglticonnection'), true);

@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Validates legacy video activity associations.

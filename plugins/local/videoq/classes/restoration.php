@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Moodle backup markers and destination-only restoration of source opt-ins.
@@ -78,7 +77,13 @@ final class restoration {
             if (\restore_dbops::get_backup_ids_record($restoreid, 'local_videoq_restore_done', $courseid)) {
                 return;
             }
-            $records = $DB->get_records('backup_ids_temp', ['backupid' => $restoreid, 'itemname' => 'local_videoq_restore', 'parentitemid' => $courseid], 'id ASC');
+            $records = $DB->get_records(
+                'backup_ids_temp',
+                ['backupid' => $restoreid,
+                 'itemname' => 'local_videoq_restore',
+                 'parentitemid' => $courseid],
+                'id ASC'
+            );
             $sources = $retired = [];
             $transaction = $DB->start_delegated_transaction();
             foreach ($records as $record) {
@@ -96,7 +101,13 @@ final class restoration {
                     if ($cm->modname !== 'resource') {
                         throw new \RuntimeException('Restored source is not a File');
                     }
-                    if ($metadata['enabled'] && has_capability('moodle/course:manageactivities', \context_module::instance($cm->id))) {
+                    if (
+                        $metadata['enabled']
+                        && has_capability(
+                            'moodle/course:manageactivities',
+                            \context_module::instance($cm->id)
+                        )
+                    ) {
                         $sources[] = $cm;
                     }
                 } else if ($metadata['role'] === 'entry') {

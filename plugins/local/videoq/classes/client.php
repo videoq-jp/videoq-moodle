@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 /**
  * Sends authenticated requests to legacy synchronization endpoints.
  */
@@ -52,10 +51,18 @@ final class client {
      */
     public static function origin(string $url): string {
         $parts = parse_url($url);
-        if (!$parts || ($parts['scheme'] ?? '') !== 'https' || empty($parts['host']) || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment'])) {
+        if (
+            !$parts
+            || ($parts['scheme'] ?? '') !== 'https'
+            || empty($parts['host'])
+            || isset($parts['user'])
+            || isset($parts['pass'])
+            || isset($parts['fragment'])
+        ) {
             throw new \InvalidArgumentException('Expected an HTTPS URL');
         }
-        return 'https://' . strtolower($parts['host']) . (isset($parts['port']) && $parts['port'] !== 443 ? ':' . $parts['port'] : '');
+        return 'https://' . strtolower($parts['host']) . (isset($parts['port'])
+            && $parts['port'] !== 443 ? ':' . $parts['port'] : '');
     }
     /**
      * Returns bounded Moodle HTTP options with TLS verification and no redirects.

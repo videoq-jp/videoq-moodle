@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq\task;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Retire copied transports and initialize sources after Moodle finishes restoring.
@@ -90,7 +89,14 @@ final class restore_material extends \core\task\adhoc_task {
                 if (!$cm || $cm->deletioninprogress) {
                     continue;
                 }
-                $DB->set_field('local_videoq_sync', 'status', 'queued', ['id' => $row->id, 'status' => 'restoring', 'enabled' => 1]);
+                $DB->set_field(
+                    'local_videoq_sync',
+                    'status',
+                    'queued',
+                    ['id' => $row->id,
+                     'status' => 'restoring',
+                    'enabled' => 1]
+                );
                 \local_videoq\synchronizer::restore_source((int)$row->cmid);
             }
         } catch (\Throwable $error) {

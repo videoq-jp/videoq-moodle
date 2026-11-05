@@ -23,7 +23,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
 /**
  * Adds synchronization controls for teachers managing a File activity.
  *
@@ -40,5 +39,15 @@ function local_videoq_extend_settings_navigation(settings_navigation $nav, conte
         return;
     }
     $node = $nav->find('modulesettings', navigation_node::TYPE_SETTING) ?: $nav;
-    $node->add(get_string('managesync', 'local_videoq'), new moodle_url('/local/videoq/manage.php', ['cmid' => $PAGE->cm->id]), navigation_node::TYPE_SETTING);
+    $node->add(
+        get_string(
+            'managesync',
+            'local_videoq'
+        ),
+        new moodle_url(
+            '/local/videoq/manage.php',
+            ['cmid' => $PAGE->cm->id]
+        ),
+        navigation_node::TYPE_SETTING
+    );
 }

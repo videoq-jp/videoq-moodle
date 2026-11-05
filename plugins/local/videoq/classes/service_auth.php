@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * LTI tool-key service authentication. No separately configured bearer credential.
@@ -86,9 +85,19 @@ final class service_auth {
         }
         // Unique index rejects replay atomically. Retain beyond accepted assertion clock skew.
         $DB->delete_records_select('local_videoq_assertions', 'expires < ?', [$now - 120]);
-        $DB->insert_record('local_videoq_assertions', (object)['assertionhash' => hash('sha256', $type->id . ':' . $claims['jti']), 'expires' => $claims['exp']]);
+        $DB->insert_record(
+            'local_videoq_assertions',
+            (object)['assertionhash' => hash(
+                'sha256',
+                $type->id . ':' . $claims['jti']
+            ),
+            'expires' => $claims['exp']]
+        );
         $token = lti_new_access_token($type->id, [self::SCOPE]);
-        return ['access_token' => $token->token, 'token_type' => 'Bearer', 'expires_in' => LTI_ACCESS_TOKEN_LIFE, 'scope' => self::SCOPE];
+        return ['access_token' => $token->token,
+             'token_type' => 'Bearer',
+             'expires_in' => LTI_ACCESS_TOKEN_LIFE,
+             'scope' => self::SCOPE];
     }
     /**
      * Validates the bearer token on a materials service request.

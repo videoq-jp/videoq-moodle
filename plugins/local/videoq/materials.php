@@ -60,7 +60,13 @@ try {
     $courseid = (int)$input['contextId'];
     $result = match ($input['action'] ?? '') {
         'manifest' => \local_videoq\materials_service::manifest($courseid, (int)$type->id),
-        'access' => \local_videoq\materials_service::access($courseid, (int)$type->id, (string)($input['resourceLinkId'] ?? ''), (string)($input['subject'] ?? '')),
+        'access' => \local_videoq\materials_service::access(
+            $courseid,
+            (int)$type->id,
+             (string)($input['resourceLinkId'] ?? ''),
+            (string)($input['subject'] ?? '')
+        ),
+
         'export' => \local_videoq\materials_service::export($courseid, (int)$type->id, $input),
         'ack' => \local_videoq\materials_service::acknowledge($courseid, (int)$type->id, $input),
         'status' => \local_videoq\materials_service::status($courseid, (int)$type->id, (string)($input['jobId'] ?? '')),

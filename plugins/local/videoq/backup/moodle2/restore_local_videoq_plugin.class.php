@@ -23,7 +23,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Restore against the destination site's connection, never the source site's binding.

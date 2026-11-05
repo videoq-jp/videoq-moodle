@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq\task;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Large media transfer runs outside launch/API requests. URLs never enter task logs.
@@ -52,10 +51,23 @@ final class export_material extends \core\task\adhoc_task {
             if ((int)$type->id !== (int)$job->typeid || $job->timecreated < time() - 1800) {
                 throw new \RuntimeException('Expired export');
             }
-            $row = $DB->get_record('local_videoq_sync', ['cmid' => $job->cmid, 'courseid' => $job->courseid, 'typeid' => $job->typeid], '*', MUST_EXIST);
+            $row = $DB->get_record(
+                'local_videoq_sync',
+                ['cmid' => $job->cmid,
+                 'courseid' => $job->courseid,
+                 'typeid' => $job->typeid],
+                '*',
+                MUST_EXIST
+            );
             $manifest = \local_videoq\synchronizer::run((int)$row->id, true);
             if (!$manifest['enabled'] || $manifest['generation'] !== (int)$job->generation) {
-                $DB->update_record('local_videoq_exports', (object)['id' => $job->id, 'status' => 'stale', 'uploadurl' => null, 'timemodified' => time()]);
+                $DB->update_record(
+                    'local_videoq_exports',
+                    (object)['id' => $job->id,
+                     'status' => 'stale',
+                     'uploadurl' => null,
+                    'timemodified' => time()]
+                );
                 return;
             }
             \local_videoq\materials_service::destination($job->uploadurl);
@@ -68,7 +80,11 @@ final class export_material extends \core\task\adhoc_task {
             $curl->setHeader(['Content-Type: ' . $file->get_mimetype(), 'Content-Length: ' . $file->get_filesize(), 'Expect:']);
             $temp = $file->copy_content_to_temp('local_videoq');
             try {
-                $curl->put($job->uploadurl, ['file' => $temp], \local_videoq\client::http_options(1800) + ['CURLOPT_USERPWD' => false]);
+                $curl->put(
+                    $job->uploadurl,
+                    ['file' => $temp],
+                    \local_videoq\client::http_options(1800) + ['CURLOPT_USERPWD' => false]
+                );
             } finally {
                 if (is_file($temp)) {
                     unlink($temp);
@@ -83,7 +99,13 @@ final class export_material extends \core\task\adhoc_task {
         } catch (\Throwable $error) {
             // Core logs exception messages for failed ad-hoc tasks. Keep signed URLs out.
             if (isset($job)) {
-                $DB->update_record('local_videoq_exports', (object)['id' => $job->id, 'status' => 'failed', 'uploadurl' => null, 'timemodified' => time()]);
+                $DB->update_record(
+                    'local_videoq_exports',
+                    (object)['id' => $job->id,
+                     'status' => 'failed',
+                     'uploadurl' => null,
+                    'timemodified' => time()]
+                );
             }
             mtrace('VideoQ media export failed; synchronization will retry.');
         } finally {

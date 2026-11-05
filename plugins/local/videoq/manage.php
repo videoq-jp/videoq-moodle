@@ -42,7 +42,12 @@ if (data_submitted()) {
     } else if ($action === 'disable') {
         \local_videoq\synchronizer::disable($cmid);
     } else if ($action === 'retry') {
-        $DB->execute('UPDATE {local_videoq_sync} SET generation = generation + 1, status = ?, timemodified = ? WHERE cmid = ?', ['queued', time(), $cmid]);
+        $DB->execute(
+            'UPDATE {local_videoq_sync} SET generation = generation + 1, status = ?, timemodified = ? WHERE cmid = ?',
+            ['queued',
+             time(),
+            $cmid]
+        );
     } else {
         throw new moodle_exception('invalidparameter');
     }
@@ -53,7 +58,16 @@ header('Cache-Control: private, no-store');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('managesync', 'local_videoq'));
 echo html_writer::tag('p', get_string('syncdescription', 'local_videoq'));
-echo html_writer::tag('p', get_string('syncstatus', 'local_videoq') . ': ' . get_string('state_' . ($row->status ?? 'off'), 'local_videoq'));
+echo html_writer::tag(
+    'p',
+    get_string(
+        'syncstatus',
+        'local_videoq'
+    ) . ': ' . get_string(
+        'state_' . ($row->status ?? 'off'),
+        'local_videoq'
+    )
+);
 if ($row && $row->errorcode) {
     echo $OUTPUT->notification(get_string('syncerror', 'local_videoq'), 'warning');
 }
@@ -61,6 +75,16 @@ foreach ($row && $row->enabled ? ['retry', 'disable'] : ['enable'] as $action) {
     echo $OUTPUT->single_button(new moodle_url($url, ['action' => $action]), get_string('sync_' . $action, 'local_videoq'), 'post');
 }
 if ($row && $row->enabled) {
-    echo html_writer::link(new moodle_url('/local/videoq/view.php', ['course' => $course->id, 'video' => $cmid]), get_string('courseassistant', 'local_videoq'));
+    echo html_writer::link(
+        new moodle_url(
+            '/local/videoq/view.php',
+            ['course' => $course->id,
+            'video' => $cmid]
+        ),
+        get_string(
+            'courseassistant',
+            'local_videoq'
+        )
+    );
 }
 echo $OUTPUT->footer();

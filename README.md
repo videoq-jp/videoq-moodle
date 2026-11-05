@@ -7,6 +7,10 @@ tested with the Boost theme.
 
 ## Installation
 
+Marketplace submission is being prepared. These plugins are not yet listed or
+approved. The manual steps below are for development and evaluation; the target
+is installation from the official listing once review and publication complete.
+
 1. Clone this repository and place `plugins/local/videoq` in Moodle's
    `public/local/videoq` and `plugins/ltisource/videoq` in
    `public/mod/lti/source/videoq` (Moodle 5.1). Run Moodle's database upgrade.

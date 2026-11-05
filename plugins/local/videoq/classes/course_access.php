@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Stateless, expiring proof bound to one Moodle user, course and LTI activity.
@@ -51,7 +50,14 @@ final class course_access {
     public static function lessons(int $courseid): array {
         global $DB;
         $items = [];
-        foreach ($DB->get_records('local_videoq_sync', ['courseid' => $courseid, 'enabled' => 1, 'status' => 'completed']) as $row) {
+        foreach (
+            $DB->get_records(
+                'local_videoq_sync',
+                ['courseid' => $courseid,
+                'enabled' => 1,
+                'status' => 'completed']
+            ) as $row
+        ) {
             $items[] = ['id' => 'sync_' . $row->cmid, 'videoCmid' => (int)$row->cmid, 'ltiCmid' => (int)$row->lticmid];
         }
         // The materials service grants only explicitly synchronized sources.
@@ -91,8 +97,14 @@ final class course_access {
             if (!$associated || (int)$DB->get_field('lti', 'typeid', ['id' => $associated->instance]) !== $typeid) {
                 continue;
             }
-            $payload = bin2hex(json_encode(['user' => $userid, 'course' => (int)$cm->course,
-                'lti' => $ltiid, 'type' => $typeid, 'exp' => time() + 3600, 'nonce' => bin2hex(random_bytes(16))], JSON_THROW_ON_ERROR));
+            $payload = bin2hex(json_encode(
+                ['user' => $userid, 'course' => (int)$cm->course,
+                'lti' => $ltiid,
+                     'type' => $typeid,
+                     'exp' => time() + 3600,
+                     'nonce' => bin2hex(random_bytes(16))],
+                JSON_THROW_ON_ERROR
+            ));
             return ['custom_videoq_access' => $payload . '.' . hash_hmac('sha256', $payload, self::secret())];
         }
         return [];

@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Opted-in materials only. Missing manifest entries are never deletion instructions.
@@ -90,7 +89,13 @@ final class materials_service {
         $proof = course_access::launch((int)$resource, (int)$subject);
         $access = course_access::resolve($proof['custom_videoq_access'] ?? '', $subject, (string)$courseid, $resource);
         foreach ($access['resources'] as &$item) {
-            $row = $DB->get_record('local_videoq_sync', ['ltiinstance' => (int)$item['resourceLinkId'], 'courseid' => $courseid], '*', MUST_EXIST);
+            $row = $DB->get_record(
+                'local_videoq_sync',
+                ['ltiinstance' => (int)$item['resourceLinkId'],
+                 'courseid' => $courseid],
+                '*',
+                MUST_EXIST
+            );
             $item['externalId'] = (string)$row->cmid;
         }
         return $access;
@@ -103,7 +108,14 @@ final class materials_service {
      */
     public static function destination(string $url): void {
         $parts = parse_url($url);
-        if (strlen($url) > 8192 || !$parts || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment']) || ($parts['scheme'] ?? '') !== 'https') {
+        if (
+            strlen($url) > 8192
+            || !$parts
+            || isset($parts['user'])
+            || isset($parts['pass'])
+            || isset($parts['fragment'])
+            || ($parts['scheme'] ?? '') !== 'https'
+        ) {
             throw new \RuntimeException('Untrusted destination');
         }
         $targets = json_decode((string)get_config('local_videoq', 'serviceuploadtargets'), true, 8, JSON_THROW_ON_ERROR);
@@ -126,7 +138,10 @@ final class materials_service {
      * @return array
      */
     public static function receipt(\stdClass $job): array {
-        return ['jobId' => $job->jobid, 'generation' => (int)$job->generation, 'status' => $job->status, 'bytes' => (int)$job->bytes];
+        return ['jobId' => $job->jobid,
+             'generation' => (int)$job->generation,
+             'status' => $job->status,
+             'bytes' => (int)$job->bytes];
     }
     /**
      * Creates or reuses an idempotent asynchronous source-file export job.
@@ -154,7 +169,14 @@ final class materials_service {
             throw new \RuntimeException('Export busy');
         }
         try {
-            $row = $DB->get_record('local_videoq_sync', ['cmid' => (int)$cmid, 'courseid' => $courseid, 'typeid' => $typeid], '*', MUST_EXIST);
+            $row = $DB->get_record(
+                'local_videoq_sync',
+                ['cmid' => (int)$cmid,
+                 'courseid' => $courseid,
+                 'typeid' => $typeid],
+                '*',
+                MUST_EXIST
+            );
             $manifest = synchronizer::run((int)$row->id, true);
             if (!$manifest['enabled'] || $manifest['generation'] !== $generation) {
                 throw new \RuntimeException('Stale source');
@@ -193,15 +215,29 @@ final class materials_service {
             !is_string($input['externalId'] ?? null) || !ctype_digit($input['externalId']) ||
                 !is_int($input['generation'] ?? null) || !in_array(
                     $input['status'] ?? '',
-                    ['disabled', 'uploading', 'pending', 'processing', 'indexing', 'completed', 'error', 'blocked', 'awaiting_upload'],
+                    ['disabled',
+                         'uploading',
+                         'pending',
+                         'processing',
+                         'indexing',
+                         'completed',
+                         'error',
+                         'blocked',
+                         'awaiting_upload'],
                     true
                 )
         ) {
             throw new \RuntimeException('Invalid acknowledgement');
         }
-        $error = in_array($input['error'] ?? '', ['STORAGE_LIMIT_EXCEEDED', 'MONTHLY_UPLOAD_LIMIT_EXCEEDED'], true) ? $input['error'] : '';
+        $error = in_array(
+            $input['error'] ?? '',
+            ['STORAGE_LIMIT_EXCEEDED',
+             'MONTHLY_UPLOAD_LIMIT_EXCEEDED'],
+            true
+        ) ? $input['error'] : '';
         $DB->execute(
-            'UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE cmid = ? AND courseid = ? AND typeid = ? AND generation = ?',
+            'UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ?'
+                . ' WHERE cmid = ? AND courseid = ? AND typeid = ? AND generation = ?',
             [$input['status'], $error, time(), (int)$input['externalId'], $courseid, $typeid, $input['generation']]
         );
         return ['acknowledged' => true];
@@ -217,7 +253,14 @@ final class materials_service {
     public static function status(int $courseid, int $typeid, string $jobid): array {
         global $DB;
         self::course($courseid, $typeid);
-        $job = $DB->get_record('local_videoq_exports', ['jobid' => $jobid, 'typeid' => $typeid, 'courseid' => $courseid], '*', MUST_EXIST);
+        $job = $DB->get_record(
+            'local_videoq_exports',
+            ['jobid' => $jobid,
+             'typeid' => $typeid,
+             'courseid' => $courseid],
+            '*',
+            MUST_EXIST
+        );
         return self::receipt($job);
     }
 }

@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq\task;
-defined('MOODLE_INTERNAL') || die();
 /**
  * Recovers pending synchronization jobs using the scheduler.
  */
@@ -46,10 +45,18 @@ final class synchronize extends \core\task\scheduled_task {
         global $DB;
         if (get_config('local_videoq', 'servicemode') === 'lti') {
             $DB->execute(
-                'UPDATE {local_videoq_exports} SET status = ?, uploadurl = NULL, timemodified = ? WHERE timecreated < ? AND status IN (?, ?)',
+                'UPDATE {local_videoq_exports} SET status = ?, uploadurl = NULL, timemodified = ?'
+                    . ' WHERE timecreated < ? AND status IN (?, ?)',
                 ['failed', time(), time() - 3600, 'queued', 'uploading']
             );
-            $DB->delete_records_select('local_videoq_exports', 'timemodified < ? AND status IN (?, ?, ?)', [time() - 86400, 'uploaded', 'failed', 'stale']);
+            $DB->delete_records_select(
+                'local_videoq_exports',
+                'timemodified < ? AND status IN (?, ?, ?)',
+                [time() - 86400,
+                 'uploaded',
+                 'failed',
+                'stale']
+            );
             $DB->delete_records_select('local_videoq_assertions', 'expires < ?', [time() - 120]);
             return;
         }

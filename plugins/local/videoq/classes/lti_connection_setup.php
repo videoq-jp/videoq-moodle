@@ -24,7 +24,6 @@
  */
 
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * A single expiring pairing code registers LTI service access; no sync key is issued.
@@ -67,7 +66,9 @@ final class lti_connection_setup {
                 $typeid = $configured ?: lti_add_type((object)['state' => LTI_TOOL_STATE_CONFIGURED], (object)[
                     'lti_typename' => 'VideoQ', 'lti_toolurl' => $value['origin'] . '/api/lti/launch',
                     'lti_ltiversion' => LTI_VERSION_1P3, 'lti_coursevisible' => 1,
-                    'lti_initiatelogin' => $value['origin'] . '/api/lti/login', 'lti_redirectionuris' => $value['origin'] . '/api/lti/launch',
+                    'lti_initiatelogin' => $value['origin'] . '/api/lti/login',
+                         'lti_redirectionuris' => $value['origin'] . '/api/lti/launch',
+
                     'lti_launchcontainer' => LTI_LAUNCH_CONTAINER_EMBED_NO_BLOCKS, 'lti_contentitem' => 0,
                 ]);
                 $pending = ['origin' => $value['origin'], 'typeid' => (int)$typeid];
@@ -79,7 +80,8 @@ final class lti_connection_setup {
             $request = [
                 'secret' => $value['secret'], 'issuer' => $CFG->wwwroot, 'clientId' => $type->clientid,
                 'deploymentId' => (string)$type->id, 'mode' => 'materials',
-                'materialsService' => ['tokenEndpoint' => $CFG->wwwroot . '/local/videoq/token.php', 'endpoint' => $CFG->wwwroot . '/local/videoq/materials.php']];
+                'materialsService' => ['tokenEndpoint' => $CFG->wwwroot . '/local/videoq/token.php',
+                     'endpoint' => $CFG->wwwroot . '/local/videoq/materials.php']];
             if ($codeverifier !== null) {
                 $request['codeVerifier'] = $codeverifier;
             }
@@ -100,8 +102,17 @@ final class lti_connection_setup {
             }
             foreach ($result['uploadTargets'] as $target) {
                 if (
-                    client::origin($target['origin'] ?? '') !== $target['origin'] || !is_string($target['prefix'] ?? null) ||
-                        !str_starts_with($target['prefix'], '/') || strlen($target['prefix']) < 2 || !str_ends_with($target['prefix'], '/')
+                    client::origin($target['origin'] ?? '') !== $target['origin'] ||
+                    !is_string($target['prefix'] ?? null) ||
+                        !str_starts_with(
+                            $target['prefix'],
+                            '/'
+                        ) ||
+                            strlen($target['prefix']) < 2 ||
+                            !str_ends_with(
+                                $target['prefix'],
+                                '/'
+                            )
                 ) {
                     throw new \RuntimeException('Invalid storage policy');
                 }
@@ -111,7 +122,12 @@ final class lti_connection_setup {
             $DB->delete_records('lti_types_config', ['typeid' => $type->id, 'name' => 'keytype']);
             $DB->insert_record('lti_types_config', (object)['typeid' => $type->id, 'name' => 'keytype', 'value' => LTI_JWK_KEYSET]);
             $DB->delete_records('lti_types_config', ['typeid' => $type->id, 'name' => 'publickeyset']);
-            $DB->insert_record('lti_types_config', (object)['typeid' => $type->id, 'name' => 'publickeyset', 'value' => $value['origin'] . '/api/lti/jwks']);
+            $DB->insert_record(
+                'lti_types_config',
+                (object)['typeid' => $type->id,
+                 'name' => 'publickeyset',
+                'value' => $value['origin'] . '/api/lti/jwks']
+            );
             set_config('apiurl', $value['origin'], 'local_videoq');
             set_config('typeid', $type->id, 'local_videoq');
             set_config('serviceuploadtargets', json_encode($result['uploadTargets'], JSON_THROW_ON_ERROR), 'local_videoq');
