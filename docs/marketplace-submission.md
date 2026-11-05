@@ -42,10 +42,10 @@ https://github.com/videoq-jp/videoq-moodle (public monorepo).
 Build with `php scripts/package-plugins.php <output-directory>`. Each archive has
 a single `videoq/` root, its own license, version metadata and README. GitHub's
 whole-repository ZIP is not an installer. The release workflow publishes checked
-GitHub archives; it does not submit them to Marketplace. The candidate packaging now uses local_videoq 0.11.3 / 2026110504 for the
-ARIA-label whitespace fix. The original lifecycle reports cover 0.11.2 /
-2026110503; the current-candidate report verifies updating both databases to the
-English-only 0.11.3 submission ZIPs.
+GitHub archives; it does not submit them to Marketplace. The candidate packaging now uses local_videoq 0.11.4 / 2026110601. Fresh
+installation initializes optional manual settings without asking administrators
+to configure a legacy connection. The original lifecycle reports cover 0.11.2;
+the DB-update report covers 0.11.3 and the browser-install report covers 0.11.4.
 Release maturity remains alpha; support claims currently cover Moodle 5.1/Boost only.
 
 The additional official plugin-CI checks use release 4.5.11, whose downloaded
@@ -92,7 +92,8 @@ Issues: https://github.com/videoq-jp/videoq-moodle/issues
 | --- | --- | --- |
 | Official Moodle coding standard | moodlehq/moodle-cs 3.7.0, PHPCS 3.13.6: 0 errors, 0 warnings | Not the entire moodle-plugin-ci suite |
 | Official plugin CI 4.5.11 | Both components pass structure and PHPDoc checks; local upgrade savepoints pass | Companion has no upgrade file; other suite commands are not implied |
-| Moodle ZIP validator | Both English-only archives accepted by the stock validator | CLI with scratch destination; alpha maturity warnings remain |
+| Moodle ZIP validator | Both English-only archives accepted by the stock validator | Alpha maturity warnings remain |
+| Browser installation | Both ZIPs uploaded and installed through stock Moodle administration; actual versions/tables/key verified | Dedicated loopback PostgreSQL fixture; not official-directory installation |
 | PHP tooling and packages | Standalone PHP, installer/dependency/release, HTTP/SSE and RSA tests pass | No paid-AI claim |
 | Privacy metadata | Both actual Moodle metadata providers and language identifiers pass; feedback explicitly declared | Full external-data lifecycle review still required |
 | PostgreSQL | Fresh lifecycle passes; old-main upgrade preserves teaching data, all three table records and access key | See scope in linked report |
@@ -103,7 +104,8 @@ Sanitized reports:
 - [PostgreSQL upgrade](evidence/marketplace-postgresql-upgrade.json)
 - [MySQL lifecycle](evidence/marketplace-mysql-lifecycle.json)
 - [Stock ZIP validation](evidence/marketplace-archive-validation.json)
-- [Current English-only candidate on PostgreSQL and MySQL](evidence/marketplace-current-candidate.json)
+- [0.11.3 English-only candidate on PostgreSQL and MySQL](evidence/marketplace-current-candidate.json)
+- [0.11.4 browser installation](evidence/marketplace-web-installation.json)
 
 Both used Moodle source `a682566412e1d429b95ac8ef4351a518f61b94c5` (5.1.8+,
 Build 20261030), pinned PHP 8.3, developer debugging and isolated DBs. The baseline
@@ -132,6 +134,31 @@ fixture follows its earlier uninstall/reinstall, so its fresh tables and renewed
 key are checked against that lifecycle rather than claimed as original records.
 [Hosted CI for the same candidate](https://github.com/videoq-jp/videoq-moodle/actions/runs/42058956148)
 also passed. Both isolated DB containers were stopped after verification.
+
+## Browser installer verification
+
+`lab/check-marketplace-web-install.php <archive-directory>` drives native Chrome
+through the same PHP WebDriver helper as other browser checks. It requires an
+explicit fixture password, external `LTI_LAB_DIR`, owned running fixture container
+and exactly `http://127.0.0.1:18881`. A CLI preflight checks the dedicated database
+and rejects existing plugin code or installed component versions before upload.
+This is development tooling, excluded from both plugin archives.
+
+The checked flow uploads local_videoq then ltisource_videoq, follows stock
+validation/dependency/database-upgrade pages, rejects a forced manual setup prompt,
+opens Connect to VideoQ and checks installed versions, three tables, initialized
+access key and empty optional defaults in a fresh PHP process. The fixture uses
+PostgreSQL and synthetic audit data. No production connection was authorized.
+Core server recommendations for this HTTP development fixture are recorded as
+limits rather than claimed as absent. Alpha warnings are preserved.
+
+Captured evidence, with only synthetic audit identity and no credentials:
+
+- [Connection screen after installation](evidence/images/marketplace-connection.png)
+- [Actual ZIP validation screen](evidence/images/marketplace-zip-validation.png)
+
+These are evidence screenshots; course/citation images for the final listing and
+actual reviewer access remain to be prepared.
 
 ## Repeatable coding check
 
@@ -172,8 +199,7 @@ Historical release verification remains unchanged. See [workflow](translations.m
 
 - Make the verified official plugin-CI checks repeatable in CI and run applicable
   Moodle unit checks with both components available.
-- Automate the installed-Moodle DB matrix in CI, and validate the ZIPs through
-  Moodle's web installer rather than only extraction plus real CLI installation.
+- Automate the installed-Moodle DB matrix in CI against the final release candidate.
 - Complete external data/retention/privacy review, developer-debug functionality
   tests and accessibility checks for the video/chat interface.
 - Submit the prepared Japanese AMOS input after component availability, obtain

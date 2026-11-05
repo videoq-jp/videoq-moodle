@@ -22,14 +22,14 @@ tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
 
 The official Marketplace listing is still being prepared and cannot be installed
 from the directory yet. After approval and publication, use Moodle's **Site
-administration → Plugins → Install plugins → Install plugins from the Moodle
-plugins directory** and install both VideoQ components, including the declared
+administration → Plugins → Install plugins → Find plugins in Moodle Marketplace** and install both VideoQ components, including the declared
 companion dependency. No Git or server-shell operation is needed for this path.
 
 For a review/evaluation build, a developer can provide the two component ZIPs
 built with the [submission profile](translations.md). Upload `local_videoq.zip`
 first and then `ltisource_videoq.zip` through Moodle's standard ZIP installer and
-complete the database upgrade. Do not upload the repository source ZIP or the
+complete the database upgrade. The optional manual connection settings are not
+required during installation. Then open **Connect to VideoQ** as described below. Do not upload the repository source ZIP or the
 AMOS translation ZIP. Web installation must be enabled by the Moodle host.
 Historical prereleases are not automatically the current submission candidate.
 
