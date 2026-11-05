@@ -11,8 +11,10 @@
 - An administrator on Moodle and the owning account on VideoQ.
 
 Moodle runs PHP and serves the browser JavaScript directly. No Node.js runtime,
-package manager or JavaScript compilation step is needed for these plugins,
-their package build, this repository's lab or CI.
+JavaScript package manager or JavaScript compilation step is needed for these
+plugins, their package build, this repository's lab or CI. The development-only
+Moodle coding check installs locked PHP tools in an isolated directory; those
+tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
 
 ## Install and connect
 

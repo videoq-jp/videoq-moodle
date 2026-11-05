@@ -35,6 +35,12 @@ jobs:
         run: echo "PHP_IMAGE=$(php scripts/runtime-images.php php)" >> "$GITHUB_ENV"
       - name: Verify repository operations policies
         run: docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/operations.php
+      - name: Prepare locked Moodle coding tools
+        run: |
+          mkdir -p "$RUNNER_TEMP/videoq-moodle-codecheck"
+          docker run --rm --user "$(id -u):$(id -g)" --entrypoint php -v "$PWD:/src:ro" -v "$RUNNER_TEMP/videoq-moodle-codecheck:/tools" "$PHP_IMAGE" /src/scripts/check-moodle-code.php prepare /tools
+      - name: Check official Moodle coding standard offline
+        run: docker run --rm --network none --user "$(id -u):$(id -g)" --entrypoint php -v "$PWD:/src:ro" -v "$RUNNER_TEMP/videoq-moodle-codecheck:/tools" "$PHP_IMAGE" /src/scripts/check-moodle-code.php scan /tools
       - name: Verify installer contract offline
         run: docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/packages.php
       - name: Verify private signing-key helper offline
@@ -46,6 +52,7 @@ jobs:
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/lab.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/browser-connection.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/token-endpoint.php
+          docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/codecheck.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/dependencies.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/release.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/live-lock.php

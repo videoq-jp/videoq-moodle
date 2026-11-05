@@ -1,276 +1,153 @@
 # Moodle Marketplace submission
 
-Status: preparation in progress. Neither component is submitted or approved.
+Preparation in progress. Neither component has been submitted, approved or
+published. Passing the checks below does not establish official approval.
 
-## Current official entry points
+## Current official guidance
 
-- https://marketplace.moodle.com/
-- https://docs.moodle.org/all/es/plugin (English FAQ content)
-- https://moodledev.io/general/community/plugincontribution/checklist
-- Current submission guidelines linked from that checklist:
-  https://moodle.atlassian.net/wiki/external/ODRhYjAyNTY4NDVmNGJlNjljN2ViMzkwYzdmYmIwMGI
+Checked on 2026-11-05:
 
-Checked 2026-11-05. The old directory contribution checklist is explicitly legacy.
-The official FAQ describes signing in, uploading a component ZIP, completing
-archive/CI checks, review through Jira Service Management, and manual publication
-after approval. Marketplace version upload by API is currently unavailable.
-The current Confluence guidelines were subsequently read with a JavaScript-capable
-fetcher on 2026-11-05. Use that current document, rather than the legacy checklist.
+- [Current submission guidelines](https://moodle.atlassian.net/wiki/external/ODRhYjAyNTY4NDVmNGJlNjljN2ViMzkwYzdmYmIwMGI)
+- [Marketplace](https://marketplace.moodle.com/)
+- [Official contribution entry point](https://moodledev.io/general/community/plugincontribution/checklist)
+- [Official submission/API FAQ](https://docs.moodle.org/all/es/plugin)
 
-## Two component submissions
+The old Plugins Directory checklist is marked legacy. The current guidelines
+were read with a JavaScript-capable fetcher. The official process requires an
+account, component ZIP upload, automated checks, review and explicit publication
+after approval. Version-upload automation through the old API is unavailable.
+
+## Decisions needed from the publisher
+
+- Marketplace account and publisher identity: not provided yet.
+- Free/paid listing classification: not selected yet. Current guidelines require
+  Marketplace purchase when provider-owned paid service access is mandatory.
+  Confirm whether the supported free self-hosted deployment qualifies, or arrange
+  Marketplace sales. Do not classify a mandatory externally purchased VideoQ
+  service as a free listing. The descriptions below remain drafts.
+- Reviewer access: prepare a public, isolated demonstration site and deliver
+  credentials privately through the review channel. Do not use production data,
+  billing credentials, AI-provider keys or private signing keys.
+
+## Component packages
 
 | Component | Purpose | Dependency | Archive |
 | --- | --- | --- | --- |
 | `local_videoq` | Course video synchronization and AI question interface | Moodle LTI activity | `local_videoq.zip` |
-| `ltisource_videoq` | LTI launch integration for VideoQ | `local_videoq` (version.php) | `ltisource_videoq.zip` |
+| `ltisource_videoq` | LTI launch integration | `local_videoq` (version.php) | `ltisource_videoq.zip` |
 
-Build component ZIPs with `php scripts/package-plugins.php <output-directory>`.
-Do not submit GitHub's whole-repository source ZIP. Each component archive must
-contain a single `videoq/` root, its license, version metadata and its own README.
-The release workflow can publish checked archives to GitHub; it does not submit
-them to Marketplace. Confirm component-name availability in the submission form.
+Confirm component-name availability during submission. Source and issue tracker:
+https://github.com/videoq-jp/videoq-moodle (public monorepo).
 
-## Proposed listing text
+Build with `php scripts/package-plugins.php <output-directory>`. Each archive has
+a single `videoq/` root, its own license, version metadata and README. GitHub's
+whole-repository ZIP is not an installer. The release workflow publishes checked
+GitHub archives; it does not submit them to Marketplace. Release maturity remains
+alpha; support claims currently cover Moodle 5.1/Boost only.
+
+## Proposed listing descriptions
 
 ### local_videoq — VideoQ course video assistant
 
-Short description: Ask AI questions across your Moodle course videos while
-watching them in Moodle, with streamed answers and video citations.
+Short: Ask questions across your Moodle course videos while watching them in
+Moodle, with streamed AI answers and video citations.
 
-Full description: VideoQ adds a course-wide AI assistant beside Moodle video
-playback. Teachers enable questions for File activities; video additions,
-replacements and deletions synchronize to a compatible VideoQ server for
-transcription and indexing. Moodle controls enrollment and source-video playback.
-VideoQ supplies answers, citations and answer feedback. Setup starts in Moodle:
-enter a VideoQ HTTPS URL, sign in to the owning account and approve the connection.
-Install the companion ltisource_videoq plugin as well. A VideoQ server, owning
-account and available processing allowance are required. Cloud hosting and AI
-usage may incur separate charges; the GPL Moodle plugin itself is free.
+Full: VideoQ adds a course-wide assistant beside Moodle video playback. Teachers
+enable questions for File activities; additions, replacements and deletions
+synchronize to a compatible VideoQ server for transcription and indexing. Moodle
+controls enrollment and source playback. VideoQ supplies answers, citations and
+answer feedback. Start setup in Moodle by entering a VideoQ HTTPS URL, signing in
+to the owning account and approving the connection. Install ltisource_videoq too.
+A compatible VideoQ server, owning account and processing allowance are required.
+Hosting and AI processing are not included in the GPL plugin. Final service and
+pricing disclosure must match the selected listing classification.
 
 ### ltisource_videoq — VideoQ LTI integration
 
-Short description: LTI 1.3 launch integration for the VideoQ Moodle course video
-assistant. Requires the local_videoq companion plugin and a VideoQ server.
+Short: LTI 1.3 launch integration for the VideoQ course video assistant. Requires
+local_videoq and a compatible VideoQ server.
 
-Full description: This companion supplies the Moodle LTI integration used by
-VideoQ course activities. Install it alongside local_videoq and start setup from
-Moodle's Connect to VideoQ administration page. Moodle user, course and resource
-identifiers are exchanged with the chosen VideoQ server for access control.
-Hosting and AI processing are separate services, not included with the GPL plugin.
+Full: Install this companion alongside local_videoq and start setup from Moodle's
+Connect to VideoQ administration page. Moodle user, course and resource identifiers
+are exchanged with the chosen VideoQ server for access control. The plugin is GPL
+software; hosting and AI processing are separate deployment requirements. Final
+service and pricing disclosure must match the selected listing classification.
 
-Source: https://github.com/videoq-jp/videoq-moodle
-Issues: https://github.com/videoq-jp/videoq-moodle/issues
 Documentation: https://github.com/videoq-jp/videoq-moodle/blob/main/docs/setup.md
+Issues: https://github.com/videoq-jp/videoq-moodle/issues
 
-## Evidence still required before submission
+## Verified technical evidence
 
-- Read the current guidelines in full and record applicable requirements.
-- Establish the publisher account and confirm component-name availability.
-- Audit both Privacy API providers against actual database storage and external
-  transfers, including administrator/user identifiers, conversations and files.
-- Run Moodle's official plugin CI/coding checks for each component with the
-  companion dependency available. Existing repository tests are not equivalent.
-- Verify install, upgrade and uninstall with developer debugging enabled on the
-  supported Moodle version; include PostgreSQL and MySQL/MariaDB evidence.
-- Resolve review blockers and select truthful release maturity/support versions.
-- Capture sanitized screenshots of setup, course video/chat and citation behavior.
-- Prepare reviewer access to an isolated demonstration site without real learner
-  data or production secrets; transmit credentials only through the review channel.
-- Build reproducible archives and record commit, checksums and evidence links.
-- Submit both components, address review feedback and publish after approval.
-- Verify actual installation from the approved listing in a clean Moodle site.
+| Check | Current evidence | Limits |
+| --- | --- | --- |
+| Official Moodle coding standard | moodlehq/moodle-cs 3.7.0, PHPCS 3.13.6: 0 errors, 0 warnings | Not the entire moodle-plugin-ci suite |
+| PHP tooling and packages | Standalone PHP, installer/dependency/release, HTTP/SSE and RSA tests pass | No paid-AI claim |
+| Privacy metadata | Both actual Moodle metadata providers and language identifiers pass; feedback explicitly declared | Full external-data lifecycle review still required |
+| PostgreSQL | Fresh lifecycle passes; old-main upgrade preserves teaching data, all three table records and access key | See scope in linked report |
+| MySQL 8.4.13 | Actual old-main upgrade, uninstall with source-data retention and fresh candidate reinstall pass | See scope in linked report |
 
-Do not mark this goal complete on ZIP generation, GitHub publication or submission
+Sanitized reports:
+
+- [PostgreSQL upgrade](evidence/marketplace-postgresql-upgrade.json)
+- [MySQL lifecycle](evidence/marketplace-mysql-lifecycle.json)
+
+Both used Moodle source `a682566412e1d429b95ac8ef4351a518f61b94c5` (5.1.8+,
+Build 20261030), pinned PHP 8.3, developer debugging and isolated DBs. The baseline
+was rebuilt from actual old-main `2d195b22a14a11365f256b3c5f0c9ca242b93827`
+(0.11.0); candidate runtime version is 2026110503 / 0.11.2. Video byte hashes,
+record values and key identity were checked in fresh processes. MySQL archive
+hashes, image digest and verified utf8mb4_unicode_ci collation are in its report.
+Audit DB containers are stopped; original trial sites were not modified.
+
+Installed tests exposed two old XMLDB empty-default diagnostics (`fingerprint`,
+`errorcode`). Source defaults were corrected to Moodle's canonical form. Candidate
+upgrade/uninstall/reinstall and XMLDB inspection pass without repair diagnostics;
+the old baseline is not falsely described as clean.
+
+No-warning coding changes were checked by AST comparison. Literal concatenations
+preserve the original SQL bytes; redundant internal guards were removed only from
+files individually flagged as definition-only by the official standard. Token
+rejection uses Moodle diagnostics with debug display suppressed for OAuth JSON.
+Its failure fixture verifies HTTP 401, JSON integrity and no exception disclosure.
+
+## Repeatable coding check
+
+Development only: no Composer tooling is distributed in Moodle installers.
+Use the pinned PHP image from `lab/images/compose.yaml`, as normal CI does.
+Manifests live under `.github/moodle-codecheck`; the transitive graph is locked.
+Composer 2.11.1 is checked against its pinned official SHA256 before execution.
+Package scripts and plugins are disabled. Dependabot tracks the PHP tool graph;
+Composer binary/version updates require a reviewed checksum update.
+
+With a fresh work directory outside the checkout:
+
+```sh
+php scripts/check-moodle-code.php prepare /tmp/videoq-moodle-codecheck
+php scripts/check-moodle-code.php scan /tmp/videoq-moodle-codecheck
+```
+
+Normal CI prepares tools with network access, then scans with `--network none`
+and read-only source mounts. Any error or warning fails the scan. Local execution
+of these exact stages passed; hosted confirmation follows the PR push. Offline
+failure tests reject unrelated directories, corrupted cached binaries and stale
+manifests before tool execution. This is not a full moodle-plugin-ci run.
+
+## Remaining gates
+
+- Run official plugin-CI structural/PHPDoc/savepoint and applicable unit checks
+  for each component with its companion available.
+- Automate the installed-Moodle DB matrix in CI, and validate the ZIPs through
+  Moodle's web installer rather than only extraction plus real CLI installation.
+- Complete external data/retention/privacy review, developer-debug functionality
+  tests and accessibility checks for the video/chat interface.
+- Prepare English-only submission archives and Japanese AMOS translation input;
+  the current development packages still include Japanese strings.
+- Capture sanitized setup, course assistant and citation screenshots.
+- Set up reviewer access, settle publisher/listing decisions and final descriptions.
+- Reconcile documentation overlap with PR #3 before merging PR #4; select release
+  maturity/support versions truthfully and publish reproducible archives.
+- Submit both components, address reviewer feedback, publish approved pages and
+  verify installation from the actual official listing in a clean Moodle site.
+
+Do not mark the goal complete on ZIP creation, GitHub publication or submission
 alone. Approved listings and directory-based installation need direct evidence.
-
-## Privacy audit progress (2026-11-05)
-
-- The three local plugin tables contain material sync state, replay hashes and
-  export jobs; no learner conversation or user-ID column is declared there.
-- `course_access::launch()` sends an expiring user/course/activity-bound proof.
-  `ltisource_videoq` declares those identifiers as an external transfer.
-- `chat.js` transfers questions, answers and Good/Bad feedback through the
-  origin-checked bridge. Explicit feedback metadata and English/Japanese
-  descriptions have now been added; the service summary includes video transfer.
-- Moodle core owns login/admin session storage, and VideoQ owns AI history.
-  This is a storage-boundary observation, not a claim that no personal data is
-  processed. Video content, titles and conversation text can contain personal data.
-- `php tests/privacy.php /path/to/moodle` checks both providers with actual
-  Moodle 5.1 metadata classes and all shipped privacy language identifiers.
-  It runs without a DB and with core debugging disabled. It does not replace
-  developer-debug installation tests or verify export/deletion of service data.
-- `lab/check-privacy.php` includes the new feedback declaration for a subsequent
-  full Moodle runtime run. That runtime run is still pending.
-
-## Current guideline findings and code-check baseline
-
-The current guidelines require English-only strings in distributed plugins,
-standard copyright/license headers, declared companion dependencies, working
-ZIP installation, Privacy API support and multi-database testing. Review must
-also cover service charges: provider-owned paid services cannot be required by
-a free listing through an external purchase flow. The publishing/payment model
-must be settled with the project owner before selecting free/paid listing status.
-The descriptions above are drafts, not a final classification or approval claim.
-Japanese translation delivery through AMOS remains to be planned before submission.
-
-An isolated PHP development toolchain was installed outside this repository:
-Composer 2.11.1 (official SHA256 verified), moodlehq/moodle-cs v3.7.0 and locked
-transitive dependencies. No installer/runtime dependency was added to the plugins.
-The initial full PHPCS run reported 578 errors and 102 warnings (386 fixable),
-mainly compact control structures, long lines, docblocks and license headers.
-Both Privacy API providers now pass the full Moodle standard with zero findings.
-The remaining plugin files have not yet been corrected. Do not describe the whole
-plugin as passing PHPCS based on those two files.
-
-Reproduce the isolated scan using PHPCS with the Moodle standard, registering
-phpcsstandards/phpcsextra and moodlehq/moodle-cs as installed standards. The exact
-Composer lock, JSON findings and installation log are kept in the working
-environment's private `videoq-marketplace-audit` directory. A portable checked-in
-PHP-only audit runner and official plugin-CI integration remain to be completed.
-
-## Formatting pass (2026-11-05)
-
-Moodle PHPCBF corrected 384 findings in a disposable copy of 35 PHP files.
-Before copying changes back, nikic/php-parser v5.9.0 parsed the original and
-candidate files and compared node types and all subnodes, ignoring only source
-positions/comments. All 35 syntax trees matched; no processing statements were
-changed. The full existing standalone PHP test suite, installer/dependency
-contracts and both real-Moodle metadata tests then passed.
-
-A new full PHPCS scan reports **171 errors and 81 warnings** (zero automatically
-fixable). Most remaining findings concern docblocks, copyright/license tags,
-long lines and unneeded internal guards. One forbidden-function finding flags
-`error_log()` in token.php and requires individual review. Full official code
-compliance, installed-Moodle developer-debug tests, database compatibility,
-listing classification, reviewer access and approval are still incomplete.
-
-## Header and endpoint diagnostics pass (2026-11-05)
-
-All previously missing file-level copyright/license annotations and single-line
-PHPDoc descriptions were corrected. An AST comparison before the diagnostics
-change confirmed those edits changed comments only.
-
-The token endpoint now uses Moodle developer diagnostics instead of direct
-`error_log()`. `NO_DEBUG_DISPLAY` is set before bootstrapping Moodle to preserve
-the OAuth JSON response. A standalone test exercises the real endpoint file with
-an isolated authentication failure and a diagnostic-display fixture: response
-remains JSON with HTTP 401, diagnostics are recorded and exception details are
-not exposed. The test is included in normal PHP-only CI. A full installed-Moodle
-developer-debug exercise is still required; the fixture is not that exercise.
-
-Full standalone PHP tests passed after the change. Official PHPCS now reports
-**60 errors and 80 warnings**, mainly missing method documentation and long lines.
-The earlier forbidden `error_log()` finding is resolved. No suppressions were added.
-
-## Function documentation pass (2026-11-05)
-
-Added missing method documentation with parameter/return types and descriptions,
-member/constant documentation, and wrapped over-limit expressions. Full official
-Moodle PHPCS now reports **0 errors and 81 warnings**. Warnings still need work;
-this is not a clean PHPCS result or Marketplace approval.
-
-The 22 changed PHP files have identical syntax trees to the preceding commit
-when source positions and comments are excluded. Full standalone PHP tests,
-including real Moodle metadata classes, endpoint rejection, packaging and real
-RSA signing, passed. Installed-Moodle developer debugging, cross-database tests,
-AMOS translation preparation and the publication/payment decision remain open.
-
-## Clean official coding-standard scan (2026-11-05)
-
-Full PHPCS with moodlehq/moodle-cs v3.7.0 now reports **0 errors and 0 warnings**
-across both component directories, without ignored rules. Long expressions were
-wrapped; four SQL literals were split by concatenation without changing their
-byte values. Internal guards were removed only in the 21 definition-only files
-flagged by the official standard.
-
-An AST comparison of all 27 changed PHP files matches the preceding commit after
-folding literal-string concatenations and accounting only for those individually
-verified redundant guards. All other expression and statement nodes match. The
-entire standalone PHP suite and metadata, installer and diagnostic tests passed.
-
-This does not establish full moodle-plugin-ci, runtime installation/upgrade,
-MySQL/PostgreSQL, accessibility or approval compliance. A repeatable CI coding
-check, independent Moodle installations, screenshot evidence, translation
-submission, reviewer access, listing model and Marketplace submission remain.
-
-## First installed-Moodle PostgreSQL run (2026-11-05)
-
-Isolated Moodle source: commit `a682566412e1d429b95ac8ef4351a518f61b94c5`,
-5.1.8+ (Build 20261030). PHP 8.3 image uses the repository's pinned digest.
-Fresh component ZIPs were extracted into a clean source checkout and installed
-with Moodle's actual CLI. Developer debugging was enabled. Installed metadata,
-all three plugin tables and initial access-key creation were verified.
-
-The uninstall with developer diagnostics exposed invalid empty-string DEFAULT
-attributes on CHAR NOT NULL fields `fingerprint` and `errorcode`. XMLDB was
-silently normalizing these during installation. Removed those attributes so the
-source matches Moodle's canonical definition; bumped local_videoq to 0.11.2
-(2026110503). The runtime checker now rejects XMLDB automatic-repair diagnostics.
-
-Uninstallation succeeded after removing ltisource_videoq first and moving its
-code out of the Moodle tree, then uninstalling local_videoq. Moodle blocks the
-latter while dependent companion code is still present; a single multi-component
-CLI invocation must not be treated as proof of complete removal. Both components'
-settings and the three local tables were verified absent; the core site remained.
-
-Reinstallation of the corrected ZIPs with Moodle's real upgrade CLI succeeded.
-Installed runtime inspection passed with zero stderr and pure JSON output,
-including actual Privacy API strings, local version 2026110503 and XMLDB loading
-without repairs. Logs and JSON reports are retained in the private audit directory.
-
-This proves clean install/uninstall/reinstall on PostgreSQL, not an old-version
-upgrade with preserved teaching data, web-installer operation, complete question
-flows or MySQL compatibility. Those tests remain required. The isolated,
-resource-limited PostgreSQL fixture is retained for the next upgrade test; no
-public ports or existing trial-site data are used.
-
-## Actual old-main upgrade on PostgreSQL (2026-11-05)
-
-A second isolated DB was installed using component ZIPs rebuilt from the actual
-old main commit `2d195b22a14a11365f256b3c5f0c9ca242b93827` (local version
-2026110501 / 0.11.0). Created a real Moodle course, File activity and original
-synthetic video, and seeded records in all three plugin tables. Stored only a
-hash of the local signing key for comparison.
-
-Replaced the baseline plugin directories with candidate ZIP contents and ran
-Moodle's standard noninteractive upgrade CLI. The update to 2026110503 / 0.11.2
-passed without warning/exception diagnostics. A fresh process verified course
-and source-file identity, exact video bytes, exact records in all three tables,
-and the access key were preserved. Runtime metadata and XMLDB checks also passed.
-All JSON evidence parsed successfully and stderr was empty.
-
-Sanitized evidence: [PostgreSQL upgrade report](evidence/marketplace-postgresql-upgrade.json).
-The DB container is stopped with its data retained for follow-up checks, not
-removed or left consuming database memory. MySQL 8.4.13 has been downloaded for
-the next sequential test, pinned to image manifest
-`sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902`.
-No MySQL result is claimed yet. No publisher account or listing-model answer has
-been received, and those decisions remain required before submission.
-
-## MySQL installed lifecycle (2026-11-05)
-
-MySQL 8.4.13 was run on a separate internal Docker network using the recorded
-immutable digest, utf8mb4_unicode_ci and resource limits. The PostgreSQL fixture
-was stopped first. Installed Moodle 5.1.8+ with actual old-main component ZIPs,
-created a real course/File activity/video and seeded all synchronization tables.
-
-Candidate ZIP upgrade via Moodle CLI passed. A fresh process confirmed exact
-video bytes, course identity, all seeded records and access key were unchanged.
-Developer-debug Privacy API and canonical XMLDB inspection passed without stderr.
-Then uninstalled companion, removed its code, and uninstalled the local plugin.
-Verified all plugin tables/settings were removed and the original course and
-video bytes survived. Fresh candidate ZIP installation then passed: tables were
-empty, a new access key was generated and original teaching data remained.
-
-All seven JSON reports parsed and passed with empty stderr. The actual old-main
-baseline installation exposed the two known XMLDB default-repair diagnostics for
-`fingerprint` and `errorcode`. Candidate upgrade, uninstall and reinstall logs
-contain no PHP warning, exception or XMLDB-repair diagnostic.
-Sanitized evidence: [MySQL lifecycle report](evidence/marketplace-mysql-lifecycle.json).
-The added fixture modes are reusable for later PostgreSQL deletion/retention runs.
-These checks do not cover paid AI, external LTI interoperability, public directory
-installation, all Moodle versions or publisher approval.
-
-Both audit DB containers are now stopped with their fixture data retained.
-The MySQL report includes baseline/candidate archive hashes and the verified
-database charset/collation for reproducibility.
