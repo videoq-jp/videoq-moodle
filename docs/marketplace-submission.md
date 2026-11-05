@@ -192,3 +192,34 @@ This does not establish full moodle-plugin-ci, runtime installation/upgrade,
 MySQL/PostgreSQL, accessibility or approval compliance. A repeatable CI coding
 check, independent Moodle installations, screenshot evidence, translation
 submission, reviewer access, listing model and Marketplace submission remain.
+
+## First installed-Moodle PostgreSQL run (2026-11-05)
+
+Isolated Moodle source: commit `a682566412e1d429b95ac8ef4351a518f61b94c5`,
+5.1.8+ (Build 20261030). PHP 8.3 image uses the repository's pinned digest.
+Fresh component ZIPs were extracted into a clean source checkout and installed
+with Moodle's actual CLI. Developer debugging was enabled. Installed metadata,
+all three plugin tables and initial access-key creation were verified.
+
+The uninstall with developer diagnostics exposed invalid empty-string DEFAULT
+attributes on CHAR NOT NULL fields `fingerprint` and `errorcode`. XMLDB was
+silently normalizing these during installation. Removed those attributes so the
+source matches Moodle's canonical definition; bumped local_videoq to 0.11.2
+(2026110503). The runtime checker now rejects XMLDB automatic-repair diagnostics.
+
+Uninstallation succeeded after removing ltisource_videoq first and moving its
+code out of the Moodle tree, then uninstalling local_videoq. Moodle blocks the
+latter while dependent companion code is still present; a single multi-component
+CLI invocation must not be treated as proof of complete removal. Both components'
+settings and the three local tables were verified absent; the core site remained.
+
+Reinstallation of the corrected ZIPs with Moodle's real upgrade CLI succeeded.
+Installed runtime inspection passed with zero stderr and pure JSON output,
+including actual Privacy API strings, local version 2026110503 and XMLDB loading
+without repairs. Logs and JSON reports are retained in the private audit directory.
+
+This proves clean install/uninstall/reinstall on PostgreSQL, not an old-version
+upgrade with preserved teaching data, web-installer operation, complete question
+flows or MySQL compatibility. Those tests remain required. The isolated,
+resource-limited PostgreSQL fixture is retained for the next upgrade test; no
+public ports or existing trial-site data are used.

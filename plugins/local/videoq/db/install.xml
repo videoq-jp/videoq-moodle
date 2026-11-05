@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB PATH="local/videoq/db" VERSION="2026110403" COMMENT="VideoQ synchronization state">
+<XMLDB PATH="local/videoq/db" VERSION="2026110503" COMMENT="VideoQ synchronization state">
   <TABLES>
     <TABLE NAME="local_videoq_sync" COMMENT="Source activities and durable synchronization state, with no learner data">
       <FIELDS>
@@ -12,9 +12,9 @@
         <FIELD NAME="linkcmid" TYPE="int" LENGTH="10" NOTNULL="true" />
         <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
         <FIELD NAME="generation" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" />
-        <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" />
+        <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" />
         <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="queued" />
-        <FIELD NAME="errorcode" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" />
+        <FIELD NAME="errorcode" TYPE="char" LENGTH="64" NOTNULL="true" />
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
         <FIELD NAME="lastsynced" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
       </FIELDS>
