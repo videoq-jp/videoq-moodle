@@ -1,5 +1,20 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 final class client {
@@ -32,28 +47,48 @@ final class client {
         $options = self::http_options();
         $url = $this->origin . '/api/lms/' . $path;
         $json = $body === null ? '' : json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        if ($method === 'GET') $response = $curl->get($url, [], $options);
-        else if ($method === 'PUT') $response = $curl->put($url, $json, $options);
-        else $response = $curl->post($url, $json, $options);
+        if ($method === 'GET') {
+            $response = $curl->get($url, [], $options);
+        } else if ($method === 'PUT') {
+            $response = $curl->put($url, $json, $options);
+        } else {
+            $response = $curl->post($url, $json, $options);
+        }
         $code = (int)($curl->get_info()['http_code'] ?? 0);
-        if ($curl->get_errno() || $code < 200 || $code >= 300) throw new \RuntimeException('VideoQ request failed');
+        if ($curl->get_errno() || $code < 200 || $code >= 300) {
+            throw new \RuntimeException('VideoQ request failed');
+        }
         $data = json_decode($response, true, 32, JSON_THROW_ON_ERROR);
-        if (!is_array($data)) throw new \RuntimeException('Invalid VideoQ response');
+        if (!is_array($data)) {
+            throw new \RuntimeException('Invalid VideoQ response');
+        }
         return $data;
     }
     public function upload(array $upload, \stored_file $file): void {
-        if (!isset($upload['url'], $upload['direct']) || !is_bool($upload['direct'])) throw new \RuntimeException('Invalid upload response');
+        if (!isset($upload['url'], $upload['direct']) || !is_bool($upload['direct'])) {
+            throw new \RuntimeException('Invalid upload response');
+        }
         $origin = self::origin($upload['url']);
-        if (!$upload['direct'] && $origin !== $this->origin) throw new \RuntimeException('Invalid API upload origin');
+        if (!$upload['direct'] && $origin !== $this->origin) {
+            throw new \RuntimeException('Invalid API upload origin');
+        }
         $curl = new \curl();
         $headers = ['Content-Type: ' . $file->get_mimetype(), 'Content-Length: ' . $file->get_filesize(), 'Expect:'];
-        if (!$upload['direct']) $headers[] = 'Authorization: Bearer ' . $this->token;
+        if (!$upload['direct']) {
+            $headers[] = 'Authorization: Bearer ' . $this->token;
+        }
         $curl->setHeader($headers);
         $temp = $file->copy_content_to_temp('local_videoq');
         try {
             $curl->put($upload['url'], ['file' => $temp], self::http_options(1800) + ['CURLOPT_USERPWD' => false]);
             $code = (int)($curl->get_info()['http_code'] ?? 0);
-            if ($curl->get_errno() || $code < 200 || $code >= 300) throw new \RuntimeException('Video upload failed');
-        } finally { if (is_file($temp)) unlink($temp); }
+            if ($curl->get_errno() || $code < 200 || $code >= 300) {
+                throw new \RuntimeException('Video upload failed');
+            }
+        } finally {
+            if (is_file($temp)) {
+                unlink($temp);
+            }
+        }
     }
 }

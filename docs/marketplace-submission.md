@@ -127,3 +127,19 @@ phpcsstandards/phpcsextra and moodlehq/moodle-cs as installed standards. The exa
 Composer lock, JSON findings and installation log are kept in the working
 environment's private `videoq-marketplace-audit` directory. A portable checked-in
 PHP-only audit runner and official plugin-CI integration remain to be completed.
+
+## Formatting pass (2026-11-05)
+
+Moodle PHPCBF corrected 384 findings in a disposable copy of 35 PHP files.
+Before copying changes back, nikic/php-parser v5.9.0 parsed the original and
+candidate files and compared node types and all subnodes, ignoring only source
+positions/comments. All 35 syntax trees matched; no processing statements were
+changed. The full existing standalone PHP test suite, installer/dependency
+contracts and both real-Moodle metadata tests then passed.
+
+A new full PHPCS scan reports **171 errors and 81 warnings** (zero automatically
+fixable). Most remaining findings concern docblocks, copyright/license tags,
+long lines and unneeded internal guards. One forbidden-function finding flags
+`error_log()` in token.php and requires individual review. Full official code
+compliance, installed-Moodle developer-debug tests, database compatibility,
+listing classification, reviewer access and approval are still incomplete.

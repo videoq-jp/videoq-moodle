@@ -1,22 +1,51 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
+
 define('NO_MOODLE_COOKIES', true);
 require(__DIR__ . '/../../config.php');
 header('Cache-Control: no-store');
 header('Content-Type: application/json');
-try { $type = \local_videoq\service_auth::authenticate(); }
-catch (\Throwable $error) { http_response_code(401); echo json_encode(['error' => 'unauthorized']); exit; }
 try {
-    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') throw new \RuntimeException('Invalid request');
+    $type = \local_videoq\service_auth::authenticate();
+} catch (\Throwable $error) {
+    http_response_code(401);
+    echo json_encode(['error' => 'unauthorized']);
+    exit;
+}
+try {
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        throw new \RuntimeException('Invalid request');
+    }
     $raw = file_get_contents('php://input', false, null, 0, 16385);
-    if (strlen($raw) > 16384) throw new \RuntimeException('Request too large');
+    if (strlen($raw) > 16384) {
+        throw new \RuntimeException('Request too large');
+    }
     $input = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
     if (($input['action'] ?? '') === 'courses') {
         $ids = $DB->get_fieldset_sql('SELECT DISTINCT courseid FROM {local_videoq_sync} WHERE typeid = ? AND (enabled = 1 OR status <> ?) ORDER BY courseid', [(int)$type->id, 'disabled']);
-        if (count($ids) > 1000) throw new \RuntimeException('Too many contexts');
-        echo json_encode(['contextIds' => array_map('strval', $ids)], JSON_THROW_ON_ERROR); exit;
+        if (count($ids) > 1000) {
+            throw new \RuntimeException('Too many contexts');
+        }
+        echo json_encode(['contextIds' => array_map('strval', $ids)], JSON_THROW_ON_ERROR);
+        exit;
     }
-    if (!is_string($input['contextId'] ?? null) || !preg_match('/^[1-9][0-9]{0,17}$/D', $input['contextId'])) throw new \RuntimeException('Invalid context');
+    if (!is_string($input['contextId'] ?? null) || !preg_match('/^[1-9][0-9]{0,17}$/D', $input['contextId'])) {
+        throw new \RuntimeException('Invalid context');
+    }
     $courseid = (int)$input['contextId'];
     $result = match ($input['action'] ?? '') {
         'manifest' => \local_videoq\materials_service::manifest($courseid, (int)$type->id),
@@ -26,6 +55,11 @@ try {
         'status' => \local_videoq\materials_service::status($courseid, (int)$type->id, (string)($input['jobId'] ?? '')),
         default => throw new \RuntimeException('Unknown operation'),
     };
-    if (($input['action'] ?? '') === 'export' && $result['status'] === 'queued') http_response_code(202);
+    if (($input['action'] ?? '') === 'export' && $result['status'] === 'queued') {
+        http_response_code(202);
+    }
     echo json_encode($result, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
-} catch (\Throwable $error) { http_response_code(403); echo json_encode(['error' => 'request_rejected']); }
+} catch (\Throwable $error) {
+    http_response_code(403);
+    echo json_encode(['error' => 'request_rejected']);
+}

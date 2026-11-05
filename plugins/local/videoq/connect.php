@@ -1,5 +1,20 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
+
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 admin_externalpage_setup('local_videoq_connect');
@@ -8,8 +23,11 @@ header('Referrer-Policy: no-referrer');
 $error = false;
 if (optional_param('state', '', PARAM_RAW) !== '') {
     try {
-        $connected = \local_videoq\browser_connection::finish(required_param('state', PARAM_RAW),
-            optional_param('code', '', PARAM_RAW), optional_param('error', '', PARAM_RAW));
+        $connected = \local_videoq\browser_connection::finish(
+            required_param('state', PARAM_RAW),
+            optional_param('code', '', PARAM_RAW),
+            optional_param('error', '', PARAM_RAW)
+        );
         redirect(new moodle_url('/local/videoq/connect.php'), get_string($connected ? 'connectionsuccess' : 'connectioncancelled', 'local_videoq'));
     } catch (\Throwable $e) {
         // Drop callback credentials from the address bar before rendering errors.
@@ -41,15 +59,23 @@ if (data_submitted()) {
 }
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('connecttitle', 'local_videoq'));
-if ($error) echo $OUTPUT->notification(get_string('connectionfailed', 'local_videoq'), 'error');
+if ($error) {
+    echo $OUTPUT->notification(get_string('connectionfailed', 'local_videoq'), 'error');
+}
 if (!empty($SESSION->local_videoq_browser['code']) && $SESSION->local_videoq_browser['expires'] > time()) {
-    echo $OUTPUT->single_button(new moodle_url('/local/videoq/connect.php', ['action' => 'retry']),
-        get_string('retryconnection', 'local_videoq'), 'post');
+    echo $OUTPUT->single_button(
+        new moodle_url('/local/videoq/connect.php', ['action' => 'retry']),
+        get_string('retryconnection', 'local_videoq'),
+        'post'
+    );
 }
 if (get_config('local_videoq', 'synctoken') || get_config('local_videoq', 'servicemode') === 'lti') {
     try {
-        if (get_config('local_videoq', 'servicemode') === 'lti') \local_videoq\service_auth::type();
-        else (new \local_videoq\client())->request('GET', 'connection');
+        if (get_config('local_videoq', 'servicemode') === 'lti') {
+            \local_videoq\service_auth::type();
+        } else {
+            (new \local_videoq\client())->request('GET', 'connection');
+        }
         echo $OUTPUT->notification(get_string(get_config('local_videoq', 'servicemode') === 'lti' ? 'connectionconfigured' : 'connectionready', 'local_videoq'), 'success');
     } catch (\Throwable $e) {
         echo $OUTPUT->notification(get_string('connectionunavailable', 'local_videoq'), 'warning');
@@ -82,11 +108,18 @@ echo html_writer::tag('textarea', '', ['id' => 'videoq-connectioncode', 'name' =
 echo html_writer::tag('button', get_string('connectbutton', 'local_videoq'), ['type' => 'submit', 'class' => 'btn btn-primary']);
 echo html_writer::end_tag('form');
 echo html_writer::end_tag('details');
-if ((get_config('local_videoq', 'pendingconnection') || get_config('local_videoq', 'pendinglticonnection')) &&
-        !get_config('local_videoq', 'typeid') && !get_config('local_videoq', 'synctoken') && get_config('local_videoq', 'servicemode') !== 'lti') {
+if (
+    (get_config('local_videoq', 'pendingconnection') || get_config('local_videoq', 'pendinglticonnection')) &&
+        !get_config('local_videoq', 'typeid') && !get_config('local_videoq', 'synctoken') && get_config('local_videoq', 'servicemode') !== 'lti'
+) {
     echo html_writer::tag('p', get_string('cancelconnectionhint', 'local_videoq'));
-    echo $OUTPUT->single_button(new moodle_url('/local/videoq/connect.php', ['action' => 'cancel']),
-        get_string('cancelconnection', 'local_videoq'), 'post');
+    echo $OUTPUT->single_button(
+        new moodle_url('/local/videoq/connect.php', ['action' => 'cancel']),
+        get_string('cancelconnection', 'local_videoq'),
+        'post'
+    );
 }
-if ($folded) echo html_writer::end_tag('details');
+if ($folded) {
+    echo html_writer::end_tag('details');
+}
 echo $OUTPUT->footer();

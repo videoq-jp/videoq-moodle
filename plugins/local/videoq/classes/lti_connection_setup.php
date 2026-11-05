@@ -1,5 +1,20 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
+
 namespace local_videoq;
 defined('MOODLE_INTERNAL') || die();
 
@@ -14,15 +29,23 @@ final class lti_connection_setup {
             throw new \RuntimeException('Install both VideoQ plugins first');
         }
         $value = connection_setup::decode($code);
-        if (($value['mode'] ?? '') !== 'materials') throw new \RuntimeException('Invalid connection mode');
+        if (($value['mode'] ?? '') !== 'materials') {
+            throw new \RuntimeException('Invalid connection mode');
+        }
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('connection-setup', 10);
-        if (!$lock) throw new \RuntimeException('Setup busy');
+        if (!$lock) {
+            throw new \RuntimeException('Setup busy');
+        }
         try {
             $pending = json_decode((string)get_config('local_videoq', 'pendinglticonnection'), true);
-            if ($pending && ($pending['origin'] !== $value['origin'])) throw new \RuntimeException('Retry pending connection');
+            if ($pending && ($pending['origin'] !== $value['origin'])) {
+                throw new \RuntimeException('Retry pending connection');
+            }
             $configured = (int)get_config('local_videoq', 'typeid');
             // Existing material IDs and courses remain attached to the same LTI identity.
-            if ($configured && rtrim((string)get_config('local_videoq', 'apiurl'), '/') !== $value['origin']) throw new \RuntimeException('Disconnect the existing installation first');
+            if ($configured && rtrim((string)get_config('local_videoq', 'apiurl'), '/') !== $value['origin']) {
+                throw new \RuntimeException('Disconnect the existing installation first');
+            }
             if (!$pending) {
                 $typeid = $configured ?: lti_add_type((object)['state' => LTI_TOOL_STATE_CONFIGURED], (object)[
                     'lti_typename' => 'VideoQ', 'lti_toolurl' => $value['origin'] . '/api/lti/launch',
@@ -40,15 +63,28 @@ final class lti_connection_setup {
                 'secret' => $value['secret'], 'issuer' => $CFG->wwwroot, 'clientId' => $type->clientid,
                 'deploymentId' => (string)$type->id, 'mode' => 'materials',
                 'materialsService' => ['tokenEndpoint' => $CFG->wwwroot . '/local/videoq/token.php', 'endpoint' => $CFG->wwwroot . '/local/videoq/materials.php']];
-            if ($codeverifier !== null) $request['codeVerifier'] = $codeverifier;
-            $raw = $curl->post($value['origin'] . '/api/lms/pairing/exchange', json_encode($request, JSON_THROW_ON_ERROR),
-                client::http_options());
-            if ($curl->get_errno() || (int)($curl->get_info()['http_code'] ?? 0) !== 200 || strlen($raw) > 16384) throw new \RuntimeException('Connection failed');
+            if ($codeverifier !== null) {
+                $request['codeVerifier'] = $codeverifier;
+            }
+            $raw = $curl->post(
+                $value['origin'] . '/api/lms/pairing/exchange',
+                json_encode($request, JSON_THROW_ON_ERROR),
+                client::http_options()
+            );
+            if ($curl->get_errno() || (int)($curl->get_info()['http_code'] ?? 0) !== 200 || strlen($raw) > 16384) {
+                throw new \RuntimeException('Connection failed');
+            }
             $result = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
-            if (($result['toolOrigin'] ?? '') !== $value['origin'] || !is_array($result['uploadTargets'] ?? null) || !$result['uploadTargets'] || count($result['uploadTargets']) > 4) throw new \RuntimeException('Invalid connection response');
+            if (($result['toolOrigin'] ?? '') !== $value['origin'] || !is_array($result['uploadTargets'] ?? null) || !$result['uploadTargets'] || count($result['uploadTargets']) > 4) {
+                throw new \RuntimeException('Invalid connection response');
+            }
             foreach ($result['uploadTargets'] as $target) {
-                if (client::origin($target['origin'] ?? '') !== $target['origin'] || !is_string($target['prefix'] ?? null) ||
-                        !str_starts_with($target['prefix'], '/') || strlen($target['prefix']) < 2 || !str_ends_with($target['prefix'], '/')) throw new \RuntimeException('Invalid storage policy');
+                if (
+                    client::origin($target['origin'] ?? '') !== $target['origin'] || !is_string($target['prefix'] ?? null) ||
+                        !str_starts_with($target['prefix'], '/') || strlen($target['prefix']) < 2 || !str_ends_with($target['prefix'], '/')
+                ) {
+                    throw new \RuntimeException('Invalid storage policy');
+                }
             }
             $transaction = $DB->start_delegated_transaction();
             // Use Moodle's existing registered-tool key configuration and JWKS cache.
@@ -63,6 +99,8 @@ final class lti_connection_setup {
             unset_config('synctoken', 'local_videoq');
             unset_config('pendinglticonnection', 'local_videoq');
             $transaction->allow_commit();
-        } finally { $lock->release(); }
+        } finally {
+            $lock->release();
+        }
     }
 }
