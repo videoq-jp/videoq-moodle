@@ -104,3 +104,5 @@ $string['retryconnection'] = '接続を再試行';
 
 $string['privacy:metadata:feedback'] = '回答を識別する情報とともにVideoQへ送信・保存する、受講者のGood/Bad評価または評価の解除。';
 $string['privacy:metadata:core'] = '管理者の接続用一時セッション、設定変更の記録、復元を開始した利用者として実行するタスクはMoodle本体が管理します。これらの記録へのデータ要求はMoodle本体のPrivacy APIが処理します。';
+$string['chatfeedbackgood'] = 'Good';
+$string['chatfeedbackbad'] = 'Bad';

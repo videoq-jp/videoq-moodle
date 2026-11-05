@@ -104,3 +104,5 @@ $string['retryconnection'] = 'Retry connection';
 
 $string['privacy:metadata:feedback'] = 'The learner’s Good/Bad rating or removal of a rating for an identified AI answer, sent to and stored by VideoQ.';
 $string['privacy:metadata:core'] = 'Moodle core manages temporary administrator connection sessions, configuration audit records and restore tasks executed as the initiating user. Its Privacy API handles those core records.';
+$string['chatfeedbackgood'] = 'Good';
+$string['chatfeedbackbad'] = 'Bad';

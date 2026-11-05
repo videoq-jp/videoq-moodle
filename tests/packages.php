@@ -23,6 +23,11 @@ try {
             $name = $zip->getNameIndex($index);
             verify(str_starts_with($name, 'videoq/') && !str_contains($name, '../'), 'Unsafe archive path');
             verify(!preg_match('/(?:node_modules|api\.env|compose\.env|\.mp4|\.pem|credential)/', $name), 'Non-plugin content in installer');
+            if (in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['php', 'js', 'css', 'mustache'], true)) {
+                $contents = $zip->getFromIndex($index);
+                verify(str_contains($contents, '@copyright') && (str_contains($contents, 'GNU GPL')
+                    || str_contains($contents, 'SPDX-License-Identifier: GPL-3.0-or-later')), 'Missing source copyright/license: ' . $name);
+            }
         }
         if ($component === 'local_videoq') foreach (['connect.php','classes/lti_connection_setup.php','classes/browser_connection.php','templates/chat.mustache','player.js','chat.js',
             'backup/moodle2/backup_local_videoq_plugin.class.php', 'backup/moodle2/restore_local_videoq_plugin.class.php',

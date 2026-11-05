@@ -195,6 +195,8 @@ if (isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'completed') {
     'heading' => get_string('coursequestions', 'local_videoq'),
     'connectionerror' => get_string('chatconnectionerror', 'local_videoq'),
     'seeksuffix' => get_string('chatseek', 'local_videoq'),
+    'feedbackgood' => get_string('chatfeedbackgood', 'local_videoq'),
+    'feedbackbad' => get_string('chatfeedbackbad', 'local_videoq'),
     'empty' => get_string('chatempty', 'local_videoq'),
     'connecting' => get_string('chatconnecting', 'local_videoq'),
     'hint' => get_string('chathint', 'local_videoq'),
