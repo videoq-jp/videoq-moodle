@@ -1,7 +1,9 @@
 # Isolated, loopback-only interoperability lab. Never use these credentials in production.
 services:
   db:
-    image: pgvector/pgvector:pg17
+    extends:
+      file: images/compose.yaml
+      service: db
     environment:
       POSTGRES_PASSWORD: lti-lab-only
     volumes:
@@ -12,7 +14,9 @@ services:
       interval: 2s
       retries: 30
   moodle:
-    image: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
+    extends:
+      file: images/compose.yaml
+      service: php
     entrypoint: [sh, /lab/start-moodle.sh]
     command: [apache2-foreground]
     environment:
@@ -33,7 +37,9 @@ services:
       - certificates:/certificates:ro
       - ./php-sync.ini:/usr/local/etc/php/conf.d/99-videoq-sync-lab.ini:ro
   proxy:
-    image: caddy:2-alpine
+    extends:
+      file: images/compose.yaml
+      service: proxy
     ports:
       - 127.0.0.1:18443:18443
     environment:
@@ -63,7 +69,9 @@ services:
       start_period: 60s
   ai:
     profiles: [mock]
-    image: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
+    extends:
+      file: images/compose.yaml
+      service: php
     entrypoint: [php, -S, '0.0.0.0:8080', /lab/mock-ai.php]
     command: []
     volumes:
