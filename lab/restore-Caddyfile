@@ -1,7 +1,0 @@
-{
-    auto_https disable_redirects
-}
-https://restore.moodle.localhost:18444 {
-    tls internal
-    reverse_proxy moodle-restore:80
-}
