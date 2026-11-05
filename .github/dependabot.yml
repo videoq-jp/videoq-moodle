@@ -13,7 +13,21 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: moodlehq/moodle-php-apache
         update-types: ["version-update:semver-minor"]
+      - dependency-name: mysql
+        update-types: ["version-update:semver-minor"]
     groups:
       lab-images:
+        patterns: ["*"]
+        update-types: [minor, patch]
+  - package-ecosystem: composer
+    directory: /.github/moodle-codecheck
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 3
+    groups:
+      coding-tools:
         patterns: ["*"]
         update-types: [minor, patch]

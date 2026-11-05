@@ -1,14 +1,46 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
+
+/**
+ * Synchronizes source videos and their assistant activities.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
+/**
+ * Synchronizes source videos and their assistant activities.
+ */
 final class synchronizer {
-    /** One stable, course-wide entry, independent of any source activity's lifetime. */
+    /**
+     * One stable, course-wide entry, independent of any source activity's lifetime.
+     *
+     * @param int $courseid Course identifier.
+     * @return void
+     */
     public static function ensure_course_entry(int $courseid): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/modlib.php');
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('course-entry-' . $courseid, 10);
-        if (!$lock) throw new \RuntimeException('Course entry is being configured');
+        if (!$lock) {
+            throw new \RuntimeException('Course entry is being configured');
+        }
         try {
             $url = $CFG->wwwroot . '/local/videoq/view.php?course=' . $courseid;
             if (!$DB->record_exists('url', ['course' => $courseid, 'externalurl' => $url])) {
@@ -20,12 +52,22 @@ final class synchronizer {
                     'display' => 0, 'printintro' => 0, 'parameters' => [],
                 ], get_course($courseid));
             }
-        } finally { $lock->release(); }
+        } finally {
+            $lock->release();
+        }
     }
-    /** Keep the transport and per-video shortcuts out of the course activity list. */
+    /**
+     * Keep the transport and per-video shortcuts out of the course activity list.
+     *
+     * @param int $courseid Course identifier.
+     * @param array $cmids Course-module identifiers to hide.
+     * @return void
+     */
     private static function hide_transport_entries(int $courseid, array $cmids): void {
         global $CFG;
-        if (empty($CFG->allowstealth)) return;
+        if (empty($CFG->allowstealth)) {
+            return;
+        }
         require_once($CFG->dirroot . '/course/lib.php');
         $format = course_get_format($courseid);
         $info = get_fast_modinfo($courseid);
@@ -36,64 +78,144 @@ final class synchronizer {
             }
         }
     }
+    /**
+     * Finds the source video file belonging to a Moodle File activity.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return \stored_file|null
+     */
     public static function video_file(int $cmid): ?\stored_file {
         $context = \context_module::instance($cmid, IGNORE_MISSING);
-        if (!$context) return null;
+        if (!$context) {
+            return null;
+        }
         $files = get_file_storage()->get_area_files($context->id, 'mod_resource', 'content', 0, 'sortorder DESC, id ASC', false);
         $file = reset($files);
         return $file && str_starts_with($file->get_mimetype(), 'video/') ? $file : null;
     }
+    /**
+     * Checks that the configured LTI tool matches the VideoQ connection.
+     *
+     * @return \stdClass
+     */
     public static function check_connection(): \stdClass {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
         $type = $DB->get_record('lti_types', ['id' => (int)get_config('local_videoq', 'typeid')], '*', MUST_EXIST);
         if (get_config('local_videoq', 'servicemode') === 'lti') {
-            if ($type->ltiversion !== LTI_VERSION_1P3 || rtrim($type->baseurl, '/') !== rtrim((string)get_config('local_videoq', 'apiurl'), '/') . '/api/lti/launch') throw new \RuntimeException('Invalid LTI connection');
+            if (
+                $type->ltiversion !== LTI_VERSION_1P3
+                || rtrim(
+                    $type->baseurl,
+                    '/'
+                ) !== rtrim(
+                    (string)get_config(
+                        'local_videoq',
+                        'apiurl'
+                    ),
+                    '/'
+                ) . '/api/lti/launch'
+            ) {
+                throw new \RuntimeException('Invalid LTI connection');
+            }
             return $type;
         }
         $connection = (new client())->request('GET', 'connection');
-        if ($type->ltiversion !== LTI_VERSION_1P3 || ($connection['issuer'] ?? '') !== $CFG->wwwroot
+        if (
+            $type->ltiversion !== LTI_VERSION_1P3 || ($connection['issuer'] ?? '') !== $CFG->wwwroot
                 || ($connection['clientId'] ?? '') !== $type->clientid || ($connection['deploymentId'] ?? '') !== (string)$type->id
-                || rtrim($type->baseurl, '/') !== $connection['toolOrigin'] . '/api/lti/launch') throw new \moodle_exception('invalidconfiguration', 'local_videoq');
+                || rtrim($type->baseurl, '/') !== $connection['toolOrigin'] . '/api/lti/launch'
+        ) {
+            throw new \moodle_exception('invalidconfiguration', 'local_videoq');
+        }
         return $type;
     }
+    /**
+     * Enables questions and creates the material binding for a source activity.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return void
+     */
     public static function enable(int $cmid): void {
         self::configure($cmid, false);
     }
-    /** Internal restore task preserves a teacher's explicit disable and any completed initialization. */
+    /**
+     * Internal restore task preserves a teacher's explicit disable and any completed initialization.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return void
+     */
     public static function restore_source(int $cmid): void {
         self::configure($cmid, true);
     }
+    /**
+     * Disables synchronization and its generated assistant activities.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return void
+     */
     public static function disable(int $cmid): void {
         global $DB;
         require_capability('moodle/course:manageactivities', \context_module::instance($cmid));
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('enable-' . $cmid, 10);
-        if (!$lock) throw new \RuntimeException('Activity is being configured');
+        if (!$lock) {
+            throw new \RuntimeException('Activity is being configured');
+        }
         try {
             // Serialize with repair so a teacher's disable cannot be overwritten
             // by a repair that was already creating replacement activities.
-            $DB->execute('UPDATE {local_videoq_sync} SET enabled = 0, generation = generation + 1, status = ?, timemodified = ? WHERE cmid = ?',
-                ['queued', time(), $cmid]);
-        } finally { $lock->release(); }
+            $DB->execute(
+                'UPDATE {local_videoq_sync} SET enabled = 0, generation = generation + 1, status = ?, timemodified = ?'
+                    . ' WHERE cmid = ?',
+                ['queued', time(), $cmid]
+            );
+        } finally {
+            $lock->release();
+        }
     }
-    /** Repair only mappings still enabled; never override an explicit teacher disable. */
+    /**
+     * Repair only mappings still enabled; never override an explicit teacher disable.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @param bool $repair Whether to preserve existing disabled mappings.
+     * @return void
+     */
     private static function configure(int $cmid, bool $repair): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/modlib.php');
         [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'resource');
-        if (!$repair) require_capability('moodle/course:manageactivities', \context_module::instance($cmid));
-        if ($cm->deletioninprogress) throw new \moodle_exception('unknownlesson', 'local_videoq');
-        if (!self::video_file($cmid)) throw new \moodle_exception('novideofile', 'local_videoq');
+        if (!$repair) {
+            require_capability('moodle/course:manageactivities', \context_module::instance($cmid));
+        }
+        if ($cm->deletioninprogress) {
+            throw new \moodle_exception('unknownlesson', 'local_videoq');
+        }
+        if (!self::video_file($cmid)) {
+            throw new \moodle_exception('novideofile', 'local_videoq');
+        }
         $type = self::check_connection();
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('enable-' . $cmid, 10);
-        if (!$lock) throw new \RuntimeException('Activity is being configured');
+        if (!$lock) {
+            throw new \RuntimeException('Activity is being configured');
+        }
         try {
             $row = $DB->get_record('local_videoq_sync', ['cmid' => $cmid]);
-            if ($repair && (!$row || !$row->enabled)) return;
-            if ($row && $DB->record_exists('course_modules', ['id' => $row->lticmid, 'deletioninprogress' => 0])
-                    && $DB->record_exists('course_modules', ['id' => $row->linkcmid, 'deletioninprogress' => 0])) {
-                if ($repair) return;
-                $DB->execute('UPDATE {local_videoq_sync} SET enabled = 1, typeid = ?, generation = generation + 1, status = ?, timemodified = ? WHERE id = ?', [(int)$type->id, 'queued', time(), $row->id]);
+            if ($repair && (!$row || !$row->enabled)) {
+                return;
+            }
+            if (
+                $row && $DB->record_exists('course_modules', ['id' => $row->lticmid, 'deletioninprogress' => 0])
+                    && $DB->record_exists('course_modules', ['id' => $row->linkcmid, 'deletioninprogress' => 0])
+            ) {
+                if ($repair) {
+                    return;
+                }
+                $DB->execute(
+                    'UPDATE {local_videoq_sync}'
+                        . ' SET enabled = 1, typeid = ?, generation = generation + 1, status = ?, timemodified = ?'
+                        . ' WHERE id = ?',
+                    [(int)$type->id, 'queued', time(), $row->id]
+                );
                 self::hide_transport_entries((int)$course->id, [(int)$row->lticmid, (int)$row->linkcmid]);
                 self::ensure_course_entry((int)$course->id);
                 return;
@@ -113,29 +235,56 @@ final class synchronizer {
                 'externalurl' => $CFG->wwwroot . '/local/videoq/view.php?course=' . $course->id . '&video=' . $cmid,
                 'display' => 0, 'printintro' => 0, 'parameters' => [],
             ]), $course);
-            $values = (object)['typeid' => (int)$type->id, 'cmid' => $cmid, 'courseid' => $course->id, 'lticmid' => $lti->coursemodule,
-                'ltiinstance' => $lti->instance, 'linkcmid' => $link->coursemodule, 'enabled' => 1, 'status' => 'queued', 'timemodified' => time()];
+            $values = (object)['typeid' => (int)$type->id,
+                 'cmid' => $cmid,
+                 'courseid' => $course->id,
+                 'lticmid' => $lti->coursemodule,
+
+                'ltiinstance' => $lti->instance,
+                     'linkcmid' => $link->coursemodule,
+                     'enabled' => 1,
+                     'status' => 'queued',
+                     'timemodified' => time()];
             if ($row) {
-                $values->id = $row->id; $values->generation = $row->generation + 1; $values->fingerprint = '';
+                $values->id = $row->id;
+                $values->generation = $row->generation + 1;
+                $values->fingerprint = '';
                 $DB->update_record('local_videoq_sync', $values);
-            } else $DB->insert_record('local_videoq_sync', $values);
+            } else {
+                $DB->insert_record('local_videoq_sync', $values);
+            }
             $transaction->allow_commit();
             // A partial deletion can leave one former companion behind. It no
             // longer belongs to the mapping and must not remain an alternate launch.
-            if ($row) foreach ([$row->lticmid, $row->linkcmid] as $oldid) {
-                $old = get_coursemodule_from_id('', $oldid, $course->id, false, IGNORE_MISSING);
-                if ($old && in_array($old->modname, ['lti', 'url'], true)) course_delete_module($old->id, false);
+            if ($row) {
+                foreach ([$row->lticmid, $row->linkcmid] as $oldid) {
+                    $old = get_coursemodule_from_id('', $oldid, $course->id, false, IGNORE_MISSING);
+                    if ($old && in_array($old->modname, ['lti', 'url'], true)) {
+                        course_delete_module($old->id, false);
+                    }
+                }
             }
             self::hide_transport_entries((int)$course->id, [(int)$lti->coursemodule, (int)$link->coursemodule]);
             self::ensure_course_entry((int)$course->id);
-        } finally { $lock->release(); }
+        } finally {
+            $lock->release();
+        }
     }
+    /**
+     * Reconciles a material binding with its current Moodle source activity.
+     *
+     * @param int $id Material binding or lesson identifier.
+     * @param bool $snapshot Whether to return a manifest without starting a transfer.
+     * @return array|null
+     */
     public static function run(int $id, bool $snapshot = false): ?array {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('sync-' . $id, 0);
         if (!$lock) {
-            if ($snapshot) throw new \RuntimeException('Material is being updated');
+            if ($snapshot) {
+                throw new \RuntimeException('Material is being updated');
+            }
             return null;
         }
         try {
@@ -149,7 +298,9 @@ final class synchronizer {
                 $row->enabled = 0;
             }
             // Only the post-restore task may activate an unfinished course restore.
-            if ($row->enabled && $row->status === 'restoring') return null;
+            if ($row->enabled && $row->status === 'restoring') {
+                return null;
+            }
             if ($row->enabled && (!$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress)) {
                 // Section cleanup or deletion of an internal activity must not
                 // delete the source's processed media, transcript or embeddings.
@@ -167,7 +318,9 @@ final class synchronizer {
                 // These activities were created and managed by this mapping.
                 // Do not leave broken course links after disable/source deletion.
                 foreach ([$lti, $link] as $companion) {
-                    if ($companion && (int)$companion->course === (int)$row->courseid) course_delete_module($companion->id, false);
+                    if ($companion && (int)$companion->course === (int)$row->courseid) {
+                        course_delete_module($companion->id, false);
+                    }
                 }
                 $lti = $link = null;
                 // Core deletion events can advance the generation while removing
@@ -186,7 +339,9 @@ final class synchronizer {
                     }
                 }
                 foreach ([$lti, $link] as $companion) {
-                    if (!$companion || $companion->deletioninprogress || (int)$companion->course !== (int)$cm->course) continue;
+                    if (!$companion || $companion->deletioninprogress || (int)$companion->course !== (int)$cm->course) {
+                        continue;
+                    }
                     if ((int)$companion->visible !== (int)$cm->visible) {
                         set_coursemodule_visible($companion->id, (int)$cm->visible, (int)$companion->visibleoncoursepage, false);
                         $companion->visible = $cm->visible;
@@ -203,7 +358,9 @@ final class synchronizer {
                         $changed = true;
                     }
                 }
-                if ($changed) rebuild_course_cache($row->courseid, true);
+                if ($changed) {
+                    rebuild_course_cache($row->courseid, true);
+                }
             }
             $file = $cm && !$cm->deletioninprogress ? self::video_file((int)$row->cmid) : null;
             $enabled = (bool)($row->enabled && $file && $course && $course->visible && $cm && $cm->visible
@@ -211,29 +368,67 @@ final class synchronizer {
                 && $link && (int)$link->course === (int)$row->courseid
                 && !$cm->deletioninprogress && $lti && $lti->visible && !$lti->deletioninprogress
                 && $link && $link->visible && !$link->deletioninprogress);
-            $manifest = ['contextId' => (string)$row->courseid, 'courseTitle' => $course ? $course->fullname : 'Moodle', 'resourceLinkId' => (string)$row->ltiinstance,
-                'deleted' => (bool)(!$row->enabled || !$file || !$cm || $cm->deletioninprogress || !$course || !$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress),
+            $manifest = ['contextId' => (string)$row->courseid,
+                 'courseTitle' => $course ? $course->fullname : 'Moodle',
+                 'resourceLinkId' => (string)$row->ltiinstance,
+
+                'deleted' => (bool)(!$row->enabled || !$file || !$cm || $cm->deletioninprogress || !$course
+                    || !$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress),
                 'enabled' => $enabled, 'title' => $cm ? \core_text::substr(strip_tags($cm->name), 0, 255) : 'Deleted video'];
-            if ($file) $manifest['file'] = ['filename' => $file->get_filename(), 'contentType' => $file->get_mimetype(),
+            if ($file) {
+                $manifest['file'] = ['filename' => $file->get_filename(), 'contentType' => $file->get_mimetype(),
                 'size' => (int)$file->get_filesize(), 'contentHash' => $file->get_contenthash()];
-            $fingerprint = hash('sha256', json_encode([$manifest, $cm->availability ?? null, $lti->availability ?? null, $link->availability ?? null]));
+            }
+            $fingerprint = hash(
+                'sha256',
+                json_encode([$manifest,
+                 $cm->availability ?? null,
+                 $lti->availability ?? null,
+                $link->availability ?? null])
+            );
             if ($row->fingerprint !== $fingerprint) {
-                $DB->execute('UPDATE {local_videoq_sync} SET generation = generation + 1, fingerprint = ?, status = ? WHERE id = ?', [$fingerprint, 'queued', $id]);
+                $DB->execute(
+                    'UPDATE {local_videoq_sync} SET generation = generation + 1, fingerprint = ?, status = ? WHERE id = ?',
+                    [$fingerprint,
+                     'queued',
+                    $id]
+                );
                 $row = $DB->get_record('local_videoq_sync', ['id' => $id], '*', MUST_EXIST);
-            } else if (!$snapshot && in_array($row->status, ['completed', 'disabled'], true)) return null;
+            } else if (!$snapshot && in_array($row->status, ['completed', 'disabled'], true)) {
+                return null;
+            }
             $manifest['generation'] = (int)$row->generation;
-            if ($snapshot) return $manifest;
-            $client = new client(); $path = 'resources/' . $row->cmid;
+            if ($snapshot) {
+                return $manifest;
+            }
+            $client = new client();
+            $path = 'resources/' . $row->cmid;
             $result = $client->request('PUT', $path, $manifest);
             if (!empty($result['upload'])) {
-                if (!$file) throw new \RuntimeException('Video source is missing');
+                if (!$file) {
+                    throw new \RuntimeException('Video source is missing');
+                }
                 $client->upload($result['upload'], $file);
                 $result = $client->request('POST', $path . '/confirm', ['generation' => (int)$row->generation]);
             }
-            $status = in_array($result['status'] ?? '', ['disabled', 'uploading', 'pending', 'processing', 'indexing', 'completed', 'error', 'blocked', 'awaiting_upload'], true) ? $result['status'] : 'error';
-            $error = in_array($result['error'] ?? '', ['STORAGE_LIMIT_EXCEEDED', 'MONTHLY_UPLOAD_LIMIT_EXCEEDED'], true) ? $result['error'] : '';
-            $DB->execute('UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE id = ? AND generation = ?', [$status, $error, time(), $id, $row->generation]);
-        } finally { $lock->release(); }
+            $status = in_array(
+                $result['status'] ?? '',
+                ['disabled', 'uploading', 'pending', 'processing', 'indexing', 'completed', 'error', 'blocked', 'awaiting_upload'],
+                true
+            ) ? $result['status'] : 'error';
+            $error = in_array(
+                $result['error'] ?? '',
+                ['STORAGE_LIMIT_EXCEEDED',
+                 'MONTHLY_UPLOAD_LIMIT_EXCEEDED'],
+                true
+            ) ? $result['error'] : '';
+            $DB->execute(
+                'UPDATE {local_videoq_sync} SET status = ?, errorcode = ?, lastsynced = ? WHERE id = ? AND generation = ?',
+                [$status, $error, time(), $id, $row->generation]
+            );
+        } finally {
+            $lock->release();
+        }
         return null;
     }
 }

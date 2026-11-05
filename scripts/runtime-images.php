@@ -11,15 +11,17 @@ function runtime_images(?string $file = null): array {
         $images[$match[1]] = $match[2];
     }
     $names = array_keys($images); sort($names);
-    if ($names !== ['db', 'php', 'proxy'] || preg_match_all('/^\s+image:/m', $source) !== 3) throw new RuntimeException('Expected three immutable images');
+    if (!in_array($names, [['db', 'php', 'proxy'], ['db', 'mysql', 'php', 'proxy']], true)
+            || preg_match_all('/^\s+image:/m', $source) !== count($names)) throw new RuntimeException('Expected immutable runtime images');
     if (!preg_match('/^moodlehq\/moodle-php-apache:8\.3(?:\.\d+)?@/', $images['php']) ||
             !preg_match('/^pgvector\/pgvector:pg17(?:\.\d+)?@/', $images['db']) ||
             !preg_match('/^caddy:2(?:\.\d+)*-alpine@/', $images['proxy'])) throw new RuntimeException('Unsupported runtime release line');
+    if (isset($images['mysql']) && !preg_match('/^mysql:8\.4(?:\.\d+)?@/', $images['mysql'])) throw new RuntimeException('Unsupported MySQL release line');
     return $images;
 }
 if (PHP_SAPI === 'cli' && realpath($_SERVER['SCRIPT_FILENAME']) === __FILE__) {
     $images = runtime_images($argv[2] ?? null);
     $name = $argv[1] ?? '';
-    if (!isset($images[$name])) throw new InvalidArgumentException('Usage: php scripts/runtime-images.php php|db|proxy');
+    if (!isset($images[$name])) throw new InvalidArgumentException('Usage: php scripts/runtime-images.php php|db|proxy|mysql');
     echo $images[$name], "\n";
 }

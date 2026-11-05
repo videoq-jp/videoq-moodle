@@ -3,7 +3,7 @@
 define('CLI_SCRIPT', true);
 require '/var/www/html/config.php';
 if ($CFG->wwwroot !== 'https://moodle.localhost:18443' || $CFG->dbhost !== 'db') throw new RuntimeException('Lab only');
-$expected = ['local_videoq'=>['conversation','access','video','position','videofile','title'],
+$expected = ['local_videoq'=>['conversation','feedback','access','video','position','videofile','title'],
     'ltisource_videoq'=>['userid','courseid','resourceid']];
 $fields = [];
 foreach ($expected as $component=>$required) {

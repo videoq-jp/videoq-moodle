@@ -1,5 +1,28 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
+
+/**
+ * Defines language strings for the VideoQ course assistant.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['pluginname'] = 'VideoQ 動画・質問画面';
 $string['lessons'] = '動画と質問教材の紐付け';
 $string['lessons_desc'] = 'id・title・videoCmid（MP4を登録したファイル活動）・ltiCmid（同じコースのVideoQ LTI 1.3活動）を持つJSON配列を指定します。例：[{"id":"lesson-1","title":"第1回","videoCmid":10,"ltiCmid":11}]。/local/videoq/view.php?lesson=lesson-1 から開けます。両方の活動の閲覧制限が適用されます。';
@@ -11,7 +34,7 @@ $string['questions'] = '教材に質問';
 $string['privacy:metadata'] = 'このプラグインは教材の紐付けと同期状態を保存し、受講者の情報は保存しません。質問機能を有効にした教材はVideoQへ転送されます。';
 $string['privacy:metadata:video'] = '管理者が紐付けたVideoQ動画の識別子。';
 $string['privacy:metadata:position'] = '取得できる場合に質問へ添えられる、現在の動画の再生位置。';
-$string['privacy:metadata:videoq'] = '紐付けたVideoQのLTIツールへ再生位置を送信します。このプラグインは受講者の記録をローカル保存しません。質問とセッションはLTIツールが管理します。';
+$string['privacy:metadata:videoq'] = '設定したVideoQと質問文・AI回答・回答評価・再生位置・教材の閲覧権限の証明を受け渡し、質問機能を有効にした動画ファイルと教材情報を転送します。プラグイン独自のテーブルには同期状態を保存し、受講者の会話は保存しません。ログインセッションはMoodle、質問履歴とAI処理はVideoQが管理します。';
 $string['apiurl'] = 'VideoQのAPIオリジン';
 $string['synctoken'] = '同期用接続キー';
 $string['typeid'] = '登録済みLTIツールのタイプID';
@@ -78,3 +101,8 @@ $string['browserconnect'] = 'VideoQに接続';
 $string['manualconnection'] = '接続コードで接続（従来の方法）';
 $string['connectioncancelled'] = '接続をキャンセルしました。';
 $string['retryconnection'] = '接続を再試行';
+
+$string['privacy:metadata:feedback'] = '回答を識別する情報とともにVideoQへ送信・保存する、受講者のGood/Bad評価または評価の解除。';
+$string['privacy:metadata:core'] = '管理者の接続用一時セッション、設定変更の記録、復元を開始した利用者として実行するタスクはMoodle本体が管理します。これらの記録へのデータ要求はMoodle本体のPrivacy APIが処理します。';
+$string['chatfeedbackgood'] = 'Good';
+$string['chatfeedbackbad'] = 'Bad';

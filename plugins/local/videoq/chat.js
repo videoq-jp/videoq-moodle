@@ -1,3 +1,27 @@
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later.
+
+/**
+ * Displays streamed VideoQ answers in Moodle messaging templates.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 // Native core_message templates and theme; the LTI frame keeps authentication and API access private.
 (function() {
     'use strict';
@@ -92,7 +116,7 @@
             element.textContent = validTime ? '(' + value.split(/[.,]/)[0].replace(/^00:/, '').replace(/^0(\d:)/, '$1') + ')' : source.title;
             if (element.tagName === 'BUTTON') {
                 element.type = 'button'; element.className = 'btn btn-link p-0 align-baseline citation';
-                element.setAttribute('aria-label', label + root.dataset.seekSuffix);
+                element.setAttribute('aria-label', label + ' ' + root.dataset.seekSuffix);
                 element.dataset.videoId = String(source.video_id);
                 element.addEventListener('click', () => {
                     const target = bridge.videos?.find(video => video.videoId === source.video_id);

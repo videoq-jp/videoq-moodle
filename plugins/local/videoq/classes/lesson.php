@@ -1,27 +1,68 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 // SPDX-License-Identifier: GPL-3.0-or-later.
-namespace local_videoq;
-defined('MOODLE_INTERNAL') || die();
 
-/** Administrator-owned associations; browser parameters cannot choose modules. */
+/**
+ * Resolves permitted source videos and LTI activities for a course.
+ *
+ * @package local_videoq
+ * @copyright 2026 VideoQ contributors
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace local_videoq;
+
+/**
+ * Administrator-owned associations; browser parameters cannot choose modules.
+ */
 final class lesson {
-    /** Resolve the shared course entry afresh; it must survive removal of a video. */
+    /**
+     * Resolve the shared course entry afresh; it must survive removal of a video.
+     *
+     * @param int $courseid Course identifier.
+     * @return array|null Accessible course entry, or null when none is available.
+     */
     public static function for_course(int $courseid): ?array {
         global $USER, $DB;
         $info = get_fast_modinfo($courseid, $USER->id);
         $typeid = (int)get_config('local_videoq', 'typeid');
         foreach (course_access::lessons($courseid) as $item) {
-            if (!isset($info->cms[$item['videoCmid']], $info->cms[$item['ltiCmid']])) continue;
+            if (!isset($info->cms[$item['videoCmid']], $info->cms[$item['ltiCmid']])) {
+                continue;
+            }
             $video = $info->cms[$item['videoCmid']];
             $lti = $info->cms[$item['ltiCmid']];
-            if (!$video->uservisible || !$lti->uservisible || $video->deletioninprogress || $lti->deletioninprogress
+            if (
+                !$video->uservisible || !$lti->uservisible || $video->deletioninprogress || $lti->deletioninprogress
                     || ($typeid && (int)$DB->get_field('lti', 'typeid', ['id' => $lti->instance]) !== $typeid)
                     || !has_capability('mod/resource:view', \context_module::instance($video->id))
-                    || !has_capability('mod/lti:view', \context_module::instance($lti->id))) continue;
+                    || !has_capability('mod/lti:view', \context_module::instance($lti->id))
+            ) {
+                continue;
+            }
             return self::find($item['id']);
         }
         return null;
     }
+    /**
+     * Validates and decodes the administrator-defined lesson mappings.
+     *
+     * @param string $json Administrator-provided JSON mappings.
+     * @return array
+     */
     public static function parse(string $json): array {
         $items = json_decode($json, false, 64, JSON_THROW_ON_ERROR);
         if (!is_array($items) || !array_is_list($items) || count($items) > 500) {
@@ -33,13 +74,15 @@ final class lesson {
                 throw new \InvalidArgumentException('Expected a lesson object');
             }
             $item = (array)$item;
-            if (!is_array($item) || count($item) !== 4
+            if (
+                !is_array($item) || count($item) !== 4
                     || !isset($item['id'], $item['title'], $item['videoCmid'], $item['ltiCmid'])
                     || !is_string($item['id']) || !preg_match('/^[a-z0-9_-]{1,64}$/D', $item['id'])
                     || !is_string($item['title']) || trim($item['title']) === '' || strlen($item['title']) > 500
                     || !is_int($item['videoCmid']) || $item['videoCmid'] < 1
                     || !is_int($item['ltiCmid']) || $item['ltiCmid'] < 1
-                    || isset($lessons[$item['id']])) {
+                    || isset($lessons[$item['id']])
+            ) {
                 throw new \InvalidArgumentException('Invalid or duplicate lesson');
             }
             $lessons[$item['id']] = $item;
@@ -47,14 +90,26 @@ final class lesson {
         return $lessons;
     }
 
+    /**
+     * Finds a configured lesson by its administrator-assigned identifier.
+     *
+     * @param string $id Material binding or lesson identifier.
+     * @return array
+     */
     public static function find(string $id): array {
         global $DB;
         if (preg_match('/^sync_([1-9][0-9]*)$/D', $id, $match)) {
             $row = $DB->get_record('local_videoq_sync', ['cmid' => (int)$match[1], 'enabled' => 1]);
-            if (!$row) throw new \moodle_exception('unknownlesson', 'local_videoq');
+            if (!$row) {
+                throw new \moodle_exception('unknownlesson', 'local_videoq');
+            }
             $resource = $DB->get_record('course_modules', ['id' => $row->cmid, 'deletioninprogress' => 0], '*', MUST_EXIST);
             $title = $DB->get_field('resource', 'name', ['id' => $resource->instance], MUST_EXIST);
-            return ['id' => $id, 'title' => $title, 'videoCmid' => (int)$row->cmid, 'ltiCmid' => (int)$row->lticmid, 'syncStatus' => $row->status];
+            return ['id' => $id,
+                 'title' => $title,
+                 'videoCmid' => (int)$row->cmid,
+                 'ltiCmid' => (int)$row->lticmid,
+                 'syncStatus' => $row->status];
         }
         try {
             $lessons = self::parse(get_config('local_videoq', 'lessons') ?: '[]');

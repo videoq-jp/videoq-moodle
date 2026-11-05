@@ -11,42 +11,78 @@
 - An administrator on Moodle and the owning account on VideoQ.
 
 Moodle runs PHP and serves the browser JavaScript directly. No Node.js runtime,
-package manager or JavaScript compilation step is needed for these plugins,
-their package build, this repository's lab or CI.
+JavaScript package manager or JavaScript compilation step is needed for these
+plugins, their package build, this repository's lab or CI. The development-only
+Moodle coding check installs locked PHP tools in an isolated directory; those
+tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
 
 ## Install and connect
 
-1. Download `local_videoq.zip`, `ltisource_videoq.zip` and `SHA256SUMS` from the
-   [releases](https://github.com/videoq-jp/videoq-moodle/releases). Verify
-   checksums with `sha256sum -c SHA256SUMS` in the download directory.
-2. Install `local_videoq.zip` through Moodle's plugin installer, then install
-   `ltisource_videoq.zip`. Complete the Moodle database upgrade. Each archive
-   contains Moodle's expected `videoq/` root. For a manual installation, put the
-   folders under `public/local/videoq` and `public/mod/lti/source/videoq` on
-   Moodle 5.1, then run Moodle's normal CLI upgrade.
-3. As Moodle administrator, open **Site administration → Plugins → Local plugins
+### Install through Moodle administration
+
+The official Marketplace listing is still being prepared and cannot be installed
+from the directory yet. After approval and publication, use Moodle's **Site
+administration → Plugins → Install plugins → Find plugins in Moodle Marketplace** and install both VideoQ components, including the declared
+companion dependency. No Git or server-shell operation is needed for this path.
+
+For a review/evaluation build, a developer can provide the two component ZIPs
+built with the [submission profile](translations.md). Upload `local_videoq.zip`
+first and then `ltisource_videoq.zip` through Moodle's standard ZIP installer and
+complete the database upgrade. The optional manual connection settings are not
+required during installation. Then open **Connect to VideoQ** as described below. Do not upload the repository source ZIP or the
+AMOS translation ZIP. Web installation must be enabled by the Moodle host.
+Historical prereleases are not automatically the current submission candidate.
+
+### Optional Git installation for server operators
+
+Clone the repository outside Moodle's public directory. For Moodle 5.1, place
+both plugin directories under its `public/` directory. Replace the example paths
+below with your actual installation paths:
+
+```sh
+git clone https://github.com/videoq-jp/videoq-moodle.git /opt/videoq-moodle
+cp -R /opt/videoq-moodle/plugins/local/videoq /var/www/moodle/public/local/videoq
+cp -R /opt/videoq-moodle/plugins/ltisource/videoq /var/www/moodle/public/mod/lti/source/videoq
+sudo -u www-data php /var/www/moodle/admin/cli/upgrade.php --non-interactive
+```
+
+Run the upgrade as your Moodle web-server user. The destination plugin directories
+must not already exist for this initial-install example. For updates, back up the
+site, enable maintenance mode, fetch the reviewed release, replace both plugin
+directories and run the upgrade again. Do not copy over existing directories and
+leave removed plugin files behind. ZIP installation through Moodle's plugin
+installer is an alternative when release archives are available; it is not required.
+
+### Connect from Moodle
+
+1. As Moodle administrator, open **Site administration → Plugins → Local plugins
    → Connect to VideoQ** (or `/local/videoq/connect.php`). Enter your **VideoQ
    HTTPS URL**: use `https://videoq.jp` for the compatible cloud release or your
    own on-premises URL, including its custom HTTPS port if needed.
-4. Choose **Connect to VideoQ**. Sign in to the owning VideoQ account, confirm
+2. Choose **Connect to VideoQ**. Sign in to the owning VideoQ account, confirm
    the displayed Moodle URL and account quota permissions, then allow the
    connection. You return to Moodle automatically. Complete the flow within ten
-   minutes; no code copying or manual LTI/key registration is needed. This flow
-   requires the compatible backend in [VideoQ PR #1319](https://github.com/videoq-jp/videoq/pull/1319),
-   which is not yet deployed to the public service. An older compatible backend
-   can still use **Connect using a code**: issue a code in VideoQ settings and
-   paste it into that collapsed section.
-5. Add a video through Moodle's ordinary **File** activity. Enable **VideoQ
+   minutes; no code copying or manual LTI/key registration is needed. The current cloud service at `https://videoq.jp` supports
+   this flow. For an on-premises deployment, use a release containing
+   [VideoQ PR #1319](https://github.com/videoq-jp/videoq/pull/1319).
+   No setup form or connection-code generation in VideoQ settings is needed.
+3. Add a video through Moodle's ordinary **File** activity. Enable **VideoQ
    questions** in its settings. Wait for background processing to finish.
-6. Open the course-wide VideoQ assistant. Moodle plays the selected video and
+4. Open the course-wide VideoQ assistant. Moodle plays the selected video and
    renders the chat using its native messaging templates. VideoQ generates
    streamed answers and supplies citations. Clicking a citation selects its
    permitted video and seeks to the cited time.
 
 Do not paste AI-provider keys, private signing keys or server configuration into
-the connection-code field. The [materials-service guide](materials-service.md)
+the connection form. The [materials-service guide](materials-service.md)
 describes operator configuration and migration from legacy `VIDEOQ1.` connections.
 Normal setup requires no separate synchronization credential or connector server.
+
+## Data requests and retention
+
+Review [data handling](privacy.md) before enabling the service. Moodle privacy
+requests do not automatically export/delete external VideoQ history; arrange the
+external request and retention process with the configured deployment operator.
 
 ## Responsibilities and access
 
@@ -82,6 +118,20 @@ Repeat **Connect to VideoQ** to reconnect through the supported workflow.
 For platform-side trust revocation as well, disable/remove the registered VideoQ
 external tool in Moodle through its standard tool administration. The remote
 VideoQ disconnect does not delete Moodle's tool registration.
+
+## Uninstall
+
+Disconnect and revoke the tool's trust as described above before removing plugins.
+Use Moodle's plugin overview to uninstall `ltisource_videoq` first, then remove
+its `public/mod/lti/source/videoq` code directory. Only then uninstall
+`local_videoq` and remove `public/local/videoq`. Moodle can still block removal
+of the local plugin while dependent companion code remains on disk, even after
+its database uninstall succeeds.
+
+Uninstalling removes plugin configuration and synchronization tables. Source
+File activities and course videos remain in Moodle. It does not erase VideoQ's
+processed copies or question history; manage those separately in the owning
+VideoQ account. Reinstallation requires connecting and enabling questions again.
 
 ## Operations and troubleshooting
 

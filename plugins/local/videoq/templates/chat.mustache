@@ -1,6 +1,38 @@
 {{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see https://www.gnu.org/licenses/.
     SPDX-License-Identifier: GPL-3.0-or-later.
+
+    @template local_videoq/chat
+    @copyright 2026 VideoQ contributors
+    @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
     Native Moodle messaging UI; question delivery and AI evidence are supplied by VideoQ.
+
+    Example context (json):
+    {
+        "heading": "AI assistant",
+        "connectionerror": "Connection unavailable.",
+        "seeksuffix": "Jump to",
+        "feedbackgood": "Good",
+        "feedbackbad": "Bad",
+        "empty": "No questions yet.",
+        "connecting": "Connecting...",
+        "hint": "Ask a question about this course.",
+        "questionmessage": false,
+        "answermessage": false
+    }
 }}
 <div id="videoq-native-chat" class="message-app h-100" data-connection-error="{{connectionerror}}" data-seek-suffix="{{seeksuffix}}" aria-label="{{heading}}">
     <div class="header-container p-3 border-bottom bg-body d-flex align-items-center justify-content-between">
@@ -28,11 +60,11 @@
 
 <template id="videoq-native-feedback-template">
     <div class="d-flex align-items-center gap-1 pt-2" data-region="answer-feedback">
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-feedback="good" aria-label="Good" aria-pressed="false">
-            <i class="icon fa fa-thumbs-up fa-fw" aria-hidden="true"></i> Good
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-feedback="good" aria-label="{{feedbackgood}}" aria-pressed="false">
+            <i class="icon fa fa-thumbs-up fa-fw" aria-hidden="true"></i> {{feedbackgood}}
         </button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-feedback="bad" aria-label="Bad" aria-pressed="false">
-            <i class="icon fa fa-thumbs-down fa-fw" aria-hidden="true"></i> Bad
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-feedback="bad" aria-label="{{feedbackbad}}" aria-pressed="false">
+            <i class="icon fa fa-thumbs-down fa-fw" aria-hidden="true"></i> {{feedbackbad}}
         </button>
         <small role="status" class="text-danger"></small>
     </div>

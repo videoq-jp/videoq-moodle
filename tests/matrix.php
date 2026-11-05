@@ -1,0 +1,35 @@
+<?php
+/** Refuse unsafe lifecycle targets before any Docker or source preparation can run. */
+declare(strict_types=1);
+$root = dirname(__DIR__);
+$temporary = sys_get_temp_dir() . '/videoq-matrix-guard-' . bin2hex(random_bytes(6));
+mkdir($temporary, 0700);
+$marker = $temporary . '/.existing-data';
+file_put_contents($marker, 'preserve this unrelated data');
+$symlink = $temporary . '-link';
+function matrix_reject(array $args, string $expected): void {
+    global $root;
+    $process = proc_open([PHP_BINARY, '-d', 'display_errors=stderr', '-d', 'log_errors=0', $root . '/lab/check-marketplace-matrix.php', ...$args],
+        [0 => ['file', '/dev/null', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    if (!is_resource($process)) throw new RuntimeException('Cannot launch guard check');
+    $output = stream_get_contents($pipes[1]); fclose($pipes[1]);
+    $error = stream_get_contents($pipes[2]); fclose($pipes[2]);
+    if (proc_close($process) === 0 || !str_contains($error, $expected) || $output !== '') {
+        throw new RuntimeException('Unsafe matrix target was not rejected before orchestration');
+    }
+}
+try {
+    matrix_reject(['pg', $temporary], 'Work directory must be empty and outside the checkout');
+    matrix_reject(['mysql', $root], 'Work directory must be empty and outside the checkout');
+    matrix_reject(['other', $temporary . '/new'], 'Expected pg or mysql');
+    if (is_dir($temporary . '/new')) throw new RuntimeException('Invalid mode created a work directory');
+    if (!symlink($temporary, $symlink)) throw new RuntimeException('Cannot create guard fixture symlink');
+    matrix_reject(['pg', $symlink], 'Use an absolute external work directory');
+    if (file_get_contents($marker) !== 'preserve this unrelated data' || iterator_count(new FilesystemIterator($temporary)) !== 1) {
+        throw new RuntimeException('Guard changed unrelated existing data');
+    }
+    echo "Matrix rejects nonempty/checkout/symlink targets and invalid modes before orchestration.\n";
+} finally {
+    if (is_link($symlink)) unlink($symlink);
+    unlink($marker); rmdir($temporary);
+}
