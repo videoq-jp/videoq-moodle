@@ -58,6 +58,8 @@ jobs:
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/release.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/live-lock.php
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/matrix.php
+      - name: Verify local root-source publication offline
+        run: php tests/source-exports.php
       - name: Check Privacy API against pinned Moodle classes
         env:
           MOODLE_REVISION: a682566412e1d429b95ac8ef4351a518f61b94c5
