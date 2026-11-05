@@ -8,24 +8,34 @@ the native Moodle chat interface keep their existing behavior.
 
 ## Compatible server and operator setup
 
-This requires the VideoQ materials-service implementation and migration
-`0051_lti_materials.sql`, currently in the compatible development checkout. A
-build of the source base commit alone is insufficient. The initial implementation
-requires configured S3-compatible signed PUT uploads; native-only bucket bindings
-must first be configured for signed uploads. Do not deploy the plugin expecting
-an unchanged VideoQ release to acquire missing backend features.
+This requires the compatible VideoQ materials-service backend. The mainline
+implementation is being reviewed in
+[VideoQ PR #1319](https://github.com/videoq-jp/videoq/pull/1319); installing these
+plugins alone does not add missing backend features to a deployed VideoQ release.
+Apply the backend's migrations using its normal release procedure. Keep the
+existing queue, processing worker and maintenance scheduler running.
 
-Apply all current VideoQ migrations using the normal release procedure. Configure
-`LTI_CONFIG` with `databaseRegistrations: true` and the correct `toolOrigin`.
-Keep the existing queue, processing worker and maintenance scheduler running.
-Generate the tool signing key ring once, outside the checkout:
+The automatic setup in that PR uses VideoQ's existing canonical HTTPS
+`BETTER_AUTH_URL`, `USER_SECRET_ENCRYPTION_KEY` and S3-compatible signed-upload
+configuration. No LTI-specific server settings or manual signing-key registration
+are needed. The first authenticated connection-code request generates a key and
+saves it encrypted in the VideoQ database. Restarts and replicas reuse it; restore
+database backups with the same application encryption key. An administrator can
+disable this automatic setup with `LTI_CONFIG=false`.
+
+The older experimental lab has a separate migration history through
+`0051_lti_materials.sql`; do not apply mainline migrations to that lab database.
+Its backend still needs explicit `LTI_CONFIG` with `databaseRegistrations: true`
+and the correct `toolOrigin`, plus a manually managed signing key. For this older
+backend or an advanced operator-managed override, generate the ring outside the
+checkout:
 
 ```sh
 cd /path/to/videoq-moodle
 php scripts/generate-lti-tool-keys.php /secure/path/lti-tool-keys.json
 ```
 
-Load that JSON file as the **VideoQ server secret** `LTI_TOOL_KEYS`. Do not put it
+For that manual path, load the JSON as the **VideoQ server secret** `LTI_TOOL_KEYS`. Do not put it
 in the Moodle settings, a URL, source control, logs or a connection code. VideoQ
 publishes only its public components at `/api/lti/jwks`. For rotation, replace the
 current private JWK and retain its public `kty`, `n`, `e` components in `previous`
