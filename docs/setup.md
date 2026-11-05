@@ -91,6 +91,9 @@ File limits for your expected video sizes. Use publicly trusted HTTPS or install
 your organization's CA through Moodle's standard trust configuration. Keep peer
 and hostname verification enabled. Do not expose signed upload URLs in logs.
 Moodle must reach the selected VideoQ server and VideoQ must reach Moodle. For
+deployments with a separate API hostname, enter the public origin serving
+VideoQ's `/api` routes; discovery opens its configured web UI automatically.
+For
 private on-premises endpoints, configure Moodle's normal outbound-network and CA
 trust policies. No URL is hardcoded to the cloud service; redirects are disabled
 on discovery and exchange requests. The administrator's Moodle session and an

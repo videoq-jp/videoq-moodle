@@ -78,7 +78,7 @@ namespace {
         curl::$metadata = ['toolOrigin' => 'https://videoq.jp', 'authorizationUrl' => 'https://videoq.jp/moodle/connect'];
         check(str_starts_with(Connection::start('https://VideoQ.jp:443/'), 'https://videoq.jp/moodle/connect?'), 'Default HTTPS port and hostname case');
         curl::$metadata = ['toolOrigin' => 'https://api.private.example:8443', 'authorizationUrl' => 'https://web.private.example:9443/moodle/connect'];
-        check(str_starts_with(Connection::start('https://web.private.example:9443'), curl::$metadata['authorizationUrl']), 'Separate frontend/API discovery');
+        check(str_starts_with(Connection::start('https://api.private.example:8443'), curl::$metadata['authorizationUrl']), 'Separate frontend/API discovery');
         foreach (['http://example.invalid/moodle/connect', 'https://example.invalid/moodle/connect?redirect=evil', 'https://example.invalid/elsewhere'] as $invalid) {
             curl::$metadata['authorizationUrl'] = $invalid;
             rejects(fn() => Connection::start('https://private.example'), 'Invalid discovered destination');
