@@ -4,7 +4,7 @@
   "components": {
     "local_videoq": {
       "component": "local_videoq",
-      "archiveSha256": "c3680903f20fa3361da98999447af6fa911212246bc4c4c56ddc823b7c9734c2",
+      "archiveSha256": "4ca0504a053cda66e64dc7fea885bd26e64be002c7fcf48a86054b130184e7ff",
       "validationPassed": true,
       "alphaWarning": true,
       "manualSetupPrompted": false,
@@ -143,14 +143,14 @@
   "installedRuntime": {
     "database": "pgsql",
     "versions": {
-      "local_videoq": 2026110602,
+      "local_videoq": 2026110603,
       "ltisource_videoq": 2026110601
     },
     "manualDefaultsInitialized": true,
     "accessKeyInitialized": true,
     "tablesCreated": 3
   },
-  "candidatePluginCommit": "814f3fbc84d57bf81e4f6753c857d5bcef1dcedf",
+  "candidatePluginCommit": "e9afc8f4002f1449088007900b1378983a5f517b",
   "moodleSourceCommit": "a682566412e1d429b95ac8ef4351a518f61b94c5",
   "moodleVersion": "5.1.8+ (Build 20261030)",
   "browserRunner": "lab/check-marketplace-web-install.php",

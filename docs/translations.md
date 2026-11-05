@@ -18,7 +18,7 @@ are unchanged; a new official release must use the submission profile after the
 remaining review gates. No release or Marketplace upload is performed here.
 
 The translation output contains `amos-ja.zip` and `amos-ja.json`. The ZIP contains
-flat files named `local_videoq.php` (73 strings) and `ltisource_videoq.php` (6
+flat files named `local_videoq.php` (75 strings) and `ltisource_videoq.php` (6
 strings). It is an AMOS import, not a plugin installer or installable Moodle
 language pack. The exporter checks data-only, single-quoted definitions, duplicate
 identifiers, exact English/Japanese key coverage and matching Moodle placeholders.

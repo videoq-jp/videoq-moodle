@@ -1,7 +1,7 @@
 {
   "scope": "Current normalized English-only candidate: installed Moodle PostgreSQL/MySQL lifecycle",
-  "pluginRevision": "fb6be9ae92b493cdb4e685573f92e43b011f8194",
-  "builderAndRunnerRevision": "814f3fbc84d57bf81e4f6753c857d5bcef1dcedf",
+  "pluginRevision": "e9afc8f4002f1449088007900b1378983a5f517b",
+  "builderAndRunnerRevision": "e9afc8f4002f1449088007900b1378983a5f517b",
   "runner": "lab/check-marketplace-matrix.php",
   "databases": {
     "pg": {
@@ -12,7 +12,7 @@
       "phpImage": "moodlehq/moodle-php-apache:8.3@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e",
       "databaseImage": "pgvector/pgvector:pg17@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8",
       "archiveSha256": {
-        "local_videoq.zip": "c3680903f20fa3361da98999447af6fa911212246bc4c4c56ddc823b7c9734c2",
+        "local_videoq.zip": "4ca0504a053cda66e64dc7fea885bd26e64be002c7fcf48a86054b130184e7ff",
         "ltisource_videoq.zip": "92cbb616311b548d4f67acb5318a219449822babb2af9ff37c7d3762bf6b5815"
       },
       "candidateDeveloperDiagnostics": 0,
@@ -30,7 +30,7 @@
           "passed": true,
           "phase": "verify",
           "database": "pgsql",
-          "version": 2026110602,
+          "version": 2026110603,
           "coursePreserved": true,
           "sourceVideoBytesPreserved": true,
           "accessKeyPreserved": true,
@@ -47,7 +47,7 @@
             "local_videoq_assertions"
           ],
           "versions": {
-            "local_videoq": 2026110602,
+            "local_videoq": 2026110603,
             "ltisource_videoq": 2026110601
           },
           "privacyMetadata": true,
@@ -110,7 +110,7 @@
             "local_videoq_assertions"
           ],
           "versions": {
-            "local_videoq": 2026110602,
+            "local_videoq": 2026110603,
             "ltisource_videoq": 2026110601
           },
           "privacyMetadata": true,
@@ -141,7 +141,7 @@
       "phpImage": "moodlehq/moodle-php-apache:8.3@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e",
       "databaseImage": "mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902",
       "archiveSha256": {
-        "local_videoq.zip": "c3680903f20fa3361da98999447af6fa911212246bc4c4c56ddc823b7c9734c2",
+        "local_videoq.zip": "4ca0504a053cda66e64dc7fea885bd26e64be002c7fcf48a86054b130184e7ff",
         "ltisource_videoq.zip": "92cbb616311b548d4f67acb5318a219449822babb2af9ff37c7d3762bf6b5815"
       },
       "candidateDeveloperDiagnostics": 0,
@@ -159,7 +159,7 @@
           "passed": true,
           "phase": "verify",
           "database": "mysqli",
-          "version": 2026110602,
+          "version": 2026110603,
           "coursePreserved": true,
           "sourceVideoBytesPreserved": true,
           "accessKeyPreserved": true,
@@ -176,7 +176,7 @@
             "local_videoq_assertions"
           ],
           "versions": {
-            "local_videoq": 2026110602,
+            "local_videoq": 2026110603,
             "ltisource_videoq": 2026110601
           },
           "privacyMetadata": true,
@@ -239,7 +239,7 @@
             "local_videoq_assertions"
           ],
           "versions": {
-            "local_videoq": 2026110602,
+            "local_videoq": 2026110603,
             "ltisource_videoq": 2026110601
           },
           "privacyMetadata": true,
@@ -264,11 +264,11 @@
     }
   },
   "hostedCi": {
-    "runUrl": "https://github.com/videoq-jp/videoq-moodle/actions/runs/42068103034",
-    "headRevision": "814f3fbc84d57bf81e4f6753c857d5bcef1dcedf",
+    "runUrl": "https://github.com/videoq-jp/videoq-moodle/actions/runs/42074846402",
+    "headRevision": "e9afc8f4002f1449088007900b1378983a5f517b",
     "requiredGatePassed": true,
     "bothDatabaseJobsPassed": true,
-    "archiveHashesMatchNativeAndPinnedImage": true
+    "archiveHashesMatchCommittedRootExports": true
   },
   "archiveReproducibility": {
     "timezone": "UTC",
@@ -284,10 +284,6 @@
       "0600",
       "0664",
       "0644"
-    ],
-    "runtimeContentIdenticalToEarlierCandidate": {
-      "local_videoq": 39,
-      "ltisource_videoq": 6
-    }
+    ]
   }
 }
