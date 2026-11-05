@@ -37,6 +37,7 @@ try {
     $original = file_get_contents($fixture . '/plugins/local/videoq/version.php');
     file_put_contents($fixture . '/plugins/local/videoq/version.php', 'uncommitted source must not be published');
     file_put_contents($fixture . '/plugins/local/videoq/untracked.php', 'untracked source must not be published');
+    file_put_contents($fixture . '/scripts/package-plugins.php', '<?php throw new RuntimeException("dirty builder must not run");');
     $builder = [PHP_BINARY, '-d', 'display_errors=stderr', '-d', 'log_errors=0', $fixture . '/scripts/export-plugin-sources.php'];
     $reference = null;
     foreach (['first', 'repeat'] as $name) {

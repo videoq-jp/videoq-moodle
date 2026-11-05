@@ -35,8 +35,10 @@ $environment = array_replace(getenv(), ['GIT_AUTHOR_NAME' => 'VideoQ source expo
     'GIT_AUTHOR_DATE' => $date, 'GIT_COMMITTER_DATE' => $date]);
 $snapshot = $output . '/.snapshot';
 mkdir($snapshot . '/scripts', 0700, true);
-// Use the current reviewed packager with files read from committed Git blobs, never the working tree.
-copy(__DIR__ . '/package-plugins.php', $snapshot . '/scripts/package-plugins.php');
+// Use the committed HEAD packager with selected committed plugin blobs, never dirty build scripts.
+$builderrevision = trim(source_command(['git', '-C', $root, 'rev-parse', 'HEAD']));
+$builder = source_command(['git', '-C', $root, 'show', $builderrevision . ':scripts/package-plugins.php']);
+if (file_put_contents($snapshot . '/scripts/package-plugins.php', $builder) !== strlen($builder)) throw new RuntimeException('Cannot write committed builder');
 $components = ['local_videoq' => 'plugins/local/videoq', 'ltisource_videoq' => 'plugins/ltisource/videoq'];
 foreach ($components as $component => $prefix) {
     $entries = source_command(['git', '-C', $root, 'ls-tree', '-r', '-z', $revision . ':' . $prefix]);
@@ -53,7 +55,7 @@ foreach ($components as $component => $prefix) {
 }
 source_command([PHP_BINARY, $snapshot . '/scripts/package-plugins.php', $output . '/archives', '--marketplace']);
 $report = ['status' => 'local-only-no-remotes', 'sourceRepository' => 'https://github.com/videoq-jp/videoq-moodle',
-    'sourceRevision' => $revision, 'builderSha256' => hash_file('sha256', __DIR__ . '/package-plugins.php'), 'components' => []];
+    'sourceRevision' => $revision, 'builderRevision' => $builderrevision, 'builderSha256' => hash('sha256', $builder), 'components' => []];
 foreach ($components as $component => $prefix) {
     $name = 'moodle-' . $component;
     $directory = $output . '/' . $name;
