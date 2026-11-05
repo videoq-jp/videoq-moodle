@@ -4,6 +4,9 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
+  merge_group:
+  schedule:
+    - cron: '23 0 * * 1'
   workflow_dispatch:
     inputs:
       release_tag:
@@ -12,12 +15,14 @@ on:
         type: string
 permissions:
   contents: read
-env:
-  PHP_IMAGE: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
 jobs:
   verify:
     name: PHP-only tooling and native browser checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: moodle-verify-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       # Public checkout through git, so CI itself needs no JavaScript actions.
       - name: Fetch the exact event revision
@@ -26,6 +31,10 @@ jobs:
           git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
           git fetch --depth=1 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
+      - name: Resolve the shared immutable PHP image
+        run: echo "PHP_IMAGE=$(php scripts/runtime-images.php php)" >> "$GITHUB_ENV"
+      - name: Verify repository operations policies
+        run: docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/operations.php
       - name: Verify installer contract offline
         run: docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/packages.php
       - name: Verify private signing-key helper offline
@@ -47,6 +56,8 @@ jobs:
         run: |
           docker compose --env-file lab/compose.env.example -f lab/compose.yaml --profile mock config --quiet
           docker compose --env-file lab/compose.env.example -f lab/compose.restore.yaml config --quiet
+          docker compose --env-file lab/compose.env.example -f lab/compose.yaml --profile mock config --format json | php tests/compose-images.php lab
+          docker compose --env-file lab/compose.env.example -f lab/compose.restore.yaml config --format json | php tests/compose-images.php restore
       - name: Build installers
         run: |
           mkdir -p dist
@@ -56,6 +67,10 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.release_tag != '')
     needs: verify
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: moodle-release-${{ github.ref }}
+      cancel-in-progress: false
     permissions:
       contents: write
     env:
@@ -69,11 +84,18 @@ jobs:
           git fetch --depth=1 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
           cp scripts/publish-release.php /tmp/videoq-publish-release.php
+          cp scripts/runtime-images.php /tmp/videoq-runtime-images.php
+          cp lab/images/compose.yaml /tmp/videoq-runtime-images.yaml
           git fetch --depth=1 origin "refs/tags/$RELEASE_TAG"
           git checkout --detach FETCH_HEAD
           if [ "$GITHUB_EVENT_NAME" = push ]; then
             test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           fi
+      - name: Resolve the tagged immutable PHP image
+        run: |
+          manifest=lab/images/compose.yaml
+          if [ ! -f "$manifest" ]; then manifest=/tmp/videoq-runtime-images.yaml; fi
+          echo "PHP_IMAGE=$(php /tmp/videoq-runtime-images.php php "$manifest")" >> "$GITHUB_ENV"
       - name: Verify and build tagged installers offline
         run: |
           docker run --rm --network none --entrypoint php -v "$PWD:/src:ro" "$PHP_IMAGE" /src/tests/packages.php

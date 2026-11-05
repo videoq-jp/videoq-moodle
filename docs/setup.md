@@ -17,7 +17,7 @@ their package build, this repository's lab or CI.
 ## Install and connect
 
 1. Download `local_videoq.zip`, `ltisource_videoq.zip` and `SHA256SUMS` from the
-   [releases](https://github.com/yukiharada1228/videoq-moodle/releases). Verify
+   [releases](https://github.com/videoq-jp/videoq-moodle/releases). Verify
    checksums with `sha256sum -c SHA256SUMS` in the download directory.
 2. Install `local_videoq.zip` through Moodle's plugin installer, then install
    `ltisource_videoq.zip`. Complete the Moodle database upgrade. Each archive

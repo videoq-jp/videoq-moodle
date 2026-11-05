@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: docker-compose
+    directory: /lab/images
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: moodlehq/moodle-php-apache
+        update-types: ["version-update:semver-minor"]
+    groups:
+      lab-images:
+        patterns: ["*"]
+        update-types: [minor, patch]

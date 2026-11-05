@@ -1,7 +1,9 @@
 # Disposable second Moodle installation for cross-site backup checks.
 services:
   moodle-restore:
-    image: moodlehq/moodle-php-apache@sha256:1db7b6ed013fcb5268095b5e28c410ba9117d38d9b6a324c100c48fcbe69745e
+    extends:
+      file: images/compose.yaml
+      service: php
     volumes:
       - ${MOODLE_SOURCE:?Set MOODLE_SOURCE}:/var/www/html
       - ./restore-moodle-config.php:/var/www/html/config.php:ro
@@ -13,7 +15,9 @@ services:
       - certificates:/certificates:ro
     networks: [trial]
   restore-proxy:
-    image: caddy:2-alpine
+    extends:
+      file: images/compose.yaml
+      service: proxy
     ports: [127.0.0.1:18444:18444]
     volumes:
       - ./restore-Caddyfile:/etc/caddy/Caddyfile:ro
