@@ -1,6 +1,16 @@
 <?php
 /** Refuse unsafe lifecycle targets before any Docker or source preparation can run. */
 declare(strict_types=1);
+require dirname(__DIR__) . '/lab/support/matrix-diagnostics.php';
+$private = 'fixture-password-and-signed-url-secret';
+$summary = matrix_diagnostic_locations('PHP Warning: ' . $private . ' in /site/public/course/lib.php on line 123'
+    . "\n* line 456 of /public/lib/private-directory-" . $private . '/course.php'
+    . "\n" . $private . ' https://storage.example/secret?signature=' . $private
+    . "\nFatal error: " . $private . ' in /src/lab/probe.php:789'
+    . "\n#0 /src/lab/probe.php(812): call() " . $private);
+if ($summary !== 'lib.php:123, course.php:456, probe.php:789, probe.php:812' || str_contains($summary, $private)) {
+    throw new RuntimeException('Matrix diagnostics exposed fixture data or lost source locations');
+}
 $root = dirname(__DIR__);
 $temporary = sys_get_temp_dir() . '/videoq-matrix-guard-' . bin2hex(random_bytes(6));
 mkdir($temporary, 0700);

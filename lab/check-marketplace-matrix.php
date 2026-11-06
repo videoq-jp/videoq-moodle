@@ -2,6 +2,7 @@
 /** Build English-only ZIPs and exercise a disposable installed-Moodle database lifecycle. */
 declare(strict_types=1);
 require dirname(__DIR__) . '/scripts/runtime-images.php';
+require __DIR__ . '/support/matrix-diagnostics.php';
 $mode = $argv[1] ?? '';
 if (!in_array($mode, ['pg', 'mysql'], true)) throw new InvalidArgumentException('Expected pg or mysql and a fresh external work directory');
 $root = dirname(__DIR__);
@@ -30,7 +31,10 @@ function matrix_run(array $args, string $log, bool $required = true): int {
         2 => ['file', $log . '.stderr', 'w']], $pipes);
     if (!is_resource($process)) throw new RuntimeException('Cannot launch fixture command');
     $code = proc_close($process);
-    if ($required && $code !== 0) throw new RuntimeException('Fixture command failed: ' . basename($log));
+    if ($required && $code !== 0) {
+        $locations = matrix_diagnostic_locations(file_get_contents($log) . file_get_contents($log . '.stderr'));
+        throw new RuntimeException('Fixture command failed: ' . basename($log) . ($locations !== '' ? ' (' . $locations . ')' : ''));
+    }
     return $code;
 }
 function matrix_diagnostics(string $log): void {
@@ -144,7 +148,11 @@ CONFIG;
     $check = static function(string $name, array $args) use ($php, $work, &$reports): void {
         $log = $work . '/' . $name . '.json';
         matrix_run([...$php, ...$args], $log);
-        if (trim(file_get_contents($log . '.stderr')) !== '') throw new RuntimeException('Unexpected check diagnostics');
+        $diagnostic = trim(file_get_contents($log . '.stderr'));
+        if ($diagnostic !== '') {
+            $locations = matrix_diagnostic_locations($diagnostic);
+            throw new RuntimeException('Unexpected check diagnostics: ' . $name . ($locations !== '' ? ' (' . $locations . ')' : ''));
+        }
         $report = json_decode(file_get_contents($log), true, 64, JSON_THROW_ON_ERROR);
         if (($report['passed'] ?? false) !== true) throw new RuntimeException('Runtime check failed: ' . $name);
         $reports[$name] = $report;
@@ -163,6 +171,7 @@ CONFIG;
     }
     $check('privacy-requests', ['/src/lab/check-marketplace-privacy.php', '/site']);
     $check('upgraded-course-entry', ['/src/lab/check-course-entry.php', '/site']);
+    $check('upgraded-course-catalog', ['/src/lab/check-course-catalog.php', '/site']);
     echo "$mode: uninstall companion before local; preserve course and source bytes\n";
     foreach (['ltisource_videoq' => 'mod/lti/source', 'local_videoq' => 'local'] as $component => $relative) {
         $log = $work . '/uninstall-' . $component . '.log';
@@ -182,6 +191,7 @@ CONFIG;
     }
     $check('reinstalled-preservation', ['/src/lab/check-marketplace-upgrade.php', '/site', 'verify-reinstalled']);
     $check('reinstalled-course-entry', ['/src/lab/check-course-entry.php', '/site']);
+    $check('reinstalled-course-catalog', ['/src/lab/check-course-catalog.php', '/site']);
     $hashes = [];
     foreach (['local_videoq.zip', 'ltisource_videoq.zip'] as $file) $hashes[$file] = hash_file('sha256', $work . '/archives/' . $file);
     $summary = ['passed' => true, 'database' => $mode, 'moodleRevision' => $pins['moodleRevision'],
@@ -197,7 +207,7 @@ CONFIG;
     // Touch only resources carrying this invocation's unpredictable ownership label.
     if (matrix_run([...$docker, 'inspect', '--format', '{{index .Config.Labels "videoq.marketplace.matrix"}}', $database], $work . '/cleanup-owner.log', false) === 0
             && trim(file_get_contents($work . '/cleanup-owner.log')) === $id) {
-        matrix_run([...$docker, 'rm', '--force', $database], $work . '/cleanup-database.log', false);
+        matrix_run([...$docker, 'rm', '--force', '--volumes', $database], $work . '/cleanup-database.log', false);
     }
     if ($networkcreated
             && matrix_run([...$docker, 'network', 'inspect', '--format', '{{index .Labels "videoq.marketplace.matrix"}}', $network], $work . '/cleanup-network-owner.log', false) === 0

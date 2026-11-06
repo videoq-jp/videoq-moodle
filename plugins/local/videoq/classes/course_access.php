@@ -64,7 +64,7 @@ final class course_access {
         // Legacy/manual associations have no external material identity and
         // must not break or widen a migrated course's access manifest.
         if (get_config('local_videoq', 'servicemode') === 'lti') {
-            return $items;
+            return self::in_course_order($courseid, $items);
         }
         foreach (lesson::parse(get_config('local_videoq', 'lessons') ?: '[]') as $item) {
             // A source migrated to automatic synchronization has one current authority.
@@ -76,6 +76,27 @@ final class course_access {
                 $items[] = $item;
             }
         }
+        return self::in_course_order($courseid, $items);
+    }
+    /**
+     * Follows Moodle's section and activity sequence without caching user access.
+     *
+     * @param int $courseid Moodle course identifier.
+     * @param array $items Source associations, including retained tombstones.
+     * @return array
+     */
+    private static function in_course_order(int $courseid, array $items): array {
+        $sections = get_fast_modinfo($courseid)->get_sections();
+        ksort($sections, SORT_NUMERIC);
+        $positions = [];
+        foreach ($sections as $cms) {
+            foreach ($cms as $cmid) {
+                $positions[(int)$cmid] = count($positions);
+            }
+        }
+        usort($items, static fn($left, $right) =>
+            (($positions[$left['videoCmid']] ?? PHP_INT_MAX) <=> ($positions[$right['videoCmid']] ?? PHP_INT_MAX))
+            ?: ($left['videoCmid'] <=> $right['videoCmid']));
         return $items;
     }
     /**

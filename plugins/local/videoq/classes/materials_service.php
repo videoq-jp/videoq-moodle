@@ -61,12 +61,13 @@ final class materials_service {
      * @param int $courseid Moodle course identifier.
      * @param int $typeid Registered LTI tool identifier.
      * @param bool $includeentries Whether the backend opted into course entries.
+     * @param bool $uservisibility Whether the backend enforces fresh per-user access.
      * @return array
      */
-    public static function manifest(int $courseid, int $typeid, bool $includeentries = false): array {
+    public static function manifest(int $courseid, int $typeid, bool $includeentries = false, bool $uservisibility = false): array {
         $items = [];
         foreach (self::course($courseid, $typeid, $includeentries) as $row) {
-            $manifest = synchronizer::run((int)$row->id, true);
+            $manifest = synchronizer::run((int)$row->id, true, $uservisibility);
             if (!$manifest) {
                 throw new \RuntimeException('Incomplete snapshot');
             }
@@ -201,7 +202,8 @@ final class materials_service {
                 '*',
                 MUST_EXIST
             );
-            $manifest = synchronizer::run((int)$row->id, true);
+            $uservisibility = ($input['includeUserVisibility'] ?? false) === true;
+            $manifest = synchronizer::run((int)$row->id, true, $uservisibility);
             if (!$manifest['enabled'] || $manifest['generation'] !== $generation) {
                 throw new \RuntimeException('Stale source');
             }
@@ -216,7 +218,7 @@ final class materials_service {
                 'status' => 'queued', 'bytes' => 0, 'timecreated' => time(), 'timemodified' => time()];
             $job->id = $DB->insert_record('local_videoq_exports', $job);
             $task = new \local_videoq\task\export_material();
-            $task->set_custom_data(['jobid' => $job->jobid]);
+            $task->set_custom_data(['jobid' => $job->jobid, 'userVisibility' => $uservisibility]);
             \core\task\manager::queue_adhoc_task($task);
             $transaction->allow_commit();
             return self::receipt($job);

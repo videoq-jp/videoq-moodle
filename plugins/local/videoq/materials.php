@@ -66,7 +66,12 @@ try {
     }
     $courseid = (int)$input['contextId'];
     $result = match ($input['action'] ?? '') {
-        'manifest' => \local_videoq\materials_service::manifest($courseid, (int)$type->id, $includeentries),
+        'manifest' => \local_videoq\materials_service::manifest(
+            $courseid,
+            (int)$type->id,
+            $includeentries,
+            ($input['includeUserVisibility'] ?? false) === true
+        ),
         'access' => \local_videoq\materials_service::access(
             $courseid,
             (int)$type->id,

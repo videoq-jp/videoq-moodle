@@ -157,3 +157,14 @@ $string['privacyunavailable'] = '外部サービスへの個人データ要求�
 $string['privacyexportscope'] = '承認されたMoodleコンテキスト内の本人の記録です。モデルメモリと仮名化した操作記録を含みます。共有教材と他の参加者の投稿は残ります。本人との紐付けを導入する前の記録、バックアップ、AIプロバイダーの記録は運用者による別途の確認が必要です。同時編集がある場合は出力の再実行が必要です。 二重実行を防ぐため、操作識別子の技術的なハッシュは残ります。本人キー・要求本文・時刻は含みません。';
 
 $string['privacy:metadata:operationbarriers'] = '削除した操作記録と同じ要求が再実行されないようVideoQに残す、ランダムな操作識別子の名前空間付きSHA-256ハッシュです。この再送防止用の記録には、利用者・コース・操作種別・要求本文・時刻の列はありません。';
+
+$string['coursecatalog'] = 'VideoQのコース教材を管理';
+$string['cataloghelp'] = '動画をMoodleのファイル活動として追加・保存してから、各動画のVideoQ連携を有効にします。活動の移動やセクションの変更はコースの編集モードで行います。VideoQの教材一覧もその順に並びます。公開状態・利用条件・参加者はMoodleで管理します。Moodleコースの削除で起動権限は失効します。外部の履歴は別途プライバシー・保存期限の手続きに従います。';
+$string['catalogempty'] = 'このコースには管理できる動画のファイル活動がありません。動画のファイルを追加・保存し、この一覧からVideoQ連携を有効にしてください。';
+$string['catalogorganize'] = 'コースの活動を整理';
+$string['catalogupload'] = '動画のファイルを追加';
+$string['catalogcourseedit'] = 'コース設定を編集';
+$string['catalogparticipants'] = 'コースの参加者';
+$string['catalogenrolments'] = '登録方法を管理';
+$string['catalogcoursecreate'] = 'Moodleコースを作成';
+$string['catalogcoursedelete'] = 'Moodleコースを削除…';

@@ -88,6 +88,11 @@ if ($courseid) {
         echo $OUTPUT->notification(get_string($launchentry ? 'courseentryempty' : 'nocoursevideos', 'local_videoq'), 'info');
         if ($canmanageentry) {
             echo html_writer::link(
+                new moodle_url('/local/videoq/catalog.php', ['course' => $courseid]),
+                get_string('coursecatalog', 'local_videoq'),
+                ['class' => 'btn btn-secondary mb-3']
+            );
+            echo html_writer::link(
                 new moodle_url('/local/videoq/course.php', ['course' => $courseid]),
                 get_string('managecourseentry', 'local_videoq'),
                 ['class' => 'btn btn-secondary mb-3']
@@ -233,6 +238,16 @@ foreach ($scope['resources'] as $allowed) {
     $catalog[] = ['mime' => $media ? $media->get_mimetype() : 'video/mp4', 'lesson' => $item['id'], 'title' => $allowed['title'],
         'url' => (new moodle_url('/mod/resource/view.php', ['id' => $item['videoCmid'], 'redirect' => 1]))->out(false),
         'activityUrl' => (new moodle_url('/mod/resource/view.php', ['id' => $item['videoCmid']]))->out(false)];
+}
+if (
+    has_capability('local/videoq:managecontent', context_course::instance($course->id))
+        && has_capability('moodle/course:manageactivities', context_course::instance($course->id))
+) {
+    echo html_writer::link(
+        new moodle_url('/local/videoq/catalog.php', ['course' => $course->id]),
+        get_string('coursecatalog', 'local_videoq'),
+        ['class' => 'btn btn-secondary mb-3']
+    );
 }
 echo html_writer::start_div('local-videoq-workspace', ['data-videoq-origin' => $toolorigin,
     'data-videoq-lessons' => json_encode($catalog, JSON_THROW_ON_ERROR), 'data-videoq-lesson' => $lessonid]);
