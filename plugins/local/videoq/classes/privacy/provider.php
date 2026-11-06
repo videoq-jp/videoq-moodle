@@ -61,62 +61,144 @@ final class provider implements
     }
 
     /**
-     * Returns no contexts because this component stores no per-user records locally.
+     * Finds external records even after the subject is no longer enrolled.
      *
-     * @param int $userid User whose local contexts are requested.
-     * @return \core_privacy\local\request\contextlist Empty local context list.
+     * @param int $userid Subject supplied by Moodle core.
+     * @return \core_privacy\local\request\contextlist Contexts containing the subject's data.
      */
     public static function get_contexts_for_userid(int $userid): \core_privacy\local\request\contextlist {
-        return new \core_privacy\local\request\contextlist();
+        $list = new \core_privacy\local\request\contextlist();
+        foreach (\local_videoq\privacy_api::servers() as $server) {
+            foreach (\local_videoq\privacy_api::contexts($server, $userid) as $id) {
+                $context = \local_videoq\privacy_api::context($id);
+                $list->add_from_sql('SELECT id FROM {context} WHERE id = :contextid', ['contextid' => $context->id]);
+            }
+        }
+        return $list;
     }
 
     /**
-     * Exports no local records; external VideoQ history is managed by its account owner.
+     * Exports only the contexts approved by Moodle's privacy workflow.
      *
-     * @param \core_privacy\local\request\approved_contextlist $contextlist Approved export request.
-     * @return void
+     * @param \core_privacy\local\request\approved_contextlist $contextlist Core-approved request.
      */
     public static function export_user_data(\core_privacy\local\request\approved_contextlist $contextlist): void {
-        // Shared course materials are owned by their Moodle activity, not this component.
+        $userid = (int)$contextlist->get_user()->id;
+        $approved = array_map('intval', $contextlist->get_contextids());
+        if (!$approved) {
+            return;
+        }
+        foreach (\local_videoq\privacy_api::servers() as $server) {
+            foreach (\local_videoq\privacy_api::targets($server, $userid, $approved) as $id) {
+                \local_videoq\privacy_export::write($server, $userid, $id);
+            }
+        }
     }
 
     /**
-     * Leaves shared course materials intact when a context expires.
+     * Erases personal data in an expired context, retaining shared course structures.
      *
-     * @param \context $context Context whose local personal data would be removed.
-     * @return void
+     * @param \context $context Core-selected expired context.
      */
     public static function delete_data_for_all_users_in_context(\context $context): void {
-        // No locally stored per-user data belongs to this component.
+        foreach (\local_videoq\privacy_api::servers() as $server) {
+            $targets = \local_videoq\privacy_api::targets($server, null, [(int)$context->id]);
+            foreach (self::users($server, $targets) as $userid) {
+                self::erase($server, $userid, $targets);
+            }
+        }
     }
 
     /**
-     * Deletes no local records for a user; external requests require the VideoQ owner.
+     * Deletes the subject's data only in the approved contexts.
      *
-     * @param \core_privacy\local\request\approved_contextlist $contextlist Approved deletion request.
-     * @return void
+     * @param \core_privacy\local\request\approved_contextlist $contextlist Core-approved request.
      */
     public static function delete_data_for_user(\core_privacy\local\request\approved_contextlist $contextlist): void {
-        // Do not remove shared video bindings or source activities for an individual request.
+        $userid = (int)$contextlist->get_user()->id;
+        $approved = array_map('intval', $contextlist->get_contextids());
+        if (!$approved) {
+            return;
+        }
+        foreach (\local_videoq\privacy_api::servers() as $server) {
+            self::erase($server, $userid, \local_videoq\privacy_api::targets($server, $userid, $approved));
+        }
     }
 
     /**
-     * Adds no users because this component holds no per-user local records.
+     * Includes former and deleted users whose external records remain in a context.
      *
-     * @param \core_privacy\local\request\userlist $userlist Context user list to populate.
-     * @return void
+     * @param \core_privacy\local\request\userlist $userlist Core-owned context user list.
      */
     public static function get_users_in_context(\core_privacy\local\request\userlist $userlist): void {
-        // Moodle core owns session, task and activity data; VideoQ owns external history.
+        foreach (\local_videoq\privacy_api::servers() as $server) {
+            $targets = \local_videoq\privacy_api::targets($server, null, [(int)$userlist->get_context()->id]);
+            foreach (self::users($server, $targets) as $userid) {
+                $userlist->add_user($userid);
+            }
+        }
     }
 
     /**
-     * Deletes no local records for the requested users.
+     * Deletes only users and the context supplied by core's approved user list.
      *
-     * @param \core_privacy\local\request\approved_userlist $userlist Approved bulk deletion request.
-     * @return void
+     * @param \core_privacy\local\request\approved_userlist $userlist Core-approved bulk request.
      */
     public static function delete_data_for_users(\core_privacy\local\request\approved_userlist $userlist): void {
-        // No automatic deletion of externally stored VideoQ history is implied.
+        foreach (\local_videoq\privacy_api::servers() as $server) {
+            $targets = \local_videoq\privacy_api::targets($server, null, [(int)$userlist->get_context()->id]);
+            foreach ($userlist->get_userids() as $userid) {
+                self::erase($server, (int)$userid, $targets);
+            }
+        }
+    }
+
+    /**
+     * Finds matching local identities with bounded signed requests.
+     *
+     * @param array $server Remembered connection.
+     * @param array $targets Core-selected external contexts.
+     * @return \Generator Matching Moodle user IDs.
+     */
+    private static function users(array $server, array $targets): \Generator {
+        if (!$targets) {
+            return;
+        }
+        foreach (\local_videoq\privacy_api::user_batches() as $batch) {
+            $found = [];
+            foreach (array_chunk($targets, 100) as $contexts) {
+                $result = \local_videoq\privacy_api::request($server, [
+                    'action' => 'users', 'subjects' => $batch, 'contexts' => $contexts]);
+                if (
+                    !isset($result['subjects']) || !is_array($result['subjects']) ||
+                        array_diff($result['subjects'], $batch) || count($result['subjects']) > count($batch)
+                ) {
+                    throw new \moodle_exception('privacyunavailable', 'local_videoq');
+                }
+                foreach ($result['subjects'] as $id) {
+                    $found[(int)$id] = true;
+                }
+            }
+            foreach (array_keys($found) as $userid) {
+                yield $userid;
+            }
+        }
+    }
+
+    /**
+     * Invalidates selected sessions and erases subject records atomically at the service.
+     *
+     * @param array $server Remembered connection.
+     * @param int $userid Core-approved subject.
+     * @param array $targets Core-approved remote contexts.
+     */
+    private static function erase(array $server, int $userid, array $targets): void {
+        foreach (array_chunk($targets, 100) as $contexts) {
+            $result = \local_videoq\privacy_api::request($server, [
+                'action' => 'erase', 'subject' => (string)$userid, 'contexts' => $contexts]);
+            if (!isset($result['erased']) || !is_array($result['erased'])) {
+                throw new \moodle_exception('privacyunavailable', 'local_videoq');
+            }
+        }
     }
 }

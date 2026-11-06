@@ -143,3 +143,6 @@ $string['accountunavailable'] = 'VideoQのアカウント管理画面を開け�
 $string['coursetags'] = 'コースのタグと教材';
 $string['coursetagsunavailable'] = 'コースのタグを利用できません。現在のMoodle権限を確認するか、開き直してください。';
 $string['privacy:metadata:coursetags'] = 'コース専用のタグ名・色・教材との対応と、仮名化した操作記録をVideoQに保存します。';
+
+$string['privacyunavailable'] = '外部サービスへの個人データ要求を完了できませんでした。管理者に承認済みのVideoQ接続と個人データ要求サービスの確認を依頼し、再実行してください。';
+$string['privacyexportscope'] = '承認されたMoodleコンテキスト内の本人の記録です。モデルメモリと仮名化した操作記録を含みます。共有教材と他の参加者の投稿は残ります。本人との紐付けを導入する前の記録、バックアップ、AIプロバイダーの記録は運用者による別途の確認が必要です。同時編集がある場合は出力の再実行が必要です。';
