@@ -47,6 +47,7 @@ final class provider implements
             'conversation' => 'privacy:metadata:conversation',
             'feedback' => 'privacy:metadata:feedback',
             'transcript' => 'privacy:metadata:transcript',
+            'courseqa' => 'privacy:metadata:courseqa',
             'access' => 'privacy:metadata:access',
             'video' => 'privacy:metadata:video',
             'position' => 'privacy:metadata:position',

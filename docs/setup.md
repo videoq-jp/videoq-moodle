@@ -18,6 +18,32 @@ tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
 
 ## Install and connect
 
+### Course Q&A (unreleased 0.13.0)
+
+With a compatible backend, **Course Q&A** opens the shared forum inside Moodle's
+existing LTI connection. Learners use their Moodle login and a course-specific
+pseudonym; no VideoQ account is created. The interface identifies questions and
+replies as shared with the course. It supports search, lesson/unanswered filters,
+paging, questions/replies, own text edits/deletion, voting and teacher featuring
+or deletion. It uses the same authenticated forum interface as the tool view,
+following Moodle's supplied font/colors. Closing it returns to the native Moodle
+assistant without reloading the tool session.
+
+The course capabilities `local/videoq:viewqa`, `postqa`, `voteqa` and `deleteownqa`
+default to allow for student/teacher/editingteacher/manager archetypes.
+`moderateqa` and `instructorqa` default to teacher/editingteacher/manager. The
+instructor badge records the permission at the latest post/edit; it does not
+grant moderation power. Override these capabilities independently for custom
+roles. Each request rechecks current access; a cached Instructor/Administrator
+launch claim cannot grant an operation. A moderator can delete another person's
+post and feature a question; only the author edits their text.
+
+Deploy the reviewed backend including its Q&A migrations, and run Moodle's
+normal upgrade for 0.13.0. Older backends do not announce the panel; older
+companions supply no Q&A permissions, so a new backend denies those operations.
+Published forum data and moderation records are stored in VideoQ. The separate
+external privacy/retention workflow remains required.
+
 ### Transcript reader (unreleased 0.12.0)
 
 This branch adds **Lesson transcripts** above the native course chat. It requires

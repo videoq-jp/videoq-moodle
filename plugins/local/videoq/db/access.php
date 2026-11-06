@@ -25,6 +25,30 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
+    'local/videoq:viewqa' => [
+        'captype' => 'read', 'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => ['student' => CAP_ALLOW, 'teacher' => CAP_ALLOW, 'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
+    ],
+    'local/videoq:postqa' => [
+        'riskbitmask' => RISK_SPAM, 'captype' => 'write', 'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => ['student' => CAP_ALLOW, 'teacher' => CAP_ALLOW, 'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
+    ],
+    'local/videoq:voteqa' => [
+        'captype' => 'write', 'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => ['student' => CAP_ALLOW, 'teacher' => CAP_ALLOW, 'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
+    ],
+    'local/videoq:deleteownqa' => [
+        'riskbitmask' => RISK_DATALOSS, 'captype' => 'write', 'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => ['student' => CAP_ALLOW, 'teacher' => CAP_ALLOW, 'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
+    ],
+    'local/videoq:moderateqa' => [
+        'riskbitmask' => RISK_DATALOSS, 'captype' => 'write', 'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => ['teacher' => CAP_ALLOW, 'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
+    ],
+    'local/videoq:instructorqa' => [
+        'captype' => 'read', 'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => ['teacher' => CAP_ALLOW, 'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
+    ],
     'local/videoq:viewtranscript' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSE,

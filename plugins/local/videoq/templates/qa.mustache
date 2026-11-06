@@ -1,0 +1,15 @@
+{{!
+    @template local_videoq/qa
+    @copyright 2026 VideoQ contributors
+    @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+    Opens course Q&A through the existing authenticated LTI frame.
+
+    Example context (json):
+    {"heading": "Course Q&A", "unavailable": "Course Q&A is unavailable."}
+}}
+<div id="videoq-course-qa" class="p-3 border-bottom bg-body" data-heading="{{heading}}" data-unavailable="{{unavailable}}" hidden>
+    <details>
+        <summary aria-controls="videoq-questions">{{heading}}</summary>
+    </details>
+    <p role="status" class="small text-danger mt-2 mb-0"></p>
+</div>

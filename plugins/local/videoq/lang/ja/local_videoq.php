@@ -25,6 +25,15 @@
 
 $string['pluginname'] = 'VideoQ 動画・質問画面';
 $string['videoq:viewtranscript'] = 'アクセス可能なVideoQ教材の文字起こしを閲覧する';
+$string['videoq:viewqa'] = '講座で共有されるQ&Aを閲覧する';
+$string['videoq:postqa'] = '講座の質問・返信を投稿し、自分の文章を編集する';
+$string['videoq:voteqa'] = '講座の質問に投票する';
+$string['videoq:deleteownqa'] = '自分が投稿した講座の質問・返信を削除する';
+$string['videoq:moderateqa'] = '他の受講者の投稿を削除し、講座の質問を注目に指定する';
+$string['videoq:instructorqa'] = '講座のQ&Aを投稿・編集するときに教師バッジを表示する';
+$string['courseqa'] = '講座のQ&A';
+$string['courseqaunavailable'] = '講座のQ&Aを表示できません。閲覧権限を確認してコースのページを開き直してください。';
+$string['privacy:metadata:courseqa'] = '講座で公開される質問・返信・投票と管理操作の記録です。VideoQにコースごとのMoodle仮名で保存します。この共有Q&Aと、非公開のAI会話履歴は別に扱います。';
 $string['transcript'] = '教材の文字起こし';
 $string['transcriptlesson'] = '教材';
 $string['transcriptrefresh'] = '教材一覧を更新';
