@@ -1,0 +1,26 @@
+{{!
+    @template local_videoq/transcript
+    @copyright 2026 VideoQ contributors
+    @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+    Lesson transcript reader; the authenticated LTI frame supplies scoped text.
+
+    Example context (json):
+    {
+        "heading": "Lesson transcripts",
+        "lesson": "Lesson",
+        "refresh": "Refresh lessons",
+        "more": "Show more",
+        "empty": "No transcript available.",
+        "error": "Unable to load the lesson.",
+        "seek": "Jump to"
+    }
+}}
+<details id="videoq-transcript" class="p-3 border-bottom bg-body" data-empty="{{empty}}" data-error="{{error}}" data-seek="{{seek}}" hidden>
+    <summary class="mb-2">{{heading}}</summary>
+    <label for="videoq-transcript-lesson">{{lesson}}</label>
+    <select id="videoq-transcript-lesson" class="form-select mb-2"></select>
+    <button id="videoq-transcript-refresh" type="button" class="btn btn-sm btn-outline-secondary">{{refresh}}</button>
+    <p id="videoq-transcript-status" role="status" class="small mt-2"></p>
+    <ol id="videoq-transcript-cues" class="list-unstyled overflow-auto mb-2"></ol>
+    <button id="videoq-transcript-more" type="button" class="btn btn-sm btn-outline-secondary" hidden>{{more}}</button>
+</details>

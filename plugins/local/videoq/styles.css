@@ -51,6 +51,10 @@
 #videoq-native-chat { flex: 1; min-height: 0; }
 .local-videoq-message-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; overflow-wrap: anywhere; }
 #videoq-native-status:empty { display: none; }
+#videoq-transcript { flex-shrink: 0; max-height: 45dvh; overflow-y: auto; }
+#videoq-transcript-cues { max-height: 28dvh; }
+#videoq-transcript-status:empty { display: none; }
+.local-videoq-transcript-text { white-space: pre-wrap; }
 @media (max-width: 900px) {
     .local-videoq-questions { height: 640px; max-height: 85dvh; min-height: 480px; }
 }

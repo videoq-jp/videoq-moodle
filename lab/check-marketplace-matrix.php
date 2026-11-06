@@ -156,6 +156,9 @@ CONFIG;
     matrix_diagnostics($work . '/candidate-upgrade.log');
     $check('upgraded-preservation', ['/src/lab/check-marketplace-upgrade.php', '/site', 'verify']);
     $check('upgraded-runtime', ['/src/lab/check-marketplace-runtime.php', '/site']);
+    foreach (['defaults', 'revoked', 'restored'] as $phase) {
+        $check('upgraded-capabilities-' . $phase, ['/src/lab/check-marketplace-capabilities.php', '/site', $phase]);
+    }
     $check('privacy-requests', ['/src/lab/check-marketplace-privacy.php', '/site']);
     echo "$mode: uninstall companion before local; preserve course and source bytes\n";
     foreach (['ltisource_videoq' => 'mod/lti/source', 'local_videoq' => 'local'] as $component => $relative) {
@@ -171,6 +174,9 @@ CONFIG;
     matrix_run([...$php, '/site/admin/cli/upgrade.php', '--non-interactive'], $work . '/candidate-reinstall.log');
     matrix_diagnostics($work . '/candidate-reinstall.log');
     $check('reinstalled-runtime', ['/src/lab/check-marketplace-runtime.php', '/site']);
+    foreach (['defaults', 'revoked', 'restored'] as $phase) {
+        $check('reinstalled-capabilities-' . $phase, ['/src/lab/check-marketplace-capabilities.php', '/site', $phase]);
+    }
     $check('reinstalled-preservation', ['/src/lab/check-marketplace-upgrade.php', '/site', 'verify-reinstalled']);
     $hashes = [];
     foreach (['local_videoq.zip', 'ltisource_videoq.zip'] as $file) $hashes[$file] = hash_file('sha256', $work . '/archives/' . $file);

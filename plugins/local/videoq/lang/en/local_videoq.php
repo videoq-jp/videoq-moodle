@@ -24,6 +24,14 @@
  */
 
 $string['pluginname'] = 'VideoQ companion';
+$string['videoq:viewtranscript'] = 'View transcripts of accessible VideoQ lessons';
+$string['transcript'] = 'Lesson transcripts';
+$string['transcriptlesson'] = 'Lesson';
+$string['transcriptrefresh'] = 'Refresh lessons';
+$string['transcriptmore'] = 'Show more';
+$string['transcriptempty'] = 'No transcript is available yet.';
+$string['transcripterror'] = 'Unable to load this lesson. Check your access and connection, then refresh the lesson list.';
+$string['privacy:metadata:transcript'] = 'Transcript text and timestamps of currently accessible lessons, returned by VideoQ for display in Moodle.';
 $string['lessons'] = 'Video and question tool associations';
 $string['lessons_desc'] = 'JSON list. Each entry requires id, title, videoCmid (a File activity containing an MP4), and ltiCmid (a VideoQ LTI 1.3 activity in the same course). Example: [{"id":"lesson-1","title":"Lesson 1","videoCmid":10,"ltiCmid":11}]. Open /local/videoq/view.php?lesson=lesson-1. Access restrictions on both activities still apply.';
 $string['invalidconfiguration'] = 'The video and question tool association is invalid. Contact the site administrator.';
@@ -64,7 +72,7 @@ $string['state_awaiting_upload'] = 'Waiting for video transfer';
 $string['privacy:metadata:videofile'] = 'The source video file for an activity with questions enabled.';
 $string['privacy:metadata:title'] = 'The synchronized lesson title and Moodle course/activity identifiers.';
 
-$string['privacy:metadata:access'] = 'A short-lived proof bound to the Moodle user, course and launch activity, used to recheck permitted videos before each question.';
+$string['privacy:metadata:access'] = 'A short-lived proof bound to the Moodle user, course and launch activity, used to recheck permitted videos and current course capabilities before questions and transcript requests.';
 
 $string['coursequestions'] = 'Ask about this course';
 $string['chatempty'] = 'Ask questions across the videos in this course.';

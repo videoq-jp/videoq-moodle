@@ -100,6 +100,7 @@ $PAGE->set_heading($courseid ? format_string($course->fullname) : format_string(
 $PAGE->requires->css(new moodle_url('/local/videoq/styles.css', ['rev' => substr(sha1_file(__DIR__ . '/styles.css'), 0, 12)]));
 $PAGE->requires->js(new moodle_url('/local/videoq/player.js', ['rev' => substr(sha1_file(__DIR__ . '/player.js'), 0, 12)]));
 $PAGE->requires->js(new moodle_url('/local/videoq/chat.js', ['rev' => substr(sha1_file(__DIR__ . '/chat.js'), 0, 12)]));
+$PAGE->requires->js(new moodle_url('/local/videoq/transcript.js', ['rev' => substr(sha1_file(__DIR__ . '/transcript.js'), 0, 12)]));
 $PAGE->requires->js_call_amd('core/auto_rows', 'init', ['#videoq-native-chat']);
 $PAGE->navbar->ignore_active();
 $PAGE->navbar->add(format_string($course->shortname), new moodle_url('/course/view.php', ['id' => $course->id]));
@@ -191,6 +192,15 @@ if (isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'completed') {
     echo html_writer::link($PAGE->url, get_string('refreshstatus', 'local_videoq'));
 } else {
     $message = ['id' => '', 'text' => '', 'formattedtime' => userdate(time(), get_string('strftimetime', 'langconfig'))];
+    echo $OUTPUT->render_from_template('local_videoq/transcript', [
+        'heading' => get_string('transcript', 'local_videoq'),
+        'lesson' => get_string('transcriptlesson', 'local_videoq'),
+        'refresh' => get_string('transcriptrefresh', 'local_videoq'),
+        'more' => get_string('transcriptmore', 'local_videoq'),
+        'empty' => get_string('transcriptempty', 'local_videoq'),
+        'error' => get_string('transcripterror', 'local_videoq'),
+        'seek' => get_string('chatseek', 'local_videoq'),
+    ]);
     echo $OUTPUT->render_from_template('local_videoq/chat', [
     'heading' => get_string('coursequestions', 'local_videoq'),
     'connectionerror' => get_string('chatconnectionerror', 'local_videoq'),
