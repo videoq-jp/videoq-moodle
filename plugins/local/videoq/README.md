@@ -1,5 +1,32 @@
 # VideoQ companion for Moodle
 
+## Course material management
+
+Course content managers with activity-management rights can open **Manage VideoQ
+course materials** from the course navigation or assistant. The read-only catalog
+lists manageable video File activities in current Moodle section/activity order,
+including videos not yet opted into VideoQ. Add a video using the core File form,
+save it, then enable its VideoQ integration. The catalog links to the permitted
+core course settings, organization, participant and enrolment workflows; each
+destination enforces its own authority and confirmation. Category course creation
+or course deletion is offered only when Moodle permits it.
+
+Use Moodle's activity editing controls to move sources or change sections.
+VideoQ selectors, transcripts, Q&A filters and material tags follow the current
+permitted source sequence. This does not change independent VideoQ library or
+course order. YouTube/direct-to-VideoQ imports and aggregate reporting are not
+implemented by this catalog.
+
+With a capable backend, hidden courses/materials stay integrated but every access
+request checks the current user's Moodle hidden-view and activity rights. Hiding
+is separate from explicit disable/deletion. New service callers negotiate
+`includeUserVisibility:true`; legacy push checks the authenticated connection's
+`userVisibility` flag. Older callers retain global visibility suppression. Source
+visibility changes still advance generation and cancel stale queued transfers.
+The asynchronous export preserves its negotiated mode without storing learner
+identity. Deploy the backend course-authority/entry stack before this companion;
+do not coexist with older unprotected native readers.
+
 ## Automatic video synchronization
 
 Use a single existing school-owned VideoQ account for its billing and allowances.

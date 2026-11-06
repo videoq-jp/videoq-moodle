@@ -59,7 +59,8 @@ final class export_material extends \core\task\adhoc_task {
                 '*',
                 MUST_EXIST
             );
-            $manifest = \local_videoq\synchronizer::run((int)$row->id, true);
+            $uservisibility = ($this->get_custom_data()->userVisibility ?? false) === true;
+            $manifest = \local_videoq\synchronizer::run((int)$row->id, true, $uservisibility);
             if (!$manifest['enabled'] || $manifest['generation'] !== (int)$job->generation) {
                 $DB->update_record(
                     'local_videoq_exports',

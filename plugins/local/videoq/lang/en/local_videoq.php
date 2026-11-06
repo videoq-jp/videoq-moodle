@@ -157,3 +157,14 @@ $string['privacyunavailable'] = 'The external privacy request could not be compl
 $string['privacyexportscope'] = 'Personal records in the approved Moodle context, including model memory and pseudonymous operation receipts. Shared materials and other participants’ content remain. Records created before subject attribution was introduced, backups and AI provider records require separate operator review. Concurrent changes may require retrying the export. Technical hashes of operation identifiers remain to prevent duplicate operations; they contain no actor key, request contents or timestamp.';
 
 $string['privacy:metadata:operationbarriers'] = 'A namespaced SHA-256 hash of a random operation identifier, retained by VideoQ to prevent a removed operation receipt from being executed again. These barriers have no actor, course, action, request contents or timestamp columns.';
+
+$string['coursecatalog'] = 'Manage VideoQ course materials';
+$string['cataloghelp'] = 'Upload videos as Moodle File activities, then enable VideoQ for each video. Use the course editing controls to move activities or change sections; VideoQ follows that order. Visibility, availability and participants are controlled by Moodle. Deleting a Moodle course revokes its launches; external history follows the separate privacy and retention process.';
+$string['catalogempty'] = 'There are no video File activities you can manage in this course. Add a video File, save it, then enable VideoQ from this list.';
+$string['catalogorganize'] = 'Organize course activities';
+$string['catalogupload'] = 'Add a video File';
+$string['catalogcourseedit'] = 'Edit course settings';
+$string['catalogparticipants'] = 'Course participants';
+$string['catalogenrolments'] = 'Manage enrolment methods';
+$string['catalogcoursecreate'] = 'Create a Moodle course';
+$string['catalogcoursedelete'] = 'Delete Moodle course…';

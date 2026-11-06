@@ -43,7 +43,22 @@ final class synchronizer {
         }
         try {
             $url = $CFG->wwwroot . '/local/videoq/view.php?course=' . $courseid;
-            if (!$DB->record_exists('url', ['course' => $courseid, 'externalurl' => $url])) {
+            // The externalurl column is TEXT. Moodle rejects ordinary condition
+            // comparisons in developer mode; exact PHP comparison also avoids
+            // prefix truncation and database-specific case folding.
+            $urls = $DB->get_recordset('url', ['course' => $courseid], 'id ASC', 'id, externalurl');
+            $exists = false;
+            try {
+                foreach ($urls as $candidate) {
+                    if ($candidate->externalurl === $url) {
+                        $exists = true;
+                        break;
+                    }
+                }
+            } finally {
+                $urls->close();
+            }
+            if (!$exists) {
                 add_moduleinfo((object)[
                     'modulename' => 'url', 'module' => $DB->get_field('modules', 'id', ['name' => 'url']),
                     'course' => $courseid, 'section' => 0, 'visible' => 1,
@@ -275,11 +290,18 @@ final class synchronizer {
      *
      * @param int $id Material binding or lesson identifier.
      * @param bool $snapshot Whether to return a manifest without starting a transfer.
+     * @param bool $uservisibility Whether a capable backend enforces fresh per-user access.
      * @return array|null
      */
-    public static function run(int $id, bool $snapshot = false): ?array {
+    public static function run(int $id, bool $snapshot = false, bool $uservisibility = false): ?array {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');
+        if (!$snapshot) {
+            // Legacy push negotiates through its authenticated connection. Old
+            // backends retain global visibility suppression; failure sends nothing.
+            $connection = (new client())->request('GET', 'connection');
+            $uservisibility = ($connection['userVisibility'] ?? false) === true;
+        }
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('sync-' . $id, 0);
         if (!$lock) {
             if ($snapshot) {
@@ -363,11 +385,11 @@ final class synchronizer {
                 }
             }
             $file = $cm && !$cm->deletioninprogress ? self::video_file((int)$row->cmid) : null;
-            $enabled = (bool)($row->enabled && $file && $course && $course->visible && $cm && $cm->visible
+            $enabled = (bool)($row->enabled && $file && $course && $cm
                 && (int)$cm->course === (int)$row->courseid && $lti && (int)$lti->course === (int)$row->courseid
                 && $link && (int)$link->course === (int)$row->courseid
-                && !$cm->deletioninprogress && $lti && $lti->visible && !$lti->deletioninprogress
-                && $link && $link->visible && !$link->deletioninprogress);
+                && !$cm->deletioninprogress && !$lti->deletioninprogress && !$link->deletioninprogress
+                && ($uservisibility || ($course->visible && $cm->visible && $lti->visible && $link->visible)));
             $manifest = ['contextId' => (string)$row->courseid,
                  'courseTitle' => $course ? $course->fullname : 'Moodle',
                  'resourceLinkId' => (string)$row->ltiinstance,
@@ -384,7 +406,8 @@ final class synchronizer {
                 json_encode([$manifest,
                  $cm->availability ?? null,
                  $lti->availability ?? null,
-                $link->availability ?? null])
+                $link->availability ?? null,
+                $course->visible ?? null, $cm->visible ?? null, $lti->visible ?? null, $link->visible ?? null])
             );
             if ($row->fingerprint !== $fingerprint) {
                 $DB->execute(

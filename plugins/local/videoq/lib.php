@@ -66,6 +66,11 @@ function local_videoq_extend_navigation_course(navigation_node $navigation, stdC
     }
     if (has_capability('local/videoq:managecontent', $context) && has_capability('moodle/course:manageactivities', $context)) {
         $navigation->add(
+            get_string('coursecatalog', 'local_videoq'),
+            new moodle_url('/local/videoq/catalog.php', ['course' => $course->id]),
+            navigation_node::TYPE_SETTING
+        );
+        $navigation->add(
             get_string('managecourseentry', 'local_videoq'),
             new moodle_url('/local/videoq/course.php', ['course' => $course->id]),
             navigation_node::TYPE_SETTING

@@ -51,6 +51,11 @@ $row = \local_videoq\course_entry::find($courseid);
 header('Cache-Control: private, no-store');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('managecourseentry', 'local_videoq'));
+echo html_writer::link(
+    new moodle_url('/local/videoq/catalog.php', ['course' => $courseid]),
+    get_string('coursecatalog', 'local_videoq'),
+    ['class' => 'btn btn-secondary mb-3']
+);
 echo html_writer::tag('p', get_string('courseentrydescription', 'local_videoq'));
 if ($failed || ($row && $row->errorcode)) {
     echo $OUTPUT->notification(get_string('courseentryerror', 'local_videoq'), 'warning');
