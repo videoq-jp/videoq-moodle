@@ -11,6 +11,19 @@ VideoQ remains an independently deployed application. Its implementation and
 runtime dependencies belong to that project; this repository neither imports
 its source nor starts its API, frontend, scheduler or processing workers.
 
+The unreleased teacher-material increment (local_videoq 0.15.0) passed the
+official Moodle coding scan with zero errors/warnings and installed Moodle 5.1
+PostgreSQL/MySQL lifecycle checks on 2026-11-06: 14 reports per database and zero
+candidate developer diagnostics. Real access proofs verify four archetypes,
+course-level content-capability revocation/restoration, independent module-level
+activity-management revocation and generation-bound processing resources excluded
+from learner access. Upgrade/uninstall/reinstall preserve the original source.
+The paired VideoQ browser tests exercise the actual companion scripts, processing
+and Moodle acknowledgement delay, draft conflicts/revocation, delayed initialization,
+panel switching, private-frame isolation and mobile layout with HTTP/processing
+fixtures. Full live Moodle + VideoQ + AI and source lifecycle/retry acceptance are
+still required before release. Marketplace artifacts have not been replaced.
+
 The unreleased personal-conversation increment (local_videoq 0.14.0) passed the
 official Moodle coding scan with zero errors/warnings and installed Moodle 5.1
 PostgreSQL/MySQL lifecycle checks on 2026-11-06: 14 reports per database, zero
