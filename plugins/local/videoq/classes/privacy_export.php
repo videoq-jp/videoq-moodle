@@ -44,7 +44,16 @@ final class privacy_export {
         $writer = \core_privacy\local\request\writer::with_context(privacy_api::context($remotecontext));
         $path = ['VideoQ', hash('sha256', json_encode($server, JSON_THROW_ON_ERROR)), hash('sha256', $remotecontext)];
         $counts = [];
-        foreach (self::COLLECTIONS as $collection) {
+        $collections = self::COLLECTIONS;
+        $catalog = privacy_api::request($server, ['action' => 'catalog']);
+        $available = $catalog['collections'] ?? [];
+        if (!is_array($available) || count($available) > 100) {
+            self::fail();
+        }
+        if (in_array('report_accesses', $available, true)) {
+            $collections[] = 'report_accesses';
+        }
+        foreach ($collections as $collection) {
             $cursor = null;
             $record = null;
             $count = 0;

@@ -125,6 +125,19 @@ logs, source storage and backups. A credential expiring does not establish that
 all related external data was deleted. Deployment operators must document those
 retention and cleanup policies separately.
 
+## Aggregate usage reporting (unreleased 0.20.0)
+
+Course reports require the separate current `local/videoq:viewreports`
+capability. Only UTC question/feedback counts for currently readable material
+scopes are returned; message text and learner identities are excluded. Successful
+reads create an external receipt with a pseudonymous actor key, course/context,
+requested dates, resource count, scope hash and time. A receipt stores no report
+or message contents. These records are included in core-approved external privacy
+export/erasure and optional configured audit retention. Older servers are queried
+for `report_accesses` only when they advertise that collection. Report data and
+credentials stay in the private LTI frame; the native bridge carries availability
+and open/close controls only. Legacy unattributed answers are excluded from counts.
+
 ## Verification
 
 The unreleased 0.15.0 material editor also sends teachers' AI descriptions, SRT

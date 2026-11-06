@@ -50,6 +50,7 @@ final class provider implements
             'courseqa' => 'privacy:metadata:courseqa',
             'materialmanagement' => 'privacy:metadata:materialmanagement',
             'coursetags' => 'privacy:metadata:coursetags',
+            'coursereports' => 'privacy:metadata:coursereports',
             'operationbarriers' => 'privacy:metadata:operationbarriers',
             'access' => 'privacy:metadata:access',
             'video' => 'privacy:metadata:video',

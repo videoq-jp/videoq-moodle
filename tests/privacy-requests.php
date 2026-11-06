@@ -82,6 +82,7 @@ namespace {
         public static string $text = '';
         public static bool $corrupt = false;
         public static bool $oversize = false;
+        public static bool $reports = false;
         public static int $status = 200;
         private int $errno = 0;
         public function setHeader($headers): void {}
@@ -93,7 +94,8 @@ namespace {
             check($options['CURLOPT_SSL_VERIFYPEER'] === true && $options['CURLOPT_SSL_VERIFYHOST'] === 2 && $options['CURLOPT_FOLLOWLOCATION'] === 0, 'Verified bounded transport');
             $r = $claims['request']; self::$requests[] = $r;
             $response = match ($r['action']) {
-                'contexts', 'catalog' => ['contexts' => array_values(array_filter(['2', '3', '@orphan'], fn($id) => strcmp($id, $r['after'] ?? '') > 0)), 'nextAfter' => null],
+                'contexts', 'catalog' => ['contexts' => array_values(array_filter(['2', '3', '@orphan'], fn($id) => strcmp($id, $r['after'] ?? '') > 0)), 'nextAfter' => null,
+                    'collections' => self::$reports ? ['report_accesses'] : []],
                 'users' => ['subjects' => array_values(array_intersect($r['subjects'], ['11', '202']))],
                 'erase' => ['erased' => ['logs' => 1]],
                 'export' => self::export($r),
@@ -102,7 +104,7 @@ namespace {
             if ($options['CURLOPT_WRITEFUNCTION'](null, $body) !== strlen($body)) $this->errno = 23;
         }
         private static function export(array $r): array {
-            if ($r['collection'] !== 'logs' || isset($r['cursor']['after'])) return ['part' => null, 'next' => null];
+            if (!in_array($r['collection'], ['logs', 'report_accesses'], true) || isset($r['cursor']['after'])) return ['part' => null, 'next' => null];
             $offset = $r['cursor']['record']['offset'] ?? 0;
             $total = mb_strlen(self::$text, 'UTF-8');
             $revision = self::$corrupt ? str_repeat('a', 64) : hash('sha256', self::$text);
@@ -156,6 +158,16 @@ namespace {
         rejects(fn() => Api::request($server, ['action' => 'erase', 'subject' => '11', 'contexts' => ['2']]));
         check(count(curl::$requests) === $before, 'A cloned issuer must not contact the former connection');
         $CFG->wwwroot = 'https://moodle.example';
+        curl::$reports = true; curl::$requests = []; Writer::$files = [];
+        curl::$text = '{"from":"2026-11-01","resourceCount":2}';
+        \local_videoq\privacy_export::write($server, 11, '2');
+        $reportrequests = array_filter(curl::$requests, fn($r) => ($r['collection'] ?? '') === 'report_accesses');
+        check(count($reportrequests) === 2, 'Advertised report receipts must be completely exported');
+        check(count(array_filter(Writer::$files, fn($key) => str_contains($key, 'report_accesses'), ARRAY_FILTER_USE_KEY)) > 0,
+            'Report audit data missing from the approved archive');
+        curl::$reports = false; curl::$requests = [];
+        \local_videoq\privacy_export::write($server, 11, '2');
+        check(!array_filter(curl::$requests, fn($r) => ($r['collection'] ?? '') === 'report_accesses'), 'Older servers must not receive unknown collections');
         $savedhistory = $config['privacyservers'];
         $config['apiurl'] = 'https://retired.example'; $config['typeid'] = '7';
         check(count(Api::servers()) === 2 && $config['privacyservers'] === $savedhistory, 'Ordinary requests must not race connection-history writes');

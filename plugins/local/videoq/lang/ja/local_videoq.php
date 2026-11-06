@@ -168,3 +168,8 @@ $string['catalogparticipants'] = 'コースの参加者';
 $string['catalogenrolments'] = '登録方法を管理';
 $string['catalogcoursecreate'] = 'Moodleコースを作成';
 $string['catalogcoursedelete'] = 'Moodleコースを削除…';
+
+$string['videoq:viewreports'] = '現在閲覧できる教材のAI質問利用状況を集計して表示する';
+$string['coursereports'] = 'AI質問の利用状況';
+$string['coursereportsunavailable'] = 'レポートを利用できません。現在のMoodle権限を確認するか、開き直してください。';
+$string['privacy:metadata:coursereports'] = 'VideoQはAI回答の所属コース情報と、レポート閲覧の期間・教材範囲ハッシュ・件数・時刻を含む識別情報のみの監査記録を保存します。レポートには個人の質問・回答本文や学習者の識別情報を表示しません。';

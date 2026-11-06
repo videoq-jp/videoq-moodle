@@ -257,6 +257,7 @@ final class course_access {
                 'manageContent' => $managecontent,
                 'manageOwnHistory' => has_capability('local/videoq:manageownhistory', $coursecontext, $user),
                 'viewTranscript' => has_capability('local/videoq:viewtranscript', $coursecontext, $user),
+                'viewReports' => has_capability('local/videoq:viewreports', $coursecontext, $user),
                 'viewQa' => has_capability('local/videoq:viewqa', $coursecontext, $user),
                 'postQa' => has_capability('local/videoq:postqa', $coursecontext, $user),
                 'voteQa' => has_capability('local/videoq:voteqa', $coursecontext, $user),
