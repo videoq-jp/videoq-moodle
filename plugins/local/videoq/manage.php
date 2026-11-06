@@ -28,7 +28,7 @@ $cmid = required_param('cmid', PARAM_INT);
 [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'resource');
 require_login($course, false, $cm);
 $context = context_module::instance($cmid);
-require_capability('moodle/course:manageactivities', $context);
+\local_videoq\source_management::require_manager($cmid);
 $url = new moodle_url('/local/videoq/manage.php', ['cmid' => $cmid]);
 $PAGE->set_url($url);
 $PAGE->set_context($context);
@@ -42,12 +42,7 @@ if (data_submitted()) {
     } else if ($action === 'disable') {
         \local_videoq\synchronizer::disable($cmid);
     } else if ($action === 'retry') {
-        $DB->execute(
-            'UPDATE {local_videoq_sync} SET generation = generation + 1, status = ?, timemodified = ? WHERE cmid = ?',
-            ['queued',
-             time(),
-            $cmid]
-        );
+        \local_videoq\synchronizer::retry($cmid);
     } else {
         throw new moodle_exception('invalidparameter');
     }

@@ -92,8 +92,34 @@ try {
     foreach (['local/videoq:managecontent', 'moodle/course:manageactivities'] as $capability) {
         assign_capability($capability, CAP_PREVENT, $roles['editingteacher'], $context->id, true); accesslib_clear_all_caches(true);
         $rejects(fn() => $catalog(), 'catalog denies revoked ' . $capability);
+        $before = $DB->get_record('local_videoq_sync', ['cmid' => $sources[0]], '*', MUST_EXIST);
+        $check(!\local_videoq\source_management::can_manage($sources[0]), 'source navigation denies revoked ' . $capability);
+        foreach (['enable', 'disable', 'retry'] as $action) {
+            $rejects(fn() => \local_videoq\synchronizer::$action($sources[0]), 'direct source ' . $action . ' denies revoked ' . $capability);
+        }
+        $check($DB->get_record('local_videoq_sync', ['id' => $before->id], '*', MUST_EXIST) == $before,
+            'denied source mutations retain exact binding for ' . $capability);
+        $snapshot = \local_videoq\synchronizer::run((int)$before->id, true, true);
+        $check($snapshot['enabled'], 'management revocation does not disable background synchronization');
         unassign_capability($capability, $roles['editingteacher'], $context->id); accesslib_clear_all_caches(true);
     }
+    $check(\local_videoq\source_management::can_manage($sources[0]), 'restored source management authority');
+    assign_capability('moodle/course:manageactivities', CAP_PREVENT, $roles['editingteacher'], $context->id, true);
+    assign_capability('moodle/course:manageactivities', CAP_ALLOW, $roles['editingteacher'], context_module::instance($sources[0])->id, true);
+    accesslib_clear_all_caches(true);
+    $check(\local_videoq\source_management::can_manage($sources[0]), 'course content plus module-only activity authority accepted');
+    $check(!\local_videoq\source_management::can_manage($sources[1]), 'module-only authority does not cover another source');
+    $before = $DB->get_record('local_videoq_sync', ['cmid' => $sources[0]], '*', MUST_EXIST);
+    \local_videoq\synchronizer::enable($sources[0]);
+    $reenabled = $DB->get_record('local_videoq_sync', ['id' => $before->id], '*', MUST_EXIST);
+    $check((int)$reenabled->generation === (int)$before->generation + 1 && $reenabled->enabled,
+        'authorized source enable advances one generation');
+    \local_videoq\synchronizer::retry($sources[0]);
+    $retried = $DB->get_record('local_videoq_sync', ['id' => $before->id], '*', MUST_EXIST);
+    $check((int)$retried->generation === (int)$reenabled->generation + 1 && $retried->enabled && $retried->status === 'queued',
+        'authorized source retry advances one generation');
+    unassign_capability('moodle/course:manageactivities', $roles['editingteacher'], context_module::instance($sources[0])->id);
+    unassign_capability('moodle/course:manageactivities', $roles['editingteacher'], $context->id); accesslib_clear_all_caches(true);
     assign_capability('mod/resource:addinstance', CAP_PREVENT, $roles['editingteacher'], $context->id, true); accesslib_clear_all_caches(true);
     $check(!isset(\local_videoq\course_catalog::actions($courseid)['catalogupload']), 'upload action follows current module capability');
     unassign_capability('mod/resource:addinstance', $roles['editingteacher'], $context->id); accesslib_clear_all_caches(true);
@@ -164,6 +190,10 @@ try {
     // Keep developer diagnostics enabled; recycle-bin backup acceptance is separate.
     set_config('coursebinenable', 0, 'tool_recyclebin');
     \local_videoq\synchronizer::disable($sources[0]);
+    $disabledrow = $DB->get_record('local_videoq_sync', ['id' => $row->id], '*', MUST_EXIST);
+    \local_videoq\synchronizer::retry($sources[0]);
+    $check($DB->get_record('local_videoq_sync', ['id' => $row->id], '*', MUST_EXIST) == $disabledrow,
+        'retry after explicit disable leaves the binding unchanged');
     set_config('synctoken', '', 'local_videoq');
     $rejects(fn() => \local_videoq\synchronizer::run((int)$row->id), 'offline legacy backend still refuses outbound sync');
     $check(!$DB->record_exists('course_modules', ['id' => $row->lticmid]) &&

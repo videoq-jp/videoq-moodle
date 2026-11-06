@@ -107,10 +107,7 @@ final class restoration {
                     }
                     if (
                         $metadata['enabled']
-                        && has_capability(
-                            'moodle/course:manageactivities',
-                            \context_module::instance($cm->id)
-                        )
+                        && source_management::can_manage((int)$cm->id)
                     ) {
                         $sources[] = $cm;
                     }

@@ -171,7 +171,7 @@ final class synchronizer {
      */
     public static function disable(int $cmid): void {
         global $DB;
-        require_capability('moodle/course:manageactivities', \context_module::instance($cmid));
+        source_management::require_manager($cmid);
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('enable-' . $cmid, 10);
         if (!$lock) {
             throw new \RuntimeException('Activity is being configured');
@@ -189,6 +189,29 @@ final class synchronizer {
         }
     }
     /**
+     * Queues a fresh generation without re-enabling an explicitly disabled source.
+     *
+     * @param int $cmid Source course-module identifier.
+     * @return void
+     */
+    public static function retry(int $cmid): void {
+        global $DB;
+        source_management::require_manager($cmid);
+        $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('enable-' . $cmid, 10);
+        if (!$lock) {
+            throw new \RuntimeException('Activity is being configured');
+        }
+        try {
+            $DB->execute(
+                'UPDATE {local_videoq_sync} SET generation = generation + 1, status = ?, timemodified = ?'
+                    . ' WHERE cmid = ? AND enabled = 1',
+                ['queued', time(), $cmid]
+            );
+        } finally {
+            $lock->release();
+        }
+    }
+    /**
      * Repair only mappings still enabled; never override an explicit teacher disable.
      *
      * @param int $cmid Source course-module identifier.
@@ -197,11 +220,11 @@ final class synchronizer {
      */
     private static function configure(int $cmid, bool $repair): void {
         global $CFG, $DB;
+        if (!$repair) {
+            source_management::require_manager($cmid);
+        }
         require_once($CFG->dirroot . '/course/modlib.php');
         [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'resource');
-        if (!$repair) {
-            require_capability('moodle/course:manageactivities', \context_module::instance($cmid));
-        }
         if ($cm->deletioninprogress) {
             throw new \moodle_exception('unknownlesson', 'local_videoq');
         }

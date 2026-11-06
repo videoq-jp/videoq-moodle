@@ -333,6 +333,14 @@ file and visibility editor, the existing synchronization page, and core course
 activity controls (including deletion). Use these flows for source changes.
 The derived editor does not replace the Moodle source file or change enrolments.
 
+The synchronization page, its activity navigation link, and direct enable,
+disable and retry actions also require both grants. A module-level activity
+management grant alone does not authorize VideoQ synchronization when the course
+content capability is denied. Restore only carries a source's opt-in forward
+when the restoring user has both grants in the destination. Existing enabled
+sources continue synchronizing in the background; removing a teacher's management
+right does not remove learners' access or silently disable a course integration.
+
 Unfinished materials remain available to authorized teachers for management;
 learners and AI search receive only ready materials. SRT changes temporarily take
 the material out of AI search until its index finishes. Empty SRT requires an
