@@ -128,8 +128,10 @@ CONFIG;
         $images[$mode === 'pg' ? 'db' : 'mysql'], ...$dbargs], $work . '/database-start.log');
     $ready = false;
     for ($attempt = 0; $attempt < 120; $attempt++) {
+        // MySQL's entrypoint uses a socket-only temporary server during init.
+        // Wait for TCP, as the separate Moodle container cannot use that socket.
         $probe = $mode === 'pg' ? ['psql', '-U', 'moodleaudit', '-d', 'moodleaudit_upgrade', '-Atc', 'SELECT 1']
-            : ['sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u "$MYSQL_USER" "$MYSQL_DATABASE" -Nse "SELECT 1"'];
+            : ['sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysql --protocol=TCP --host=127.0.0.1 -u "$MYSQL_USER" "$MYSQL_DATABASE" -Nse "SELECT 1"'];
         if (matrix_run([...$docker, 'exec', $database, ...$probe], $work . '/database-ready.log', false) === 0) { $ready = true; break; }
         usleep(500000);
     }
