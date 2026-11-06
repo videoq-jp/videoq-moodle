@@ -15,6 +15,7 @@ $CFG->noemailever = true;
 \core\session\manager::set_user(get_admin());
 $saved = [];
 foreach (['typeid', 'apiurl', 'servicemode', 'serviceuploadtargets'] as $key) $saved[$key] = get_config('local_videoq', $key);
+$recycle = get_config('tool_recyclebin', 'coursebinenable');
 $checks = [];
 $check = static function(bool $value, string $label) use (&$checks): void {
     if (!$value) throw new RuntimeException('Catalog check failed: ' . $label);
@@ -130,6 +131,11 @@ try {
     $check($hidden['enabled'] && !$hidden['deleted'] && $hidden['generation'] > $row->generation, 'new backend keeps hidden source with fresh generation');
     $rejects(fn() => $launch('student'), 'hidden source denies learner');
     $check(count($launch('editingteacher')['resources']) === 2, 'teacher hidden-view rights retain resource and management');
+    assign_capability('moodle/course:viewhiddenactivities', CAP_PREVENT, $roles['editingteacher'], $context->id, true);
+    accesslib_clear_all_caches(true);
+    $rejects(fn() => $launch('editingteacher'), 'hidden source denies teacher without core hidden-view capability');
+    unassign_capability('moodle/course:viewhiddenactivities', $roles['editingteacher'], $context->id);
+    accesslib_clear_all_caches(true);
     $old = \local_videoq\synchronizer::run((int)$row->id, true);
     $check(!$old['enabled'] && !$old['deleted'], 'old caller retains global visibility suppression');
     $hidden = \local_videoq\synchronizer::run((int)$row->id, true, true);
@@ -140,22 +146,31 @@ try {
     $check($coursehidden['enabled'] && !$coursehidden['deleted'], 'hidden course is not a global disable for new backend');
     $rejects(fn() => $launch('student'), 'hidden course denies learner');
     $check(count($launch('editingteacher')['resources']) === 2, 'teacher hidden-course rights retain current source access');
+    assign_capability('moodle/course:viewhiddencourses', CAP_PREVENT, $roles['editingteacher'], $context->id, true);
+    accesslib_clear_all_caches(true);
+    $rejects(fn() => $launch('editingteacher'), 'hidden course denies teacher without core hidden-course capability');
+    unassign_capability('moodle/course:viewhiddencourses', $roles['editingteacher'], $context->id);
+    accesslib_clear_all_caches(true);
     update_course((object)['id' => $courseid, 'visible' => 1]);
     set_coursemodule_visible($sources[0], 1);
     $restored = \local_videoq\synchronizer::run((int)$row->id, true, true);
     $check($restored['enabled'], 'restored source stays enabled');
     $DB->set_field('local_videoq_sync', 'status', 'completed', ['courseid' => $courseid]);
     $check(count($launch('student')['resources']) === 2, 'restored learner resource scope');
+    // This authorization fixture does not exercise core recycle-bin backups.
+    // Keep developer diagnostics enabled; recycle-bin backup acceptance is separate.
+    set_config('coursebinenable', 0, 'tool_recyclebin');
     \local_videoq\synchronizer::disable($sources[0]);
     $disabled = \local_videoq\synchronizer::run((int)$row->id, true, true);
     $check(!$disabled['enabled'] && $disabled['deleted'], 'explicit disable still emits tombstone');
     $rejects(fn() => $launch('editingteacher'), 'teacher cannot bypass explicit disable');
     echo json_encode(['passed' => true, 'database' => $CFG->dbtype, 'checks' => $checks,
-        'limits' => ['Real core File APIs, moves, roles and visibility; synthetic readiness acknowledgements, no browser/backend/AI processing.']], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
+        'limits' => ['Real core File APIs, moves, roles and visibility; synthetic readiness acknowledgements, no browser/backend/AI processing or recycle-bin backup acceptance.']], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
 } finally {
     \core\session\manager::set_user(get_admin());
     if ($courseid) $DB->delete_records('local_videoq_sync', ['courseid' => $courseid]);
     foreach ($saved as $key => $value) {
         if ($value === false) unset_config($key, 'local_videoq'); else set_config($key, $value, 'local_videoq');
     }
+    if ($recycle === false) unset_config('coursebinenable', 'tool_recyclebin'); else set_config('coursebinenable', $recycle, 'tool_recyclebin');
 }

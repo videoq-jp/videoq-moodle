@@ -2,6 +2,7 @@
 /** Build English-only ZIPs and exercise a disposable installed-Moodle database lifecycle. */
 declare(strict_types=1);
 require dirname(__DIR__) . '/scripts/runtime-images.php';
+require __DIR__ . '/support/matrix-diagnostics.php';
 $mode = $argv[1] ?? '';
 if (!in_array($mode, ['pg', 'mysql'], true)) throw new InvalidArgumentException('Expected pg or mysql and a fresh external work directory');
 $root = dirname(__DIR__);
@@ -144,7 +145,11 @@ CONFIG;
     $check = static function(string $name, array $args) use ($php, $work, &$reports): void {
         $log = $work . '/' . $name . '.json';
         matrix_run([...$php, ...$args], $log);
-        if (trim(file_get_contents($log . '.stderr')) !== '') throw new RuntimeException('Unexpected check diagnostics');
+        $diagnostic = trim(file_get_contents($log . '.stderr'));
+        if ($diagnostic !== '') {
+            $locations = matrix_diagnostic_locations($diagnostic);
+            throw new RuntimeException('Unexpected check diagnostics: ' . $name . ($locations !== '' ? ' (' . $locations . ')' : ''));
+        }
         $report = json_decode(file_get_contents($log), true, 64, JSON_THROW_ON_ERROR);
         if (($report['passed'] ?? false) !== true) throw new RuntimeException('Runtime check failed: ' . $name);
         $reports[$name] = $report;
