@@ -135,3 +135,7 @@ $string['sourcecourse'] = 'コースで教材を操作（削除など）';
 $string['materialmanagementunavailable'] = '教材管理を利用できません。現在の権限を確認するか、開き直してください。';
 $string['personalconversations'] = '自分のAI会話';
 $string['personalconversationsunavailable'] = '保存済み会話を利用できません。コースから開き直すか管理者にお問い合わせください。';
+
+$string['accountmanagement'] = '接続先のVideoQアカウントを管理';
+$string['accountmanagementhelp'] = 'VideoQのアカウント設定・課金・システム管理には、VideoQへの別途ログインと、対応するアカウントの権限が必要です。';
+$string['accountunavailable'] = 'VideoQのアカウント管理画面を開けません。接続を確認し、必要に応じてVideoQサーバーを更新してください。';

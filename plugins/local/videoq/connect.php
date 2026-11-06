@@ -105,6 +105,12 @@ if (get_config('local_videoq', 'synctoken') || get_config('local_videoq', 'servi
     }
     echo html_writer::tag('p', s((string)get_config('local_videoq', 'apiurl')));
     echo html_writer::tag('p', get_string('connectionnext', 'local_videoq'));
+    echo html_writer::tag('p', get_string('accountmanagementhelp', 'local_videoq'));
+    echo html_writer::link(
+        new moodle_url('/local/videoq/account.php'),
+        get_string('accountmanagement', 'local_videoq'),
+        ['class' => 'btn btn-outline-primary mb-3', 'target' => '_blank', 'rel' => 'noopener noreferrer']
+    );
 }
 $folded = get_config('local_videoq', 'servicemode') === 'lti';
 if ($folded) {

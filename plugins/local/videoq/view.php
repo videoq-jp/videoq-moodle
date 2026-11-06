@@ -213,6 +213,12 @@ if ($managedsources) {
         echo html_writer::end_tag('li');
     }
     echo html_writer::end_tag('ul');
+    echo html_writer::tag('p', get_string('accountmanagementhelp', 'local_videoq'));
+    echo html_writer::link(
+        new moodle_url('/local/videoq/account.php', ['course' => $course->id]),
+        get_string('accountmanagement', 'local_videoq'),
+        ['class' => 'btn btn-outline-secondary btn-sm', 'target' => '_blank', 'rel' => 'noopener noreferrer']
+    );
     echo html_writer::end_tag('details');
     echo html_writer::end_div();
 }

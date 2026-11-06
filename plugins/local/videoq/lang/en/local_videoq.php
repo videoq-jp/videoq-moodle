@@ -135,3 +135,7 @@ $string['sourcecourse'] = 'Open course activity controls (including deletion)';
 $string['materialmanagementunavailable'] = 'Material management is unavailable. Check your current permissions or relaunch.';
 $string['personalconversations'] = 'My AI conversations';
 $string['personalconversationsunavailable'] = 'Saved personal conversations are unavailable. Relaunch from the course or contact the administrator.';
+
+$string['accountmanagement'] = 'Manage the connected VideoQ account';
+$string['accountmanagementhelp'] = 'VideoQ account settings, billing and system administration require a separate VideoQ sign-in and the corresponding account permissions.';
+$string['accountunavailable'] = 'The VideoQ account management page is unavailable. Check the connection and update the VideoQ server if needed.';
