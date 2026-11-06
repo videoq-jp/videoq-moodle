@@ -62,8 +62,8 @@
         function scrollLatest() { requestAnimationFrame(() => { messages.scrollTop = messages.scrollHeight; }); }
         const resize = new ResizeObserver(scrollLatest);
         resize.observe(messages);
-        function setBusy(busy) {
-            controls.disabled = busy;
+        function setBusy(busy, disabled = busy) {
+            controls.disabled = disabled;
             messages.setAttribute('aria-busy', String(busy));
             send.querySelector('[data-region="send-icon-container"]').classList.toggle('hidden', busy);
             send.querySelector('[data-region="loading-icon-container"]').classList.toggle('hidden', !busy);
@@ -241,7 +241,7 @@
                 connected = true;
                 status.textContent = typeof data.text === 'string' ? data.text : '';
                 status.classList.toggle('text-danger', data.kind === 'error');
-                setBusy(data.busy);
+                setBusy(data.busy, typeof data.disabled === 'boolean' ? data.disabled : data.busy);
                 if (!data.busy) { const restoreFocus = pending !== null; pending = null; if (restoreFocus) input.focus({ preventScroll: true }); scrollLatest(); }
             }
         });

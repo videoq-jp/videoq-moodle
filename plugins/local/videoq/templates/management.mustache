@@ -1,0 +1,13 @@
+{{!
+    @template local_videoq/management
+    @copyright 2026 VideoQ contributors
+    @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+    Opens derived material editing in the existing authenticated tool.
+
+    Example context (json):
+    {"heading": "Manage course materials", "unavailable": "Material management is unavailable."}
+}}
+<div id="videoq-material-management" class="p-3 border-bottom bg-body" data-heading="{{heading}}" data-unavailable="{{unavailable}}" hidden>
+    <details><summary aria-controls="videoq-questions">{{heading}}</summary></details>
+    <p role="status" class="small text-danger mt-2 mb-0"></p>
+</div>

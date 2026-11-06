@@ -57,6 +57,13 @@
 .local-videoq-transcript-text { white-space: pre-wrap; }
 #videoq-course-qa [role="status"]:empty { display: none; }
 #videoq-personal-history [role="status"]:empty { display: none; }
+#videoq-material-management [role="status"]:empty { display: none; }
+.local-videoq-management-open #videoq-native-chat,
+.local-videoq-management-open #videoq-transcript { display: none !important; }
+.local-videoq-management-open #videoq-questions {
+    position: static; flex: 1; width: 100%; height: 100%; min-height: 0;
+    clip-path: none; pointer-events: auto;
+}
 .local-videoq-personal-open #videoq-native-chat,
 .local-videoq-personal-open #videoq-transcript { display: none !important; }
 .local-videoq-personal-open #videoq-questions {

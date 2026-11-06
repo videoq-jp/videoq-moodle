@@ -105,6 +105,9 @@ $PAGE->requires->js(new moodle_url('/local/videoq/qa.js', ['rev' => substr(sha1_
 $PAGE->requires->js(new moodle_url('/local/videoq/personal_history.js', [
     'rev' => substr(sha1_file(__DIR__ . '/personal_history.js'), 0, 12),
 ]));
+$PAGE->requires->js(new moodle_url('/local/videoq/management.js', [
+    'rev' => substr(sha1_file(__DIR__ . '/management.js'), 0, 12),
+]));
 $PAGE->requires->js_call_amd('core/auto_rows', 'init', ['#videoq-native-chat']);
 $PAGE->navbar->ignore_active();
 $PAGE->navbar->add(format_string($course->shortname), new moodle_url('/course/view.php', ['id' => $course->id]));
@@ -126,7 +129,9 @@ echo $OUTPUT->header();
 
 // Render only activities the current learner may view. API independently rechecks this on each question.
 $scope = ['resources' => [['lesson' => $lessonid, 'title' => $lesson['title']]]];
-if (!isset($lesson['syncStatus']) || $lesson['syncStatus'] === 'completed') {
+$canmanage = has_capability('local/videoq:managecontent', context_course::instance($course->id))
+    && has_capability('moodle/course:manageactivities', context_module::instance($videocm->id));
+if ($canmanage || !isset($lesson['syncStatus']) || $lesson['syncStatus'] === 'completed') {
     $launchproof = \local_videoq\course_access::launch((int)$lti->id, (int)$USER->id);
     $scope = \local_videoq\course_access::resolve(
         $launchproof['custom_videoq_access'],
@@ -136,9 +141,13 @@ if (!isset($lesson['syncStatus']) || $lesson['syncStatus'] === 'completed') {
     );
 }
 $catalog = [];
+$managedsources = [];
 foreach ($scope['resources'] as $allowed) {
     $item = \local_videoq\lesson::find($allowed['lesson']);
     $media = \local_videoq\synchronizer::video_file((int)$item['videoCmid']);
+    if (isset($allowed['management'])) {
+        $managedsources[] = ['cmid' => (int)$item['videoCmid'], 'title' => $allowed['title']];
+    }
     $catalog[] = ['mime' => $media ? $media->get_mimetype() : 'video/mp4', 'lesson' => $item['id'], 'title' => $allowed['title'],
         'url' => (new moodle_url('/mod/resource/view.php', ['id' => $item['videoCmid'], 'redirect' => 1]))->out(false),
         'activityUrl' => (new moodle_url('/mod/resource/view.php', ['id' => $item['videoCmid']]))->out(false)];
@@ -181,6 +190,32 @@ echo html_writer::tag(
     ]
 );
 echo html_writer::end_div();
+if ($managedsources) {
+    echo html_writer::start_div('card-body py-3');
+    echo html_writer::start_tag('details');
+    echo html_writer::tag('summary', get_string('sourcematerialactions', 'local_videoq'));
+    echo html_writer::start_tag('ul', ['class' => 'list-unstyled mt-3']);
+    foreach ($managedsources as $source) {
+        echo html_writer::start_tag('li', ['class' => 'mb-3']);
+        echo html_writer::tag('p', s($source['title']), ['class' => 'fw-semibold mb-1']);
+        $links = [
+            [new moodle_url('/course/modedit.php', ['update' => $source['cmid']]), 'sourceedit'],
+            [new moodle_url('/local/videoq/manage.php', ['cmid' => $source['cmid']]), 'sourcesync'],
+            [new moodle_url('/course/view.php', ['id' => $course->id], 'module-' . $source['cmid']), 'sourcecourse'],
+        ];
+        foreach ($links as [$url, $label]) {
+            echo html_writer::link(
+                $url,
+                get_string($label, 'local_videoq'),
+                ['class' => 'btn btn-outline-secondary btn-sm me-2 mb-2']
+            );
+        }
+        echo html_writer::end_tag('li');
+    }
+    echo html_writer::end_tag('ul');
+    echo html_writer::end_tag('details');
+    echo html_writer::end_div();
+}
 echo html_writer::end_tag('section');
 echo html_writer::start_tag(
     'section',
@@ -191,11 +226,17 @@ echo html_writer::start_tag(
      )]
 );
 echo html_writer::tag('h2', get_string('questions', 'local_videoq'), ['class' => 'visually-hidden']);
-if (isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'completed') {
+if (!$canmanage && isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'completed') {
     echo html_writer::tag('p', get_string('state_' . $lesson['syncStatus'], 'local_videoq'), ['role' => 'status']);
     echo html_writer::link($PAGE->url, get_string('refreshstatus', 'local_videoq'));
 } else {
     $message = ['id' => '', 'text' => '', 'formattedtime' => userdate(time(), get_string('strftimetime', 'langconfig'))];
+    if ($managedsources) {
+        echo $OUTPUT->render_from_template('local_videoq/management', [
+            'heading' => get_string('materialmanagement', 'local_videoq'),
+            'unavailable' => get_string('materialmanagementunavailable', 'local_videoq'),
+        ]);
+    }
     echo $OUTPUT->render_from_template('local_videoq/personal_history', [
         'heading' => get_string('personalconversations', 'local_videoq'),
         'unavailable' => get_string('personalconversationsunavailable', 'local_videoq'),

@@ -54,11 +54,11 @@ final class course_access {
             $DB->get_records(
                 'local_videoq_sync',
                 ['courseid' => $courseid,
-                'enabled' => 1,
-                'status' => 'completed']
+                'enabled' => 1]
             ) as $row
         ) {
-            $items[] = ['id' => 'sync_' . $row->cmid, 'videoCmid' => (int)$row->cmid, 'ltiCmid' => (int)$row->lticmid];
+            $items[] = ['id' => 'sync_' . $row->cmid, 'videoCmid' => (int)$row->cmid, 'ltiCmid' => (int)$row->lticmid,
+                'generation' => (int)$row->generation, 'syncStatus' => $row->status];
         }
         // The materials service grants only explicitly synchronized sources.
         // Legacy/manual associations have no external material identity and
@@ -153,6 +153,7 @@ final class course_access {
             throw new \RuntimeException('Invalid access');
         }
         $allowed = [];
+        $managecontent = has_capability('local/videoq:managecontent', $coursecontext, $user);
         foreach (self::lessons((int)$course->id) as $item) {
             if (!isset($modinfo->cms[$item['videoCmid']], $modinfo->cms[$item['ltiCmid']])) {
                 continue;
@@ -170,7 +171,23 @@ final class course_access {
             ) {
                 continue;
             }
-            $allowed[] = ['resourceLinkId' => (string)$lti->instance, 'lesson' => $item['id'], 'title' => $video->name];
+            $management = $managecontent && isset($item['generation'])
+                && has_capability('moodle/course:manageactivities', \context_module::instance($video->id), $user);
+            $learning = !isset($item['syncStatus']) || $item['syncStatus'] === 'completed';
+            if (!$learning && !$management) {
+                continue;
+            }
+            $material = ['resourceLinkId' => (string)$lti->instance, 'lesson' => $item['id'], 'title' => $video->name];
+            if (isset($item['generation'])) {
+                $material['generation'] = $item['generation'];
+            }
+            if (!$learning) {
+                $material['learning'] = false;
+            }
+            if ($management) {
+                $material['management'] = ['generation' => $item['generation']];
+            }
+            $allowed[] = $material;
         }
         if (!$allowed) {
             throw new \RuntimeException('Invalid access');
@@ -180,6 +197,7 @@ final class course_access {
             'resourceLinkId' => $resource,
             'resources' => $allowed,
             'permissions' => [
+                'manageContent' => $managecontent,
                 'manageOwnHistory' => has_capability('local/videoq:manageownhistory', $coursecontext, $user),
                 'viewTranscript' => has_capability('local/videoq:viewtranscript', $coursecontext, $user),
                 'viewQa' => has_capability('local/videoq:viewqa', $coursecontext, $user),
