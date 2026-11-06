@@ -51,6 +51,13 @@ $check(has_capability($capability, $primary, $state['users']['teacher']), 'teach
 $guest = $DB->get_record('user', ['username' => 'guest'], '*', MUST_EXIST);
 $check(!has_capability($capability, $primary, $guest, false), 'guest denied');
 $qacaps = ['viewqa', 'postqa', 'voteqa', 'deleteownqa', 'moderateqa', 'instructorqa'];
+$historycap = 'local/videoq:manageownhistory';
+foreach ($state['users'] as $archetype => $userid) {
+    $expected = !($phase === 'revoked' && $archetype === 'student');
+    $check(has_capability($historycap, $primary, $userid) === $expected, $archetype . ' personal history');
+}
+$check(!has_capability($historycap, $primary, $guest, false), 'guest personal history denied');
+$check(has_capability($historycap, $secondary, $state['users']['student']), 'other course personal history unaffected');
 foreach ($qacaps as $name) {
     $full = 'local/videoq:' . $name;
     $definition = $DB->get_record('capabilities', ['name' => $full], '*', MUST_EXIST);
@@ -67,10 +74,12 @@ $check(has_capability('local/videoq:postqa', $secondary, $state['users']['studen
 $check(has_capability('local/videoq:moderateqa', $secondary, $state['users']['teacher']), 'other course moderation unaffected');
 if ($phase === 'defaults') {
     assign_capability($capability, CAP_PREVENT, $state['studentRole'], $primary->id, true);
+    assign_capability($historycap, CAP_PREVENT, $state['studentRole'], $primary->id, true);
     assign_capability('local/videoq:postqa', CAP_PREVENT, $state['studentRole'], $primary->id, true);
     assign_capability('local/videoq:moderateqa', CAP_PREVENT, $state['roles']['teacher'], $primary->id, true);
 } elseif ($phase === 'revoked') {
     unassign_capability($capability, $state['studentRole'], $primary->id);
+    unassign_capability($historycap, $state['studentRole'], $primary->id);
     unassign_capability('local/videoq:postqa', $state['studentRole'], $primary->id);
     unassign_capability('local/videoq:moderateqa', $state['roles']['teacher'], $primary->id);
 } else {
@@ -80,6 +89,7 @@ if ($phase === 'defaults') {
 }
 echo json_encode(['passed' => true, 'phase' => $phase, 'database' => $CFG->dbtype,
     'studentPermission' => $phase !== 'revoked', 'teacherPermission' => true,
+    'studentPersonalHistory' => $phase !== 'revoked',
     'qaCapabilities' => $qacaps, 'qaArchetypes' => array_keys($state['users']),
     'studentPostQa' => $phase !== 'revoked', 'teacherModerateQa' => $phase !== 'revoked',
     'otherCourseUnaffected' => true, 'guestDenied' => true], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";

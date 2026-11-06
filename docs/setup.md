@@ -185,6 +185,17 @@ VideoQ account. Reinstallation requires connecting and enabling questions again.
 
 ## Operations and troubleshooting
 
+The unreleased local_videoq 0.14.0 adds **My AI conversations** to the existing
+assistant workspace when the backend supports saved conversations. Upgrade the
+backend and run its migrations before relying on this feature. It provides
+list/read/resume, new conversation, per-conversation NDJSON download and deletion.
+The independent course capability `local/videoq:manageownhistory` defaults to
+students, teachers, editing teachers and managers; course overrides can remove
+it without disabling ordinary AI chat. Missing capability support denies saved
+history. A teacher can manage only their own conversations through this panel.
+See [data handling](privacy.md) for ownership, retention and external privacy
+request limits. Opening history or course Q&A reuses the current tool session.
+
 Keep Moodle cron/ad-hoc tasks, the VideoQ processing worker and materials scheduler
 running. Configure PHP/web upload and request limits, storage capacity and Moodle
 File limits for your expected video sizes. Use publicly trusted HTTPS or install

@@ -32,21 +32,25 @@
         const origin = workspace.dataset.videoqOrigin;
         const details = root.querySelector('details');
         const status = root.querySelector('[role="status"]');
-        const initialTitle = frame.title;
+        const initialTitle = frame.dataset.videoqBaseTitle || (frame.dataset.videoqBaseTitle = frame.title);
         let bridge = null, available = false, opened = false, everOpened = false;
         function display(open, notify = true) {
+            if (open) workspace.dispatchEvent(new CustomEvent('videoq:tool-panel', { detail: 'qa' }));
             const changed = opened !== open;
             opened = open;
             panel.classList.toggle('local-videoq-qa-open', open);
             details.open = open;
-            frame.title = open ? root.dataset.heading : initialTitle;
-            frame.setAttribute('tabindex', open ? '0' : '-1');
-            if (open) frame.removeAttribute('aria-hidden');
-            else frame.setAttribute('aria-hidden', 'true');
+            if (open || workspace.dataset.videoqActiveTool === 'qa') {
+                frame.title = open ? root.dataset.heading : initialTitle;
+                frame.setAttribute('tabindex', open ? '0' : '-1');
+                if (open) { frame.removeAttribute('aria-hidden'); workspace.dataset.videoqActiveTool = 'qa'; }
+                else { frame.setAttribute('aria-hidden', 'true'); delete workspace.dataset.videoqActiveTool; }
+            }
             if (changed && notify && bridge) frame.contentWindow.postMessage({ type: 'videoq:qa-ui', version: 1,
                 channel: bridge.channel, videoId: bridge.videoId, open }, origin);
         }
         details.addEventListener('toggle', () => { if (details.open) everOpened = true; display(details.open && available); });
+        workspace.addEventListener('videoq:tool-panel', event => { if (event.detail !== 'qa' && opened) display(false); });
         window.addEventListener('message', event => {
             if (event.source !== frame.contentWindow || event.origin !== origin) return;
             const data = event.data;

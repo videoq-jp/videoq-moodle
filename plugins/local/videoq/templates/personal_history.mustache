@@ -1,0 +1,13 @@
+{{!
+    @template local_videoq/personal_history
+    @copyright 2026 VideoQ contributors
+    @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+    Opens the learner's private conversation manager in the authenticated tool.
+
+    Example context (json):
+    {"heading": "My AI conversations", "unavailable": "Saved conversations are unavailable."}
+}}
+<div id="videoq-personal-history" class="p-3 border-bottom bg-body" data-heading="{{heading}}" data-unavailable="{{unavailable}}" hidden>
+    <details><summary aria-controls="videoq-questions">{{heading}}</summary></details>
+    <p role="status" class="small text-danger mt-2 mb-0"></p>
+</div>
