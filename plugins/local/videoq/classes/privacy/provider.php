@@ -48,6 +48,7 @@ final class provider implements
             'feedback' => 'privacy:metadata:feedback',
             'transcript' => 'privacy:metadata:transcript',
             'courseqa' => 'privacy:metadata:courseqa',
+            'materialmanagement' => 'privacy:metadata:materialmanagement',
             'access' => 'privacy:metadata:access',
             'video' => 'privacy:metadata:video',
             'position' => 'privacy:metadata:position',

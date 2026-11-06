@@ -39,6 +39,7 @@ final class lesson {
         global $USER, $DB;
         $info = get_fast_modinfo($courseid, $USER->id);
         $typeid = (int)get_config('local_videoq', 'typeid');
+        $pending = null;
         foreach (course_access::lessons($courseid) as $item) {
             if (!isset($info->cms[$item['videoCmid']], $info->cms[$item['ltiCmid']])) {
                 continue;
@@ -53,9 +54,13 @@ final class lesson {
             ) {
                 continue;
             }
-            return self::find($item['id']);
+            $lesson = self::find($item['id']);
+            if (!isset($lesson['syncStatus']) || $lesson['syncStatus'] === 'completed') {
+                return $lesson;
+            }
+            $pending ??= $lesson;
         }
-        return null;
+        return $pending;
     }
     /**
      * Validates and decodes the administrator-defined lesson mappings.

@@ -100,6 +100,16 @@ retention and cleanup policies separately.
 
 ## Verification
 
+The unreleased 0.15.0 material editor also sends teachers' AI descriptions, SRT
+edits and processing requests to VideoQ. Its metadata declaration includes the
+external audit receipts: a pseudonymous actor key, source identifiers, operation,
+revision hashes and time. Audit receipts contain no draft text. The draft stays
+inside the authenticated tool frame; the Moodle bridge receives only availability
+and an unsaved-draft boolean. After a permission revocation, an existing draft can
+be copied from read-only fields; no new protected data is requested for that draft.
+The complete external export/delete and audit-retention process is still part of
+the remaining VideoQ privacy work. The Moodle callbacks alone do not perform it.
+
 `tests/privacy.php <Moodle-source>` uses real pinned Moodle interfaces and metadata
 classes without a DB; normal CI runs it with networking disabled. The dedicated
 `lab/check-marketplace-privacy.php /site` fixture also executes all six request

@@ -259,3 +259,33 @@ generated VideoQ activities/links, then enable **VideoQ questions** on the resto
 File activities manually. Whole-database/object-store
 recovery and individual `.mbz` restore are separate capabilities. See the
 [verification scope](verification.md) before relying on a particular workflow.
+
+## Teacher material editing (unreleased 0.15.0)
+
+The course assistant's **Manage course materials** panel edits the AI description
+and SRT transcript, rebuilds the search index and retries eligible processing
+failures. It requires both `local/videoq:managecontent` in the course and
+`moodle/course:manageactivities` on the source File activity. The new capability
+defaults to editing teachers and managers; students and non-editing teachers do
+not receive it. Current permissions and source visibility are rechecked for every
+operation. A launch's Instructor/Administrator claim grants no editing authority.
+
+**Manage Moodle source activities** links authorized sources to Moodle's title,
+file and visibility editor, the existing synchronization page, and core course
+activity controls (including deletion). Use these flows for source changes.
+The derived editor does not replace the Moodle source file or change enrolments.
+
+Unfinished materials remain available to authorized teachers for management;
+learners and AI search receive only ready materials. SRT changes temporarily take
+the material out of AI search until its index finishes. Empty SRT requires an
+explicit clear confirmation. Conflicting edits and lost responses retain the
+draft; copy a revoked draft from the read-only editor before leaving the page.
+Processing is polled at most 60 times at five-second intervals, then needs manual
+refresh. For an old/unsupported or already-completed processing receipt, use
+**Manage VideoQ synchronization** to retry. Processing limits still apply.
+
+Upgrade the compatible VideoQ worker before enabling the new API's explicit-clear
+jobs, then apply the API's migrations/grants and deploy the API before upgrading
+the companion. Older peers retain learning but cannot infer the new write grant.
+This version remains unreleased pending the verification gates; no Marketplace
+archive or public source branch is updated by this feature work.

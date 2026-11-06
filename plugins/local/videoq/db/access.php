@@ -25,6 +25,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
+    'local/videoq:managecontent' => [
+        'riskbitmask' => RISK_DATALOSS, 'captype' => 'write', 'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => ['editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
+    ],
     'local/videoq:manageownhistory' => [
         'riskbitmask' => RISK_DATALOSS, 'captype' => 'write', 'contextlevel' => CONTEXT_COURSE,
         'archetypes' => ['student' => CAP_ALLOW, 'teacher' => CAP_ALLOW, 'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],

@@ -47,6 +47,13 @@ try {
     if (($input['includePermissions'] ?? false) !== true) {
         unset($result['permissions']);
     }
+    if (($input['includeContentManagement'] ?? false) !== true) {
+        $result['resources'] = array_values(array_filter($result['resources'], fn($item) => ($item['learning'] ?? true) === true));
+        foreach ($result['resources'] as &$item) {
+            unset($item['management'], $item['learning'], $item['generation']);
+        }
+        unset($item);
+    }
     echo json_encode($result, JSON_THROW_ON_ERROR);
 } catch (Throwable $error) {
     http_response_code(403);
