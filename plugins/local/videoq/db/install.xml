@@ -28,7 +28,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
         <FIELD NAME="sourcekind" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="file" />
-        <FIELD NAME="youtubeid" TYPE="char" LENGTH="11" NOTNULL="true" DEFAULT="" />
+        <FIELD NAME="youtubeid" TYPE="char" LENGTH="11" NOTNULL="true" />
         <FIELD NAME="typeid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
         <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" />
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />

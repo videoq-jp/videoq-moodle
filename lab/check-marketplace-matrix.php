@@ -40,7 +40,9 @@ function matrix_run(array $args, string $log, bool $required = true): int {
 function matrix_diagnostics(string $log): void {
     $output = file_get_contents($log) . file_get_contents($log . '.stderr');
     if (preg_match('/Warning:|Deprecated:|Notice:|Debug info:|Stack trace:|!!!|XMLDB has detected/i', $output)) {
-        throw new RuntimeException('Developer diagnostics found: ' . basename($log));
+        $locations = matrix_diagnostic_locations($output);
+        throw new RuntimeException('Developer diagnostics found: ' . basename($log)
+            . ($locations !== '' ? ' (' . $locations . ')' : ''));
     }
 }
 function matrix_source(string $repo, string $revision, string $target, ?string $cache, string $work, string $label): void {
