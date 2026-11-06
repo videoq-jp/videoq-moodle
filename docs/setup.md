@@ -353,3 +353,17 @@ endpoint lets a learner select another person's ID or sign assertions. Requests
 remain possible for inactive/over-quota connections while the registered
 platform identity and key remain. Keep these until outstanding requests are
 finished, and test export/delete with synthetic records before learner use.
+
+## Optional audit retention
+
+The paired audit-retention backend adds `auditRetentionDays` (integer 1–3650) to
+VideoQ's existing `LTI_CONFIG` JSON. Omit it to disable automatic cleanup; no
+implicit retention period is chosen. Apply the complete schema/data migration
+chain (0057/0058) and security profile, then drain/upgrade every API writer before
+enabling this setting. Older APIs reject the new setting. This metadata-only
+plugin update is 0.17.1 / 2026110700; it needs no new Moodle schema or secret.
+
+Cleanup removes expired material/tag operation receipts and clears expired LTI
+moderation actor keys. It retains minimal operation-ID hashes so retrying an old
+request cannot repeat a write. Normal core-approved personal data requests do
+not depend on this optional cleanup setting. See [data handling](privacy.md).
