@@ -117,6 +117,8 @@ final class connection_setup {
                 }
             }
             $transaction = $DB->start_delegated_transaction();
+            privacy_api::servers(true);
+            privacy_api::remember($pending['origin'], $type);
             set_config('apiurl', $pending['origin'], 'local_videoq');
             set_config('typeid', $pending['typeid'], 'local_videoq');
             set_config('synctoken', $pending['token'], 'local_videoq');

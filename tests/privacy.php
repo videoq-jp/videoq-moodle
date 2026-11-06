@@ -26,6 +26,7 @@ spl_autoload_register(static function(string $class) use ($source): void {
     }
 });
 $root = dirname(__DIR__);
+require_once $root . '/plugins/local/videoq/classes/privacy_api.php';
 $components = [
     'local_videoq' => ['local', ['conversation', 'feedback', 'access', 'video', 'position', 'videofile', 'title']],
     'ltisource_videoq' => ['ltisource', ['userid', 'courseid', 'resourceid']],

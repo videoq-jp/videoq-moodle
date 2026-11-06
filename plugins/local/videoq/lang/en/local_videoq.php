@@ -143,3 +143,6 @@ $string['accountunavailable'] = 'The VideoQ account management page is unavailab
 $string['coursetags'] = 'Course tags and materials';
 $string['coursetagsunavailable'] = 'Course tags are unavailable. Check your current Moodle permissions or relaunch.';
 $string['privacy:metadata:coursetags'] = 'Course-specific tag names, colors, material assignments and pseudonymous operation receipts are stored by VideoQ.';
+
+$string['privacyunavailable'] = 'The external privacy request could not be completed. Ask the administrator to check the approved VideoQ connection and privacy service, then retry.';
+$string['privacyexportscope'] = 'Personal records in the approved Moodle context, including model memory and pseudonymous operation receipts. Shared materials and other participants’ content remain. Records created before subject attribution was introduced, backups and AI provider records require separate operator review. Concurrent changes may require retrying the export.';

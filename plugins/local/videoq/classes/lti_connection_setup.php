@@ -128,6 +128,8 @@ final class lti_connection_setup {
                  'name' => 'publickeyset',
                 'value' => $value['origin'] . '/api/lti/jwks']
             );
+            privacy_api::servers(true);
+            privacy_api::remember($value['origin'], $type);
             set_config('apiurl', $value['origin'], 'local_videoq');
             set_config('typeid', $type->id, 'local_videoq');
             set_config('serviceuploadtargets', json_encode($result['uploadTargets'], JSON_THROW_ON_ERROR), 'local_videoq');

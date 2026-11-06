@@ -62,24 +62,47 @@ An administrator who changes tool privacy settings can change core LTI disclosur
 
 ## Export and deletion requests
 
-Moodle's Privacy API sees no personal contexts/users in these plugins' own tables.
-Their request methods return no local personal records and leave shared course
-materials, connection configuration and synchronization bindings intact. Core
-providers handle Moodle-owned activity, file, session/task and audit records.
-This follows the [official external-only provider guidance](https://moodledev.io/docs/5.1/apis/subsystems/privacy/faq).
+Unreleased `local_videoq` 0.17.0 adds external data requests through Moodle's
+standard approved-context and approved-user workflows. The paired VideoQ
+privacy service must be explicitly enabled after coordinated deployment. This
+is separate from the historical Marketplace candidate, whose callbacks were
+metadata-only. Core providers continue to own Moodle activity/file/session/task
+and audit records.
 
-**A Moodle data request does not automatically export or delete VideoQ data.**
-Administrators must arrange external requests with the owner/operator of the
-configured VideoQ deployment. Record that process, contact and actual retention
-policy before enabling the service for learners. No per-learner external
-export/deletion endpoint is called by these providers. Do not treat an empty
-Moodle plugin export as evidence that the external service holds no data.
+The provider exports attributed personal conversations, question/answer logs,
+retrieval evidence, evaluation scores, authored Q&A, votes, moderation and
+material/tag operation receipts, recent history and model memory. Authentication
+credentials and provider error traces are excluded. Ordinary records use NDJSON;
+large records use numbered UTF-8 fragments and a SHA-256 concatenation manifest.
+Concurrent changes can require restarting the request. No record is silently
+truncated.
 
-Deleting a source activity or disabling VideoQ questions follows material
-synchronization/tombstones. This is distinct from a learner data request.
-Disconnecting, uninstalling, or deleting a Moodle account does not itself certify
-external deletion. Uninstalling removes plugin tables/settings while preserving
-source Moodle materials; revoke the remote connection separately.
+Only approved course contexts are processed. Missing/deleted course mappings use
+the system context for residual records; system approval does not grant access
+to all courses. Former/deleted users are included while their Moodle IDs remain.
+Individual erasure removes attributable records and invalidates selected sessions.
+Own Q&A text/identity are replaced with tombstones so peer replies survive.
+Shared materials, source mappings and tag vocabulary/assignments remain.
+
+Requests use short-lived, single-use assertions signed by Moodle's platform key,
+with a distinct purpose and exact API audience. Learner roles and browser
+credentials do not grant privacy authority. Public connection identities are
+remembered for requests after reconnecting; no user IDs or connection secrets are
+stored in this history. A changed/cloned Moodle issuer cannot use old identities.
+Keep the signing key and remote registration until outstanding requests are done.
+Uninstall removes local configuration, including this public connection history.
+
+External service failures stop the request. Ask the operator to resolve the
+connection/rollout issue and retry; an empty export must not be treated as proof
+that an unreachable service has no data. Legacy unattributed logs, physically
+removed Moodle user IDs, backups, application logs, AI-provider storage and
+personal data embedded in shared materials need separate operator review.
+Automatic retention of personal material/tag receipts and moderation identities
+remains open. Record the operator contact and actual retention policy.
+
+See [setup](setup.md#external-privacy-service-unreleased-0170) for deployment
+requirements. Disconnecting, deleting a source activity or a Moodle account,
+and uninstalling do not themselves certify external deletion.
 
 ## Temporary integration state
 
@@ -107,8 +130,8 @@ revision hashes and time. Audit receipts contain no draft text. The draft stays
 inside the authenticated tool frame; the Moodle bridge receives only availability
 and an unsaved-draft boolean. After a permission revocation, an existing draft can
 be copied from read-only fields; no new protected data is requested for that draft.
-The complete external export/delete and audit-retention process is still part of
-the remaining VideoQ privacy work. The Moodle callbacks alone do not perform it.
+The new external privacy callbacks include these personal receipts. Shared edited
+content and automatic receipt retention still require the operator workflow above.
 
 `tests/privacy.php <Moodle-source>` uses real pinned Moodle interfaces and metadata
 classes without a DB; normal CI runs it with networking disabled. The dedicated
@@ -116,3 +139,8 @@ classes without a DB; normal CI runs it with networking disabled. The dedicated
 methods for both components with system/course/module contexts and nonempty
 approved requests. It compares shared course, file, synchronization and settings
 records before and after. This does not test external VideoQ data requests.
+
+`tests/privacy-requests.php` checks approved scope intersection, former users,
+Unicode and large exports, integrity failures and transport limits. The historical
+Marketplace matrix reports above do not establish this new external lifecycle;
+use the paired privacy branch acceptance evidence for it.

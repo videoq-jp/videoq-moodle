@@ -173,9 +173,9 @@ Normal setup requires no separate synchronization credential or connector server
 
 ## Data requests and retention
 
-Review [data handling](privacy.md) before enabling the service. Moodle privacy
-requests do not automatically export/delete external VideoQ history; arrange the
-external request and retention process with the configured deployment operator.
+Review [data handling](privacy.md) before enabling the service. The unreleased
+0.17.0 provider can process external requests when the paired service is enabled.
+Legacy data, shared content, backups and provider records still need an operator process.
 
 ## Responsibilities and access
 
@@ -332,3 +332,24 @@ jobs, then apply the API's migrations/grants and deploy the API before upgrading
 the companion. Older peers retain learning but cannot infer the new write grant.
 This version remains unreleased pending the verification gates; no Marketplace
 archive or public source branch is updated by this feature work.
+
+## External privacy service (unreleased 0.17.0)
+
+Deploy the paired VideoQ privacy branch and this plugin together. In the existing
+VideoQ `LTI_CONFIG` JSON, enable `privacyEnabled: true` only after all API writer
+processes are upgraded and drained. Keep the existing canonical tool origin,
+registrations and database-registration settings. The service defaults to off.
+Apply the complete existing migrations, official conversation checkpoint setup
+and API security profile. No new secret or Moodle schema migration is required.
+
+Old recent-history caches without subject attribution must expire (24-hour TTL)
+and the normal expired-credential cleanup must run. Until then the service
+rejects privacy operations rather than guessing whose data a cache contains.
+Do not enable the service during a mixed-version rollout. Old/unavailable
+backends fail requests; coordinate the rollout before accepting real requests.
+
+Use Moodle's normal privacy requests and approval workflow. No additional web
+endpoint lets a learner select another person's ID or sign assertions. Requests
+remain possible for inactive/over-quota connections while the registered
+platform identity and key remain. Keep these until outstanding requests are
+finished, and test export/delete with synthetic records before learner use.
