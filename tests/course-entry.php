@@ -23,7 +23,7 @@ namespace {
         public function __construct(public int $id) {}
         public static function instance(int $id): self { return new self($id); }
     }
-    $config = ['version' => 2026110701, 'typeid' => 3, 'apiurl' => 'https://api.example'];
+    $config = ['version' => 2026110701, 'typeid' => 3, 'apiurl' => 'https://api.example', 'servicemode' => 'lti', 'synctoken' => str_repeat('a',64)];
     $capabilities = ['local/videoq:managecontent' => true, 'moodle/course:manageactivities' => true];
     function get_config(string $component, string $name): mixed { global $config; return $config[$name] ?? false; }
     function require_capability(string $name, context_course $context): void {
@@ -65,6 +65,7 @@ namespace {
         private int $error = 0;
         public function setHeader(array $headers): void {}
         public function get(string $url, array $body, array $options): string {
+            if ($url === 'https://api.example/api/lms/connection') return json_encode(self::$metadata);
             check($url === 'https://api.example/api/lms/pairing/discovery', 'Configured endpoint only');
             check($options['CURLOPT_FOLLOWLOCATION'] === 0 && $options['CURLOPT_SSL_VERIFYPEER'] === true
                 && $options['CURLOPT_SSL_VERIFYHOST'] === 2, 'Verified TLS and no redirects');
@@ -105,9 +106,15 @@ namespace {
         Entry::configure(42,true);
         check(count($created) === 1 && $DB->row->generation === 2, 'Repair duplicated the activity');
         check(local_videoq\synchronizer::$entries === [42,42], 'Stable course URL helper not called');
+        $config['servicemode'] = '';
+        curl::$metadata['courseEntries'] = false;
+        rejects(fn()=>Entry::configure(42,true));
+        curl::$metadata['courseEntries'] = true;
+        Entry::configure(42,true);
+        check(count($created) === 1 && $DB->row->generation === 3, 'Legacy backend needs materials/S3 discovery or duplicates an entry');
         curl::$metadata['courseEntries'] = false;
         Entry::configure(42,false);
-        check($DB->row->enabled === 0 && $DB->row->generation === 3, 'Disable requires backend availability or lost generation');
+        check($DB->row->enabled === 0 && $DB->row->generation === 4, 'Disable requires backend availability or lost generation');
         $config['version'] = 2026110700;
         check(Entry::find(42) === null && Entry::for_launch(501) === null, 'Pre-upgrade table guard');
         echo "Course entry: course-wide capabilities, old backend refusal, bounded TLS discovery, no media, idempotent repair and offline disable passed.\n";

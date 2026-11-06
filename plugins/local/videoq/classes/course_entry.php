@@ -98,6 +98,15 @@ final class course_entry {
      */
     private static function require_backend(): void {
         global $CFG;
+        if (get_config('local_videoq', 'servicemode') !== 'lti') {
+            // Legacy push need not have S3/materials-service discovery enabled.
+            // Use its already authenticated, approved connection instead.
+            $connection = (new client())->request('GET', 'connection');
+            if (($connection['courseEntries'] ?? false) !== true) {
+                throw new \RuntimeException('Course entries unavailable');
+            }
+            return;
+        }
         require_once($CFG->libdir . '/filelib.php');
         $origin = rtrim((string)get_config('local_videoq', 'apiurl'), '/');
         if (client::origin($origin) !== $origin) {

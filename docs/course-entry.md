@@ -10,7 +10,8 @@ it does not complete all VideoQ feature parity or canonical course deletion.
 
 1. Upgrade the backend with migration 0059 and course-entry support, then upgrade
    `local_videoq` to 0.18.0 / 2026110701. Drain older backend writers before enabling
-   entries. The configured backend must advertise `courseEntries: true`.
+   entries. The configured backend must advertise `courseEntries: true` through
+   materials discovery or the authenticated legacy connection response.
    Use a regular course; the site frontpage is not a supported course entry.
 2. Open **Manage VideoQ course entry** in course settings, or follow the setup link
    from the empty VideoQ course view. Both `local/videoq:managecontent` and
