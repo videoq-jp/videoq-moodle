@@ -89,10 +89,19 @@ try {
     $rejects(fn() => $access(false), 'old permission caller cannot read a YouTube source');
     $check(\local_videoq\restoration::describe($cmid) === ['role' => 'source', 'enabled' => 1, 'sourcekind' => 'youtube'],
         'backup marker contains portable kind and opt-in without remote IDs');
-    assign_capability('mod/url:view', CAP_PREVENT, $roles['student'], context_module::instance($cmid)->id, true);
+    $sourcecontext = context_module::instance($cmid);
+    // Core mod_url grants view to the authenticated-user role. A prevent on
+    // student alone does not revoke that other grant; a prohibit does.
+    assign_capability('mod/url:view', CAP_PREVENT, $roles['student'], $sourcecontext->id, true);
     accesslib_clear_all_caches(true);
+    $check(has_capability('mod/url:view', $sourcecontext, $users['student'])
+        && count($access()['resources']) === 1, 'another current Moodle role still grants URL view');
+    assign_capability('mod/url:view', CAP_PROHIBIT, $roles['student'], $sourcecontext->id, true);
+    accesslib_clear_all_caches(true);
+    $check(!has_capability('mod/url:view', $sourcecontext, $users['student'])
+        && has_capability('mod/url:view', $sourcecontext, $users['editingteacher']), 'fixture revokes only the learner URL view');
     $rejects(fn() => $access(), 'same proof denies revoked mod/url view');
-    unassign_capability('mod/url:view', $roles['student'], context_module::instance($cmid)->id); accesslib_clear_all_caches(true);
+    unassign_capability('mod/url:view', $roles['student'], $sourcecontext->id); accesslib_clear_all_caches(true);
     $check(count($access()['resources']) === 1, 'same proof follows restored URL view');
     \core\session\manager::set_user($users['editingteacher']);
     $check(array_column(\local_videoq\course_catalog::sources($courseid), 'cmid') === [$cmid], 'catalog excludes generated URL shortcuts');
