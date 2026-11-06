@@ -180,6 +180,7 @@ final class course_access {
             'resourceLinkId' => $resource,
             'resources' => $allowed,
             'permissions' => [
+                'manageOwnHistory' => has_capability('local/videoq:manageownhistory', $coursecontext, $user),
                 'viewTranscript' => has_capability('local/videoq:viewtranscript', $coursecontext, $user),
                 'viewQa' => has_capability('local/videoq:viewqa', $coursecontext, $user),
                 'postQa' => has_capability('local/videoq:postqa', $coursecontext, $user),

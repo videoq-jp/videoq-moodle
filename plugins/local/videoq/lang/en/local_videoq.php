@@ -123,3 +123,7 @@ $string['privacy:metadata:feedback'] = 'The learner’s Good/Bad rating or remov
 $string['privacy:metadata:core'] = 'Moodle core manages temporary administrator connection sessions, configuration audit records and restore tasks executed as the initiating user. Its Privacy API handles those core records.';
 $string['chatfeedbackgood'] = 'Good';
 $string['chatfeedbackbad'] = 'Bad';
+
+$string['videoq:manageownhistory'] = 'Manage own saved AI conversations';
+$string['personalconversations'] = 'My AI conversations';
+$string['personalconversationsunavailable'] = 'Saved personal conversations are unavailable. Relaunch from the course or contact the administrator.';

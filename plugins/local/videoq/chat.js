@@ -195,6 +195,11 @@
             }
             if (!bridge || data.type !== 'videoq:chat' || data.channel !== bridge.channel || data.videoId !== bridge.videoId) return;
             if (data.event === 'history' && Array.isArray(data.turns)) {
+                if (data.replace === true) {
+                    if (pending) return;
+                    messages.replaceChildren(empty); empty.hidden = false;
+                    shownQuestions.clear(); shownAnswers.clear(); answerBodies.clear(); ratings.clear();
+                }
                 for (const turn of data.turns.slice(-50)) {
                     if (!turn || typeof turn.id !== 'string' || !/^[a-f0-9]{32}$/.test(turn.id)
                             || typeof turn.question !== 'string' || turn.question.length > 4000 || shownQuestions.has(turn.id)) continue;

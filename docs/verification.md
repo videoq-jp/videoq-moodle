@@ -11,6 +11,17 @@ VideoQ remains an independently deployed application. Its implementation and
 runtime dependencies belong to that project; this repository neither imports
 its source nor starts its API, frontend, scheduler or processing workers.
 
+The unreleased personal-conversation increment (local_videoq 0.14.0) passed the
+official Moodle coding scan with zero errors/warnings and installed Moodle 5.1
+PostgreSQL/MySQL lifecycle checks on 2026-11-06: 14 reports per database, zero
+candidate developer diagnostics. The checks cover all four standard archetypes,
+course-local history-capability revocation/restoration, guest denial, upgrade,
+reinstall, Privacy API callbacks and source-material preservation. VideoQ's
+separate browser tests exercised the actual companion history/Q&A/chat scripts,
+native transcript replacement, delayed initialization and iframe/session
+preservation with fixture HTTP responses. They do not establish a complete live
+Moodle + VideoQ + AI workflow or automatic external Privacy API handling.
+
 | Check | What it proves |
 |---|---|
 | `php tests/packages.php` | Offline standard Moodle ZIPs, required assets, safe boundaries, checksums |

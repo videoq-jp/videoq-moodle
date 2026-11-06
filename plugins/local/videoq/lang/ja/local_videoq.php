@@ -123,3 +123,7 @@ $string['privacy:metadata:feedback'] = '回答を識別する情報とともにV
 $string['privacy:metadata:core'] = '管理者の接続用一時セッション、設定変更の記録、復元を開始した利用者として実行するタスクはMoodle本体が管理します。これらの記録へのデータ要求はMoodle本体のPrivacy APIが処理します。';
 $string['chatfeedbackgood'] = 'Good';
 $string['chatfeedbackbad'] = 'Bad';
+
+$string['videoq:manageownhistory'] = '自分の保存済みAI会話を管理する';
+$string['personalconversations'] = '自分のAI会話';
+$string['personalconversationsunavailable'] = '保存済み会話を利用できません。コースから開き直すか管理者にお問い合わせください。';
