@@ -115,6 +115,9 @@ try {
     }
     $row = $DB->get_record('local_videoq_sync', ['cmid' => $sources[0]], '*', MUST_EXIST);
     $launch = static function(string $archetype) use ($row, $courseid, $users): array {
+        // Real service requests get fresh per-request dynamic module visibility.
+        // This CLI checker changes roles repeatedly within one PHP process.
+        get_fast_modinfo($courseid, 0, true);
         $proof = \local_videoq\course_access::launch((int)$row->ltiinstance, (int)$users[$archetype]->id);
         return \local_videoq\course_access::resolve($proof['custom_videoq_access'] ?? '', (string)$users[$archetype]->id,
             (string)$courseid, (string)$row->ltiinstance);

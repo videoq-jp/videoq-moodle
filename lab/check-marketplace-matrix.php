@@ -31,7 +31,10 @@ function matrix_run(array $args, string $log, bool $required = true): int {
         2 => ['file', $log . '.stderr', 'w']], $pipes);
     if (!is_resource($process)) throw new RuntimeException('Cannot launch fixture command');
     $code = proc_close($process);
-    if ($required && $code !== 0) throw new RuntimeException('Fixture command failed: ' . basename($log));
+    if ($required && $code !== 0) {
+        $locations = matrix_diagnostic_locations(file_get_contents($log) . file_get_contents($log . '.stderr'));
+        throw new RuntimeException('Fixture command failed: ' . basename($log) . ($locations !== '' ? ' (' . $locations . ')' : ''));
+    }
     return $code;
 }
 function matrix_diagnostics(string $log): void {
@@ -204,7 +207,7 @@ CONFIG;
     // Touch only resources carrying this invocation's unpredictable ownership label.
     if (matrix_run([...$docker, 'inspect', '--format', '{{index .Config.Labels "videoq.marketplace.matrix"}}', $database], $work . '/cleanup-owner.log', false) === 0
             && trim(file_get_contents($work . '/cleanup-owner.log')) === $id) {
-        matrix_run([...$docker, 'rm', '--force', $database], $work . '/cleanup-database.log', false);
+        matrix_run([...$docker, 'rm', '--force', '--volumes', $database], $work . '/cleanup-database.log', false);
     }
     if ($networkcreated
             && matrix_run([...$docker, 'network', 'inspect', '--format', '{{index .Labels "videoq.marketplace.matrix"}}', $network], $work . '/cleanup-network-owner.log', false) === 0
