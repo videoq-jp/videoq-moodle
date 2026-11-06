@@ -66,11 +66,15 @@ final class course_entry {
      * @return bool
      */
     public static function valid(\stdClass $row): bool {
-        global $DB;
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/mod/lti/locallib.php');
         $cm = get_coursemodule_from_id('lti', (int)$row->lticmid, 0, false, IGNORE_MISSING);
+        $type = $DB->get_record('lti_types', ['id' => $row->typeid]);
         $toolurl = (string)$DB->get_field('lti', 'toolurl', ['id' => $row->ltiinstance, 'course' => $row->courseid]);
         $expected = rtrim((string)get_config('local_videoq', 'apiurl'), '/') . '/api/lti/launch';
         return (int)$row->courseid !== SITEID && $DB->record_exists('course', ['id' => $row->courseid])
+            && $type && (int)$type->state === LTI_TOOL_STATE_CONFIGURED && $type->ltiversion === LTI_VERSION_1P3
+            && rtrim($type->baseurl, '/') === $expected
             && $cm && !$cm->deletioninprogress && (int)$cm->course === (int)$row->courseid
             && (int)$cm->instance === (int)$row->ltiinstance
             && (int)$row->typeid === (int)get_config('local_videoq', 'typeid')
@@ -144,6 +148,9 @@ final class course_entry {
         self::require_manager($courseid);
         if ($enabled) {
             $type = synchronizer::check_connection();
+            if ((int)$type->state !== LTI_TOOL_STATE_CONFIGURED) {
+                throw new \RuntimeException('Tool unavailable');
+            }
             self::require_backend();
             require_once($CFG->dirroot . '/course/modlib.php');
         }

@@ -71,6 +71,12 @@ try {
     $access=$resolve();
     $check($access['resources']===[] && $access['courseEntry']['generation']===1 && $access['permissions']['viewQa']
         && $access['permissions']['manageOwnHistory'] && !$access['permissions']['manageContent'],'fresh empty-scope learner permissions');
+    $DB->set_field('lti_types','state',LTI_TOOL_STATE_REJECTED,['id'=>$typeid]);
+    $rejects(fn()=>$resolve(),'tool-wide revocation rejects issued proofs');
+    $check(\local_videoq\course_access::launch((int)$activity->instance,(int)$users['student']->id)===[],'rejected tool cannot mint an entry proof');
+    $rejects(fn()=>\local_videoq\course_entry::configure($courseid,true),'rejected tool cannot configure an entry');
+    $DB->set_field('lti_types','state',LTI_TOOL_STATE_CONFIGURED,['id'=>$typeid]);
+    $check($resolve()['resources']===[],'tool-wide permission restoration');
     $rejects(fn()=>\local_videoq\materials_service::manifest($courseid,$typeid),'old caller cannot receive course manifests');
     $snapshot=\local_videoq\materials_service::manifest($courseid,$typeid,true);
     $check(count($snapshot['resources'])===1 && $snapshot['resources'][0]['externalId']==='course_'.$courseid,'opted-in service manifest');

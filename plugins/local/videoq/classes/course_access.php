@@ -86,12 +86,17 @@ final class course_access {
      * @return array
      */
     public static function launch(int $ltiid, int $userid): array {
-        global $DB;
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/mod/lti/locallib.php');
         $cm = get_coursemodule_from_instance('lti', $ltiid, 0, false, IGNORE_MISSING);
         if (!$cm) {
             return [];
         }
         $typeid = (int)$DB->get_field('lti', 'typeid', ['id' => $ltiid], MUST_EXIST);
+        $type = $DB->get_record('lti_types', ['id' => $typeid]);
+        if (!$type || (int)$type->state !== LTI_TOOL_STATE_CONFIGURED || $type->ltiversion !== LTI_VERSION_1P3) {
+            return [];
+        }
         $entry = course_entry::for_launch($ltiid);
         if ($entry) {
             if (!$entry->enabled || !course_entry::valid($entry)) {
@@ -133,7 +138,8 @@ final class course_access {
      * @return array
      */
     public static function resolve(string $token, string $subject, string $context, string $resource): array {
-        global $DB;
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/mod/lti/locallib.php');
         if (
             !preg_match('/^([a-f0-9]{1,2048})\.([a-f0-9]{64})$/D', $token, $m)
                 || !hash_equals(hash_hmac('sha256', $m[1], self::secret()), $m[2])
@@ -141,6 +147,10 @@ final class course_access {
             throw new \RuntimeException('Invalid access');
         }
         $proof = json_decode(hex2bin($m[1]), true, 8, JSON_THROW_ON_ERROR);
+        $type = $DB->get_record('lti_types', ['id' => (int)($proof['type'] ?? 0)]);
+        if (!$type || (int)$type->state !== LTI_TOOL_STATE_CONFIGURED || $type->ltiversion !== LTI_VERSION_1P3) {
+            throw new \RuntimeException('Tool unavailable');
+        }
         if (
             ($proof['exp'] ?? 0) <= time() || (string)$proof['user'] !== $subject
                 || (string)$proof['course'] !== $context || (string)$proof['lti'] !== $resource

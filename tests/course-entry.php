@@ -11,13 +11,14 @@ namespace core\lock {
 namespace local_videoq {
     final class synchronizer {
         public static array $entries = [];
-        public static function check_connection(): \stdClass { return (object)['id' => 3, 'baseurl' => 'https://api.example/api/lti/launch']; }
+        public static function check_connection(): \stdClass { return (object)['id' => 3, 'state' => 1, 'baseurl' => 'https://api.example/api/lti/launch']; }
         public static function hide_transport_entries(int $id, array $cms): void {}
         public static function ensure_course_entry(int $id): void { self::$entries[] = $id; }
     }
 }
 namespace {
     define('SITEID', 1); define('IGNORE_MISSING', 0); define('FORMAT_HTML', 1); define('LTI_LAUNCH_CONTAINER_EMBED_NO_BLOCKS', 3);
+    define('LTI_TOOL_STATE_CONFIGURED',1); define('LTI_VERSION_1P3','1.3.0');
     class moodle_exception extends RuntimeException {}
     final class context_course {
         public function __construct(public int $id) {}
@@ -43,7 +44,11 @@ namespace {
     }
     final class FixtureDb {
         public ?stdClass $row = null;
-        public function get_record(string $table, array $where): mixed { return $this->row ? clone $this->row : false; }
+        public int $toolstate = 1;
+        public function get_record(string $table, array $where): mixed {
+            if ($table === 'lti_types') return (object)['state'=>$this->toolstate,'ltiversion'=>LTI_VERSION_1P3,'baseurl'=>'https://api.example/api/lti/launch'];
+            return $this->row ? clone $this->row : false;
+        }
         public function record_exists(string $table, array $where): bool { return $table === 'course'; }
         public function get_field(string $table, string $field, array $where): mixed {
             return $field === 'toolurl' ? 'https://api.example/api/lti/launch' : 3;
@@ -79,8 +84,9 @@ namespace {
     function check(bool $valid, string $label): void { if (!$valid) throw new RuntimeException($label); }
     function rejects(callable $action): void { try { $action(); } catch (Throwable) { return; } throw new RuntimeException('Expected rejection'); }
     $temporary = sys_get_temp_dir() . '/videoq-course-' . bin2hex(random_bytes(8));
-    mkdir($temporary,0700); mkdir($temporary.'/course');
+    mkdir($temporary,0700); mkdir($temporary.'/course'); mkdir($temporary.'/mod'); mkdir($temporary.'/mod/lti');
     file_put_contents($temporary.'/filelib.php','<?php'); file_put_contents($temporary.'/course/modlib.php','<?php');
+    file_put_contents($temporary.'/mod/lti/locallib.php','<?php');
     $CFG = (object)['dirroot' => $temporary, 'libdir' => $temporary]; $DB = new FixtureDb();
     require dirname(__DIR__).'/plugins/local/videoq/classes/client.php';
     require dirname(__DIR__).'/plugins/local/videoq/classes/course_entry.php';
@@ -103,6 +109,7 @@ namespace {
         check(count($created) === 1 && $created[0]->modulename === 'lti' && $created[0]->instructorchoicesendname === 0
             && $created[0]->instructorchoicesendemailaddr === 0, 'Only a private real LTI entry is created');
         check($DB->row->generation === 1 && $DB->row->enabled === 1, 'Initial durable state');
+        $DB->toolstate = 3; check(!Entry::valid($DB->row), 'Rejected tool still authorizes an entry'); $DB->toolstate = 1;
         Entry::configure(42,true);
         check(count($created) === 1 && $DB->row->generation === 2, 'Repair duplicated the activity');
         check(local_videoq\synchronizer::$entries === [42,42], 'Stable course URL helper not called');
@@ -119,6 +126,7 @@ namespace {
         check(Entry::find(42) === null && Entry::for_launch(501) === null, 'Pre-upgrade table guard');
         echo "Course entry: course-wide capabilities, old backend refusal, bounded TLS discovery, no media, idempotent repair and offline disable passed.\n";
     } finally {
-        unlink($temporary.'/filelib.php'); unlink($temporary.'/course/modlib.php'); rmdir($temporary.'/course'); rmdir($temporary);
+        unlink($temporary.'/filelib.php'); unlink($temporary.'/course/modlib.php'); unlink($temporary.'/mod/lti/locallib.php');
+        rmdir($temporary.'/mod/lti'); rmdir($temporary.'/mod'); rmdir($temporary.'/course'); rmdir($temporary);
     }
 }
