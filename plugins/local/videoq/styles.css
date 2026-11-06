@@ -55,6 +55,13 @@
 #videoq-transcript-cues { max-height: 28dvh; }
 #videoq-transcript-status:empty { display: none; }
 .local-videoq-transcript-text { white-space: pre-wrap; }
+#videoq-course-qa [role="status"]:empty { display: none; }
+.local-videoq-qa-open #videoq-native-chat,
+.local-videoq-qa-open #videoq-transcript { display: none !important; }
+.local-videoq-qa-open #videoq-questions {
+    position: static; flex: 1; width: 100%; height: 100%; min-height: 0;
+    clip-path: none; pointer-events: auto;
+}
 @media (max-width: 900px) {
     .local-videoq-questions { height: 640px; max-height: 85dvh; min-height: 480px; }
 }

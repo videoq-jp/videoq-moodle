@@ -240,6 +240,7 @@
                 if (!data.busy) { const restoreFocus = pending !== null; pending = null; if (restoreFocus) input.focus({ preventScroll: true }); scrollLatest(); }
             }
         });
+        frame.contentWindow?.postMessage({ type: 'videoq:hello', version: 1 }, origin);
         window.addEventListener('pagehide', () => { window.clearTimeout(initialTimer); resize.disconnect(); }, { once: true });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });

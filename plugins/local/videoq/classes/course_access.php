@@ -181,6 +181,12 @@ final class course_access {
             'resources' => $allowed,
             'permissions' => [
                 'viewTranscript' => has_capability('local/videoq:viewtranscript', $coursecontext, $user),
+                'viewQa' => has_capability('local/videoq:viewqa', $coursecontext, $user),
+                'postQa' => has_capability('local/videoq:postqa', $coursecontext, $user),
+                'voteQa' => has_capability('local/videoq:voteqa', $coursecontext, $user),
+                'deleteOwnQa' => has_capability('local/videoq:deleteownqa', $coursecontext, $user),
+                'moderateQa' => has_capability('local/videoq:moderateqa', $coursecontext, $user),
+                'instructorQa' => has_capability('local/videoq:instructorqa', $coursecontext, $user),
             ],
         ];
     }

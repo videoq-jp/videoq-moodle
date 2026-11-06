@@ -10,6 +10,15 @@ authorized text through an origin, source and channel checked bridge.
 The plugins implement Moodle's metadata and request providers. This describes the current
 implementation, not a legal compliance certification.
 
+The unreleased course Q&A stores published questions/replies, votes and
+moderation identifiers in VideoQ. Its author pseudonyms differ by course and do
+not create VideoQ accounts. The posting interface explains course sharing;
+private AI conversations are not automatically published to this forum.
+Moodle's panel opens the authenticated tool frame; forum bodies and credentials
+remain in that frame. Only feature availability and display commands cross the
+parent bridge. External data requests must include this forum data as well as AI
+history; the plugin request callbacks do not yet perform that external work.
+
 ## Where data is held
 
 | Location | Data and responsibility |

@@ -114,6 +114,7 @@
             cursor = value.nextCursor; more.hidden = cursor === null;
             status.textContent = cues.children.length ? '' : root.dataset.empty;
         });
+        frame.contentWindow?.postMessage({ type: 'videoq:hello', version: 1 }, origin);
         window.addEventListener('pagehide', () => window.clearTimeout(timeout), { once: true });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });

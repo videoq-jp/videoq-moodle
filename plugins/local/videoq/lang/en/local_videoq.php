@@ -25,6 +25,15 @@
 
 $string['pluginname'] = 'VideoQ companion';
 $string['videoq:viewtranscript'] = 'View transcripts of accessible VideoQ lessons';
+$string['videoq:viewqa'] = 'View shared course Q&A';
+$string['videoq:postqa'] = 'Post and edit own course questions and replies';
+$string['videoq:voteqa'] = 'Vote on course questions';
+$string['videoq:deleteownqa'] = 'Delete own course questions and replies';
+$string['videoq:moderateqa'] = 'Delete other participants\' posts and feature course questions';
+$string['videoq:instructorqa'] = 'Display the instructor badge when posting or editing course Q&A';
+$string['courseqa'] = 'Course Q&A';
+$string['courseqaunavailable'] = 'Course Q&A is unavailable. Check your access and reopen the course page.';
+$string['privacy:metadata:courseqa'] = 'Published course questions, replies, votes and moderation actions stored by VideoQ with course-specific Moodle pseudonyms. This shared forum is separate from private AI conversation history.';
 $string['transcript'] = 'Lesson transcripts';
 $string['transcriptlesson'] = 'Lesson';
 $string['transcriptrefresh'] = 'Refresh lessons';
