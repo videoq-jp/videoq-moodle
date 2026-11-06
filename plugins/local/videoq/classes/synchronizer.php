@@ -296,12 +296,6 @@ final class synchronizer {
     public static function run(int $id, bool $snapshot = false, bool $uservisibility = false): ?array {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');
-        if (!$snapshot) {
-            // Legacy push negotiates through its authenticated connection. Old
-            // backends retain global visibility suppression; failure sends nothing.
-            $connection = (new client())->request('GET', 'connection');
-            $uservisibility = ($connection['userVisibility'] ?? false) === true;
-        }
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('sync-' . $id, 0);
         if (!$lock) {
             if ($snapshot) {
@@ -385,6 +379,12 @@ final class synchronizer {
                 }
             }
             $file = $cm && !$cm->deletioninprogress ? self::video_file((int)$row->cmid) : null;
+            if (!$snapshot) {
+                // Reconcile local disable/deletion first, even when the server is
+                // unavailable. Legacy push then negotiates authenticated support.
+                $connection = (new client())->request('GET', 'connection');
+                $uservisibility = ($connection['userVisibility'] ?? false) === true;
+            }
             $enabled = (bool)($row->enabled && $file && $course && $cm
                 && (int)$cm->course === (int)$row->courseid && $lti && (int)$lti->course === (int)$row->courseid
                 && $link && (int)$link->course === (int)$row->courseid

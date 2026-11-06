@@ -14,7 +14,7 @@ require_once $CFG->dirroot . '/mod/lti/locallib.php';
 $CFG->noemailever = true;
 \core\session\manager::set_user(get_admin());
 $saved = [];
-foreach (['typeid', 'apiurl', 'servicemode', 'serviceuploadtargets'] as $key) $saved[$key] = get_config('local_videoq', $key);
+foreach (['typeid', 'apiurl', 'servicemode', 'serviceuploadtargets', 'synctoken'] as $key) $saved[$key] = get_config('local_videoq', $key);
 $recycle = get_config('tool_recyclebin', 'coursebinenable');
 $checks = [];
 $check = static function(bool $value, string $label) use (&$checks): void {
@@ -161,6 +161,10 @@ try {
     // Keep developer diagnostics enabled; recycle-bin backup acceptance is separate.
     set_config('coursebinenable', 0, 'tool_recyclebin');
     \local_videoq\synchronizer::disable($sources[0]);
+    set_config('synctoken', '', 'local_videoq');
+    $rejects(fn() => \local_videoq\synchronizer::run((int)$row->id), 'offline legacy backend still refuses outbound sync');
+    $check(!$DB->record_exists('course_modules', ['id' => $row->lticmid]) &&
+        !$DB->record_exists('course_modules', ['id' => $row->linkcmid]), 'offline backend cannot leave retired local launch activities');
     $disabled = \local_videoq\synchronizer::run((int)$row->id, true, true);
     $check(!$disabled['enabled'] && $disabled['deleted'], 'explicit disable still emits tombstone');
     $rejects(fn() => $launch('editingteacher'), 'teacher cannot bypass explicit disable');
