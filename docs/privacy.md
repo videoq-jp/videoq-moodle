@@ -97,8 +97,12 @@ connection/rollout issue and retry; an empty export must not be treated as proof
 that an unreachable service has no data. Legacy unattributed logs, physically
 removed Moodle user IDs, backups, application logs, AI-provider storage and
 personal data embedded in shared materials need separate operator review.
-Automatic retention of personal material/tag receipts and moderation identities
-remains open. Record the operator contact and actual retention policy.
+The unreleased audit-retention backend can delete expired material/tag receipts
+and clear LTI moderation actor keys when the operator explicitly configures a
+retention period. A permanent, namespaced hash of each operation UUID remains
+to prevent duplicate execution; it has no actor, course, action, contents or
+timestamp columns. Someone holding the original UUID can recognize that marker.
+This is a technical replay safeguard, not a legal anonymity guarantee. Record the operator contact and actual retention policy.
 
 See [setup](setup.md#external-privacy-service-unreleased-0170) for deployment
 requirements. Disconnecting, deleting a source activity or a Moodle account,
@@ -131,7 +135,8 @@ inside the authenticated tool frame; the Moodle bridge receives only availabilit
 and an unsaved-draft boolean. After a permission revocation, an existing draft can
 be copied from read-only fields; no new protected data is requested for that draft.
 The new external privacy callbacks include these personal receipts. Shared edited
-content and automatic receipt retention still require the operator workflow above.
+content still requires the operator workflow above; receipt cleanup must be
+explicitly configured and scheduled.
 
 `tests/privacy.php <Moodle-source>` uses real pinned Moodle interfaces and metadata
 classes without a DB; normal CI runs it with networking disabled. The dedicated
@@ -144,3 +149,19 @@ records before and after. This does not test external VideoQ data requests.
 Unicode and large exports, integrity failures and transport limits. The historical
 Marketplace matrix reports above do not establish this new external lifecycle;
 use the paired privacy branch acceptance evidence for it.
+
+## Optional automatic audit cleanup (unreleased 0.17.1 metadata)
+
+After deploying the paired audit-retention backend and complete migrations/grants,
+the operator may set `auditRetentionDays` (integer 1–3650) in the existing VideoQ
+`LTI_CONFIG` JSON. Unset means disabled. This controls personal material/tag
+receipts and LTI moderation actor identifiers, independently of enrolment.
+Moodle/browser roles cannot change this deployment setting.
+
+The normal retention schedule processes bounded batches. Monitor the structured
+`lti_audit_retention_backlog` event; remaining volume, contention or runtime budget
+can require more invocations. There is no strict wall-clock deletion SLA. In the
+on-prem API runtime, `node dist/node.mjs retention` runs the retention path;
+`maintenance` runs delivery recovery. Shared materials, peer posts, native
+moderation actors and the minimal replay markers remain. Approved individual
+privacy deletion still works without opting in to automatic cleanup.
