@@ -95,6 +95,11 @@ $check(!has_capability($capability, $primary, $guest, false), 'guest denied');
 $qacaps = ['viewqa', 'postqa', 'voteqa', 'deleteownqa', 'moderateqa', 'instructorqa'];
 $historycap = 'local/videoq:manageownhistory';
 $contentcap = 'local/videoq:managecontent';
+$reportcap = 'local/videoq:viewreports';
+$definition = $DB->get_record('capabilities', ['name' => $reportcap], '*', MUST_EXIST);
+$check((int)$definition->contextlevel === CONTEXT_COURSE && $definition->captype === 'read'
+    && ((int)$definition->riskbitmask & RISK_PERSONAL) !== 0, 'report personal-data read definition');
+$check(!has_capability($reportcap, $primary, $guest, false), 'guest reports denied');
 $definition = $DB->get_record('capabilities', ['name' => $contentcap], '*', MUST_EXIST);
 $check((int)$definition->contextlevel === CONTEXT_COURSE && $definition->captype === 'write', 'content write definition');
 $check(!has_capability($contentcap, $primary, $guest, false), 'guest management denied');
@@ -108,6 +113,9 @@ foreach ($state['users'] as $archetype => $userid) {
     $access = \local_videoq\course_access::resolve($proof['custom_videoq_access'], (string)$userid,
         (string)$state['courses'][0], (string)$launchid);
     $check($access['permissions']['manageContent'] === $manage, $archetype . ' fresh permission response');
+    $report = $archetype !== 'student' && !($phase === 'revoked' && $archetype === 'teacher');
+    $check(has_capability($reportcap, $primary, $userid) === $report, $archetype . ' report capability');
+    $check($access['permissions']['viewReports'] === $report, $archetype . ' fresh report permission');
     $processing = array_values(array_filter($access['resources'], fn($item) => $item['lesson'] === 'sync_' . $state['materials']['indexing']['cmid']));
     $processingmanage = $manage && !($phase === 'revoked' && $archetype === 'manager');
     $check(count($processing) === ($processingmanage ? 1 : 0), $archetype . ' processing scope');
@@ -120,6 +128,7 @@ foreach ($state['users'] as $archetype => $userid) {
     $check(isset($ready[0]['management']) === $manage, $archetype . ' per-resource management metadata');
 }
 $check(has_capability($contentcap, $secondary, $state['users']['editingteacher']), 'content override isolated to primary course');
+$check(has_capability($reportcap, $secondary, $state['users']['teacher']), 'report override isolated to primary course');
 $check(!has_capability($historycap, $primary, $guest, false), 'guest personal history denied');
 $check(has_capability($historycap, $secondary, $state['users']['student']), 'other course personal history unaffected');
 foreach ($qacaps as $name) {
@@ -137,6 +146,7 @@ foreach ($qacaps as $name) {
 $check(has_capability('local/videoq:postqa', $secondary, $state['users']['student']), 'other course posting unaffected');
 $check(has_capability('local/videoq:moderateqa', $secondary, $state['users']['teacher']), 'other course moderation unaffected');
 if ($phase === 'defaults') {
+    assign_capability($reportcap, CAP_PREVENT, $state['roles']['teacher'], $primary->id, true);
     assign_capability($capability, CAP_PREVENT, $state['studentRole'], $primary->id, true);
     assign_capability($historycap, CAP_PREVENT, $state['studentRole'], $primary->id, true);
     assign_capability('local/videoq:postqa', CAP_PREVENT, $state['studentRole'], $primary->id, true);
@@ -145,6 +155,7 @@ if ($phase === 'defaults') {
     assign_capability('moodle/course:manageactivities', CAP_PREVENT, $state['roles']['manager'],
         context_module::instance($state['materials']['indexing']['cmid'])->id, true);
 } elseif ($phase === 'revoked') {
+    unassign_capability($reportcap, $state['roles']['teacher'], $primary->id);
     unassign_capability($capability, $state['studentRole'], $primary->id);
     unassign_capability($historycap, $state['studentRole'], $primary->id);
     unassign_capability('local/videoq:postqa', $state['studentRole'], $primary->id);

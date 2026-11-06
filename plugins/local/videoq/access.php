@@ -50,6 +50,9 @@ try {
     if (($input['includePermissions'] ?? false) !== true) {
         unset($result['permissions']);
     }
+    if (($input['includeReports'] ?? false) !== true) {
+        unset($result['permissions']['viewReports']);
+    }
     if (($input['includeContentManagement'] ?? false) !== true) {
         $result['resources'] = array_values(array_filter($result['resources'], fn($item) => ($item['learning'] ?? true) === true));
         foreach ($result['resources'] as &$item) {

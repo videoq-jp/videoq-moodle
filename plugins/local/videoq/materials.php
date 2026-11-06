@@ -91,6 +91,9 @@ try {
     if (($input['action'] ?? '') === 'access' && ($input['includePermissions'] ?? false) !== true) {
         unset($result['permissions']);
     }
+    if (($input['includeReports'] ?? false) !== true) {
+        unset($result['permissions']['viewReports']);
+    }
     if (!$includeentries) {
         unset($result['courseEntry']);
     }

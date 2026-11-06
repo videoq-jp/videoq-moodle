@@ -348,6 +348,28 @@ the companion. Older peers retain learning but cannot infer the new write grant.
 This version remains unreleased pending the verification gates; no Marketplace
 archive or public source branch is updated by this feature work.
 
+## Course AI usage reports (unreleased 0.20.0)
+
+**AI question usage** displays daily question/feedback counts and aggregate CSV.
+It requires current `local/videoq:viewreports` in the course, granted by default
+to teachers, editing teachers and managers. Students and guests do not receive
+it. Overrides can remove reports independently of Q&A and content editing.
+
+Only Moodle answers with verified installation/course provenance and an entirely
+currently readable original material scope are included. Older unattributed
+answers are excluded. Hidden or removed materials can reduce earlier counts.
+Dates use UTC, with at most 366 inclusive days per request. Individual questions,
+answers and learner identities are not shown. Refresh and CSV download each
+recheck permissions. Report data and credentials stay in the private VideoQ frame.
+
+Coordinate the paired backend: drain old API/sync writers, apply generated report
+migration 0060 and updated API grants, deploy the API, then upgrade local_videoq
+to 2026110703. This adds no Moodle tables. Older peers keep reports unavailable.
+Successful reads create metadata-only access receipts, included in approved
+privacy export/erasure and optional backend `auditRetentionDays` cleanup.
+Existing privacy rollout requirements apply. This feature is unreleased;
+Marketplace archives and public source branches remain separate.
+
 ## External privacy service (unreleased 0.17.0)
 
 Deploy the paired VideoQ privacy branch and this plugin together. In the existing
