@@ -16,6 +16,27 @@ plugins, their package build, this repository's lab or CI. The development-only
 Moodle coding check installs locked PHP tools in an isolated directory; those
 tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
 
+## Connected account management (unreleased 0.15.1)
+
+After connecting, site administrators can open **Manage the connected VideoQ
+account** on the connection page. Course content editors can open the same link
+from their authorized source controls. VideoQ asks for its own login and matches
+the exact Moodle registration to the signed-in account. Moodle roles alone do not
+grant account ownership, billing access or VideoQ system-administrator authority.
+
+The separate page links to the existing global video/tag library, independent
+VideoQ courses, profile, connected apps and API-key settings. Cloud account owners
+also get billing navigation; on-premises deployments keep cloud billing disabled.
+VideoQ system administration requires the current VideoQ administrator role.
+Opening these links does not reconnect a disabled Moodle connection or change a
+subscription. No credential is transferred through the URL or private iframe.
+
+This requires matching API and web deployments advertising the management page.
+An older backend gives a local unavailable message instead of guessing a web URL.
+Course-scoped tag editing, canonical Moodle imports and the remaining external
+privacy workflows are separate work; this page provides independent account
+operations rather than granting course users those privileges.
+
 ## Install and connect
 
 ### Course Q&A (unreleased 0.13.0)
