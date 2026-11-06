@@ -37,16 +37,28 @@ foreach ($components as $component => [$type, $required]) {
     $class = '\\' . $component . '\\privacy\\provider';
     $collection = $class::get_metadata(new \core_privacy\local\metadata\collection($component));
     $entries = $collection->get_collection();
-    if (count($entries) !== ($component === 'local_videoq' ? 2 : 1)) {
+    if (count($entries) !== ($component === 'local_videoq' ? 3 : 1)) {
         throw new RuntimeException('Unexpected metadata locations: ' . $component);
     }
     $external = array_filter($entries, static fn($item) => $item instanceof \core_privacy\local\metadata\types\external_location);
-    $entry = reset($external);
+    $locations = [];
+    foreach ($external as $location) $locations[$location->get_name()] = $location;
+    $names = array_keys($locations); sort($names);
+    if ($names !== ($component === 'local_videoq' ? ['videoq', 'youtube'] : ['videoq'])) {
+        throw new RuntimeException('External locations differ from the declared integration');
+    }
+    $entry = $locations['videoq'];
     $additional = [];
     if ($component === 'local_videoq') {
         $core = array_filter($entries, static fn($item) => $item instanceof \core_privacy\local\metadata\types\subsystem_link && $item->get_name() === 'core');
         if (count($core) !== 1) throw new RuntimeException('Core session/task metadata must be declared');
         $additional[] = reset($core)->get_summary();
+        $youtube = $locations['youtube'];
+        $youtubefields = $youtube->get_privacy_fields();
+        if (array_keys($youtubefields) !== ['playback']) {
+            throw new RuntimeException('YouTube browser playback metadata must be declared explicitly');
+        }
+        $additional = [...$additional, $youtube->get_summary(), ...array_values($youtubefields)];
     }
     if (!$entry instanceof \core_privacy\local\metadata\types\external_location || $entry->get_name() !== 'videoq') {
         throw new RuntimeException('VideoQ must be declared as an external data location');
