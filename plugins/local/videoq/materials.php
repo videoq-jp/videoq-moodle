@@ -43,11 +43,18 @@ try {
         throw new \RuntimeException('Request too large');
     }
     $input = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
+    $includeentries = ($input['includeCourseEntries'] ?? false) === true;
     if (($input['action'] ?? '') === 'courses') {
         $ids = $DB->get_fieldset_sql(
             'SELECT DISTINCT courseid FROM {local_videoq_sync} WHERE typeid = ? AND (enabled = 1 OR status <> ?) ORDER BY courseid',
             [(int)$type->id, 'disabled']
         );
+        if ($includeentries && \local_videoq\course_entry::available()) {
+            $entries = $DB->get_fieldset_sql('SELECT courseid FROM {local_videoq_courses}
+                WHERE typeid = ? AND (enabled = 1 OR status <> ?)', [(int)$type->id, 'disabled']);
+            $ids = array_values(array_unique(array_merge($ids, $entries)));
+            sort($ids, SORT_NUMERIC);
+        }
         if (count($ids) > 1000) {
             throw new \RuntimeException('Too many contexts');
         }
@@ -59,12 +66,13 @@ try {
     }
     $courseid = (int)$input['contextId'];
     $result = match ($input['action'] ?? '') {
-        'manifest' => \local_videoq\materials_service::manifest($courseid, (int)$type->id),
+        'manifest' => \local_videoq\materials_service::manifest($courseid, (int)$type->id, $includeentries),
         'access' => \local_videoq\materials_service::access(
             $courseid,
             (int)$type->id,
              (string)($input['resourceLinkId'] ?? ''),
-            (string)($input['subject'] ?? '')
+            (string)($input['subject'] ?? ''),
+            $includeentries
         ),
 
         'export' => \local_videoq\materials_service::export($courseid, (int)$type->id, $input),
@@ -77,6 +85,9 @@ try {
     }
     if (($input['action'] ?? '') === 'access' && ($input['includePermissions'] ?? false) !== true) {
         unset($result['permissions']);
+    }
+    if (!$includeentries) {
+        unset($result['courseEntry']);
     }
     if (($input['action'] ?? '') === 'access' && ($input['includeContentManagement'] ?? false) !== true) {
         $result['resources'] = array_values(array_filter($result['resources'], fn($item) => ($item['learning'] ?? true) === true));

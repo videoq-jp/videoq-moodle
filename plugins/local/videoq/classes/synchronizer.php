@@ -63,7 +63,7 @@ final class synchronizer {
      * @param array $cmids Course-module identifiers to hide.
      * @return void
      */
-    private static function hide_transport_entries(int $courseid, array $cmids): void {
+    public static function hide_transport_entries(int $courseid, array $cmids): void {
         global $CFG;
         if (empty($CFG->allowstealth)) {
             return;

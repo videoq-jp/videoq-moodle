@@ -24,6 +24,15 @@
  */
 
 $string['pluginname'] = 'VideoQ 動画・質問画面';
+$string['managecourseentry'] = 'VideoQのコース入口を管理';
+$string['courseentrydescription'] = '動画がないコースにもVideoQの入口を作成できます。講座のQ&A・自分の履歴・タグには、現在のMoodle権限が適用されます。AIへの質問には、閲覧可能で処理済みの動画が必要です。この入口を無効にしても、共有コースのデータや動画活動は保持します。';
+$string['courseentryerror'] = 'コースの入口を更新できませんでした。VideoQとの接続と、本体がコース入口に対応していることを確認して再試行してください。';
+$string['courseentry_enable'] = 'コースの入口を有効にする';
+$string['courseentry_disable'] = 'コースの入口を無効にする';
+$string['courseentry_repair'] = '入口を修復して同期する';
+$string['courseentrypending'] = 'コースの入口を同期しています。少し待ってからこのページを更新してください。';
+$string['courseentryempty'] = '現在、この画面で利用できる動画教材はありません。権限に応じて講座のQ&Aや自分の履歴を利用できます。閲覧可能な動画の処理が完了すると、AIに質問できます。';
+$string['courseentryrefresh'] = 'コースの入口を更新';
 $string['videoq:viewtranscript'] = 'アクセス可能なVideoQ教材の文字起こしを閲覧する';
 $string['videoq:viewqa'] = '講座で共有されるQ&Aを閲覧する';
 $string['videoq:postqa'] = '講座の質問・返信を投稿し、自分の文章を編集する';

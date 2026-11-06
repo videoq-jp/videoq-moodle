@@ -17,7 +17,7 @@ $cm = reset($modules);
 if (!$cm) throw new RuntimeException('Expected a seeded course activity');
 $user = get_admin();
 $contexts = [context_system::instance(), context_course::instance($course->id), context_module::instance($cm->id)];
-$tables = ['course', 'course_modules', 'files', 'local_videoq_sync', 'local_videoq_exports',
+$tables = ['course', 'course_modules', 'files', 'local_videoq_sync', 'local_videoq_exports', 'local_videoq_courses',
     'local_videoq_assertions', 'config_plugins'];
 $snapshot = static function() use ($DB, $tables): array {
     $result = [];

@@ -80,5 +80,16 @@ function xmldb_local_videoq_upgrade($oldversion) {
     if ($oldversion < 2026110403) {
         upgrade_plugin_savepoint(true, 2026110403, 'local', 'videoq');
     }
+    if ($oldversion < 2026110701) {
+        $schema = new xmldb_file(__DIR__ . '/install.xml');
+        if (!$schema->loadXMLStructure()) {
+            throw new \RuntimeException('Invalid install schema');
+        }
+        $table = $schema->getStructure()->getTable('local_videoq_courses');
+        if (!$DB->get_manager()->table_exists($table)) {
+            $DB->get_manager()->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026110701, 'local', 'videoq');
+    }
     return true;
 }

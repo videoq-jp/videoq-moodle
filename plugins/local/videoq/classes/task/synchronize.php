@@ -75,5 +75,22 @@ final class synchronize extends \core\task\scheduled_task {
                 mtrace('VideoQ synchronization failed for activity ' . $row->cmid . '; will retry.');
             }
         }
+        if (\local_videoq\course_entry::available()) {
+            $entries = $DB->get_records_select(
+                'local_videoq_courses',
+                'enabled = 1 OR status <> ?',
+                ['disabled'],
+                'lastsynced ASC, id ASC'
+            );
+            foreach ($entries as $entry) {
+                try {
+                    \local_videoq\course_entry::run((int)$entry->courseid);
+                } catch (\Throwable $error) {
+                    $DB->set_field('local_videoq_courses', 'status', 'error', ['id' => $entry->id]);
+                    $DB->set_field('local_videoq_courses', 'errorcode', 'SYNC_FAILED', ['id' => $entry->id]);
+                    mtrace('VideoQ synchronization failed for course ' . $entry->courseid . '; will retry.');
+                }
+            }
+        }
     }
 }

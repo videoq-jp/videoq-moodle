@@ -92,22 +92,36 @@ final class course_access {
             return [];
         }
         $typeid = (int)$DB->get_field('lti', 'typeid', ['id' => $ltiid], MUST_EXIST);
+        $entry = course_entry::for_launch($ltiid);
+        if ($entry) {
+            if (!$entry->enabled || !course_entry::valid($entry)) {
+                return [];
+            }
+            return self::sign(['user' => $userid, 'course' => (int)$cm->course, 'lti' => $ltiid,
+                'type' => $typeid, 'entryGeneration' => (int)$entry->generation]);
+        }
         foreach (self::lessons((int)$cm->course) as $item) {
             $associated = get_coursemodule_from_id('lti', $item['ltiCmid'], $cm->course, false, IGNORE_MISSING);
-            if (!$associated || (int)$DB->get_field('lti', 'typeid', ['id' => $associated->instance]) !== $typeid) {
+            if (
+                !$associated || (int)$associated->instance !== $ltiid
+                || (int)$DB->get_field('lti', 'typeid', ['id' => $associated->instance]) !== $typeid
+            ) {
                 continue;
             }
-            $payload = bin2hex(json_encode(
-                ['user' => $userid, 'course' => (int)$cm->course,
-                'lti' => $ltiid,
-                     'type' => $typeid,
-                     'exp' => time() + 3600,
-                     'nonce' => bin2hex(random_bytes(16))],
-                JSON_THROW_ON_ERROR
-            ));
-            return ['custom_videoq_access' => $payload . '.' . hash_hmac('sha256', $payload, self::secret())];
+            return self::sign(['user' => $userid, 'course' => (int)$cm->course, 'lti' => $ltiid, 'type' => $typeid]);
         }
         return [];
+    }
+    /**
+     * Signs an expiring launch-specific proof without storing a learner record.
+     *
+     * @param array $claims Verified launch identifiers.
+     * @return array
+     */
+    private static function sign(array $claims): array {
+        $claims += ['exp' => time() + 3600, 'nonce' => bin2hex(random_bytes(16))];
+        $payload = bin2hex(json_encode($claims, JSON_THROW_ON_ERROR));
+        return ['custom_videoq_access' => $payload . '.' . hash_hmac('sha256', $payload, self::secret())];
     }
     /**
      * Verifies a course access proof and rechecks current learner permissions.
@@ -152,6 +166,17 @@ final class course_access {
         ) {
             throw new \RuntimeException('Invalid access');
         }
+        $entry = course_entry::for_launch((int)$proof['lti']);
+        $entryproof = isset($proof['entryGeneration']);
+        if ($entryproof || $entry) {
+            if (
+                !$entryproof || !$entry || !$entry->enabled || !course_entry::valid($entry)
+                || (int)$entry->courseid !== (int)$course->id || (int)$entry->typeid !== (int)$proof['type']
+                || (int)$entry->generation !== $proof['entryGeneration']
+            ) {
+                throw new \RuntimeException('Invalid course entry');
+            }
+        }
         $allowed = [];
         $managecontent = has_capability('local/videoq:managecontent', $coursecontext, $user);
         foreach (self::lessons((int)$course->id) as $item) {
@@ -189,13 +214,14 @@ final class course_access {
             }
             $allowed[] = $material;
         }
-        if (!$allowed) {
+        if (!$allowed && !$entryproof) {
             throw new \RuntimeException('Invalid access');
         }
         return [
             'contextId' => (string)$course->id,
             'resourceLinkId' => $resource,
             'resources' => $allowed,
+            ...($entryproof ? ['courseEntry' => ['generation' => (int)$entry->generation]] : []),
             'permissions' => [
                 'manageContent' => $managecontent,
                 'manageOwnHistory' => has_capability('local/videoq:manageownhistory', $coursecontext, $user),

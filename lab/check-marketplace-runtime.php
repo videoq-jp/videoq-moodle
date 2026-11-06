@@ -15,7 +15,7 @@ if ($CFG->wwwroot !== 'https://marketplace-audit.invalid'
 if ((int)$CFG->debug !== DEBUG_DEVELOPER || !$CFG->debugdisplay) {
     throw new RuntimeException('Developer debugging must be enabled');
 }
-$tables = ['local_videoq_sync', 'local_videoq_exports', 'local_videoq_assertions'];
+$tables = ['local_videoq_sync', 'local_videoq_exports', 'local_videoq_assertions', 'local_videoq_courses'];
 $phase = $argv[2] ?? 'installed';
 if ($phase === 'uninstalled') {
     foreach ($tables as $table) {

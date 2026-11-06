@@ -51,3 +51,24 @@ function local_videoq_extend_settings_navigation(settings_navigation $nav, conte
         navigation_node::TYPE_SETTING
     );
 }
+
+/**
+ * Adds course-wide setup without granting module-only managers course authority.
+ *
+ * @param navigation_node $navigation Course settings node.
+ * @param stdClass $course Current course.
+ * @param context_course $context Current course context.
+ * @return void
+ */
+function local_videoq_extend_navigation_course(navigation_node $navigation, stdClass $course, context_course $context): void {
+    if ((int)$course->id === SITEID || !\local_videoq\course_entry::available()) {
+        return;
+    }
+    if (has_capability('local/videoq:managecontent', $context) && has_capability('moodle/course:manageactivities', $context)) {
+        $navigation->add(
+            get_string('managecourseentry', 'local_videoq'),
+            new moodle_url('/local/videoq/course.php', ['course' => $course->id]),
+            navigation_node::TYPE_SETTING
+        );
+    }
+}
