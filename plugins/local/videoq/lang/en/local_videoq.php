@@ -139,3 +139,7 @@ $string['personalconversationsunavailable'] = 'Saved personal conversations are 
 $string['accountmanagement'] = 'Manage the connected VideoQ account';
 $string['accountmanagementhelp'] = 'VideoQ account settings, billing and system administration require a separate VideoQ sign-in and the corresponding account permissions.';
 $string['accountunavailable'] = 'The VideoQ account management page is unavailable. Check the connection and update the VideoQ server if needed.';
+
+$string['coursetags'] = 'Course tags and materials';
+$string['coursetagsunavailable'] = 'Course tags are unavailable. Check your current Moodle permissions or relaunch.';
+$string['privacy:metadata:coursetags'] = 'Course-specific tag names, colors, material assignments and pseudonymous operation receipts are stored by VideoQ.';

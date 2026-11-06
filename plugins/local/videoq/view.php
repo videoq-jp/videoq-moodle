@@ -108,6 +108,9 @@ $PAGE->requires->js(new moodle_url('/local/videoq/personal_history.js', [
 $PAGE->requires->js(new moodle_url('/local/videoq/management.js', [
     'rev' => substr(sha1_file(__DIR__ . '/management.js'), 0, 12),
 ]));
+$PAGE->requires->js(new moodle_url('/local/videoq/tags.js', [
+    'rev' => substr(sha1_file(__DIR__ . '/tags.js'), 0, 12),
+]));
 $PAGE->requires->js_call_amd('core/auto_rows', 'init', ['#videoq-native-chat']);
 $PAGE->navbar->ignore_active();
 $PAGE->navbar->add(format_string($course->shortname), new moodle_url('/course/view.php', ['id' => $course->id]));
@@ -243,6 +246,10 @@ if (!$canmanage && isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'co
             'unavailable' => get_string('materialmanagementunavailable', 'local_videoq'),
         ]);
     }
+    echo $OUTPUT->render_from_template('local_videoq/tags', [
+        'heading' => get_string('coursetags', 'local_videoq'),
+        'unavailable' => get_string('coursetagsunavailable', 'local_videoq'),
+    ]);
     echo $OUTPUT->render_from_template('local_videoq/personal_history', [
         'heading' => get_string('personalconversations', 'local_videoq'),
         'unavailable' => get_string('personalconversationsunavailable', 'local_videoq'),

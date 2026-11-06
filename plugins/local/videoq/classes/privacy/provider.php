@@ -49,6 +49,7 @@ final class provider implements
             'transcript' => 'privacy:metadata:transcript',
             'courseqa' => 'privacy:metadata:courseqa',
             'materialmanagement' => 'privacy:metadata:materialmanagement',
+            'coursetags' => 'privacy:metadata:coursetags',
             'access' => 'privacy:metadata:access',
             'video' => 'privacy:metadata:video',
             'position' => 'privacy:metadata:position',

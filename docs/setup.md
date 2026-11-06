@@ -16,6 +16,28 @@ plugins, their package build, this repository's lab or CI. The development-only
 Moodle coding check installs locked PHP tools in an isolated directory; those
 tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
 
+## Course tags and filtering (unreleased 0.16.0)
+
+The course assistant offers **Course tags and materials** using the existing
+private tool frame. Learners can search permitted material titles, filter by tag
+or untagged materials, open a ready source and read its transcript when separately
+allowed. Names, counts and IDs from hidden materials are not returned.
+
+Course content editors can create course-specific vocabulary and change tags on
+sources they currently manage. Renaming or deleting a tag requires management
+rights over every source using it. These tags are separate from the connected
+account's global VideoQ tags. Moodle capability/module access is rechecked on each
+request; LTI launch-role names alone grant no tag editing rights.
+
+A failed or conflicted save keeps the draft. A revoked draft is read only and can
+still be selected/copied. Saving again after an uncertain response uses the same
+operation ID; refreshing or switching the editor asks before discarding changes.
+The native bridge transfers availability/draft flags, without tag text or account
+credentials. Older backends keep this control hidden; older companions can use
+the embedded interface. Deploy API migration 0056 and its restricted-role grants
+before enabling this companion. This increment does not complete imports,
+course-order management or external privacy export/deletion and retention.
+
 ## Connected account management (unreleased 0.15.1)
 
 After connecting, site administrators can open **Manage the connected VideoQ

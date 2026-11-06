@@ -139,3 +139,7 @@ $string['personalconversationsunavailable'] = '保存済み会話を利用でき
 $string['accountmanagement'] = '接続先のVideoQアカウントを管理';
 $string['accountmanagementhelp'] = 'VideoQのアカウント設定・課金・システム管理には、VideoQへの別途ログインと、対応するアカウントの権限が必要です。';
 $string['accountunavailable'] = 'VideoQのアカウント管理画面を開けません。接続を確認し、必要に応じてVideoQサーバーを更新してください。';
+
+$string['coursetags'] = 'コースのタグと教材';
+$string['coursetagsunavailable'] = 'コースのタグを利用できません。現在のMoodle権限を確認するか、開き直してください。';
+$string['privacy:metadata:coursetags'] = 'コース専用のタグ名・色・教材との対応と、仮名化した操作記録をVideoQに保存します。';
