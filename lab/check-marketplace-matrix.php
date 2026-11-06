@@ -172,6 +172,7 @@ CONFIG;
     $check('privacy-requests', ['/src/lab/check-marketplace-privacy.php', '/site']);
     $check('upgraded-course-entry', ['/src/lab/check-course-entry.php', '/site']);
     $check('upgraded-course-catalog', ['/src/lab/check-course-catalog.php', '/site']);
+    $check('upgraded-youtube-sources', ['/src/lab/check-youtube-source.php', '/site']);
     echo "$mode: uninstall companion before local; preserve course and source bytes\n";
     foreach (['ltisource_videoq' => 'mod/lti/source', 'local_videoq' => 'local'] as $component => $relative) {
         $log = $work . '/uninstall-' . $component . '.log';
@@ -192,6 +193,7 @@ CONFIG;
     $check('reinstalled-preservation', ['/src/lab/check-marketplace-upgrade.php', '/site', 'verify-reinstalled']);
     $check('reinstalled-course-entry', ['/src/lab/check-course-entry.php', '/site']);
     $check('reinstalled-course-catalog', ['/src/lab/check-course-catalog.php', '/site']);
+    $check('reinstalled-youtube-sources', ['/src/lab/check-youtube-source.php', '/site']);
     $hashes = [];
     foreach (['local_videoq.zip', 'ltisource_videoq.zip'] as $file) $hashes[$file] = hash_file('sha256', $work . '/archives/' . $file);
     $summary = ['passed' => true, 'database' => $mode, 'moodleRevision' => $pins['moodleRevision'],

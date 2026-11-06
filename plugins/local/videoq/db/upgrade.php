@@ -97,5 +97,20 @@ function xmldb_local_videoq_upgrade($oldversion) {
     if ($oldversion < 2026110703) {
         upgrade_plugin_savepoint(true, 2026110703, 'local', 'videoq');
     }
+    if ($oldversion < 2026110704) {
+        $manager = $DB->get_manager();
+        $schema = new xmldb_file(__DIR__ . '/install.xml');
+        if (!$schema->loadXMLStructure()) {
+            throw new \RuntimeException('Invalid install schema');
+        }
+        $table = $schema->getStructure()->getTable('local_videoq_sync');
+        foreach (['sourcekind', 'youtubeid'] as $name) {
+            $field = $table->getField($name);
+            if (!$manager->field_exists($table, $field)) {
+                $manager->add_field($table, $field);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026110704, 'local', 'videoq');
+    }
     return true;
 }

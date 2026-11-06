@@ -38,7 +38,7 @@ namespace {
     function get_coursemodule_from_id(string $module, int $id, int $course, bool $section, int $strict): mixed {
         global $modules;
         $cm = $modules[$id] ?? null;
-        if (!$cm || $cm->modname !== $module || ($course && (int)$cm->course !== $course)) {
+        if (!$cm || ($module && $cm->modname !== $module) || ($course && (int)$cm->course !== $course)) {
             if ($strict === MUST_EXIST) throw new RuntimeException('Unknown source');
             return false;
         }
@@ -65,6 +65,7 @@ namespace {
     }
     final class moodle_url { public function __construct(string $path, array $params) {} }
     function get_string(string $name, string $component): string { return $name; }
+    function get_config(string $component, string $key): mixed { return false; }
     function check(bool $value, string $label): void { if (!$value) throw new RuntimeException($label); }
     function rejects(callable $operation): void {
         try { $operation(); } catch (Throwable) { return; }
@@ -72,6 +73,7 @@ namespace {
     }
     $DB = new FixtureDb();
     $PAGE = (object)['cm' => $modules[10]];
+    require dirname(__DIR__) . '/plugins/local/videoq/classes/source.php';
     require dirname(__DIR__) . '/plugins/local/videoq/classes/source_management.php';
     require dirname(__DIR__) . '/plugins/local/videoq/classes/synchronizer.php';
     require dirname(__DIR__) . '/plugins/local/videoq/lib.php';

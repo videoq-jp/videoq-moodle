@@ -85,7 +85,8 @@ final class restore_material extends \core\task\adhoc_task {
                 if (!$row || !$row->enabled) {
                     continue;
                 }
-                $cm = get_coursemodule_from_id('resource', $row->cmid, $courseid, false, IGNORE_MISSING);
+                $module = ($row->sourcekind ?? 'file') === 'youtube' ? 'url' : 'resource';
+                $cm = get_coursemodule_from_id($module, $row->cmid, $courseid, false, IGNORE_MISSING);
                 if (!$cm || $cm->deletioninprogress) {
                     continue;
                 }

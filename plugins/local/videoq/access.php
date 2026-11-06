@@ -41,7 +41,8 @@ try {
         $input['token'],
         $input['subject'],
         $input['contextId'],
-        $input['resourceLinkId']
+        $input['resourceLinkId'],
+        ($input['includeYoutubeSources'] ?? false) === true
     );
     // Older tools validate the original response strictly. Extend it only on opt-in.
     if (($input['includeCourseEntries'] ?? false) !== true) {

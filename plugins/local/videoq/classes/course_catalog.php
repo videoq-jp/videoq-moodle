@@ -49,15 +49,15 @@ final class course_catalog {
         foreach ($sections as $cms) {
             foreach ($cms as $cmid) {
                 $cm = $info->get_cm($cmid);
+                $row = $bindings[$cmid] ?? null;
                 if (
-                    $cm->modname !== 'resource' || !$cm->uservisible || $cm->deletioninprogress
-                    || !has_capability('mod/resource:view', \context_module::instance($cmid))
+                    !source::supports($cm) || !$cm->uservisible || $cm->deletioninprogress
+                    || !has_capability(source::view_capability($cm), \context_module::instance($cmid))
                     || !has_capability('moodle/course:manageactivities', \context_module::instance($cmid))
-                    || !synchronizer::video_file((int)$cmid)
+                    || (!source::read((int)$cmid) && !$row)
                 ) {
                     continue;
                 }
-                $row = $bindings[$cmid] ?? null;
                 $result[] = ['cmid' => (int)$cmid, 'title' => $cm->name,
                     'status' => $row && $row->enabled ? $row->status : 'off'];
             }
@@ -86,6 +86,12 @@ final class course_catalog {
             $actions['catalogupload'] = new \moodle_url(
                 '/course/modedit.php',
                 ['add' => 'resource', 'course' => $courseid, 'section' => 0]
+            );
+        }
+        if (source::youtube_available() && has_capability('mod/url:addinstance', $context)) {
+            $actions['catalogyoutube'] = new \moodle_url(
+                '/course/modedit.php',
+                ['add' => 'url', 'course' => $courseid, 'section' => 0]
             );
         }
         if (has_capability('moodle/course:update', $context)) {

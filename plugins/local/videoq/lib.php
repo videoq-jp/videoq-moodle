@@ -33,7 +33,7 @@
 function local_videoq_extend_settings_navigation(settings_navigation $nav, context $context) {
     global $PAGE;
     if (
-        $context->contextlevel !== CONTEXT_MODULE || !$PAGE->cm || $PAGE->cm->modname !== 'resource'
+        $context->contextlevel !== CONTEXT_MODULE || !$PAGE->cm
             || !\local_videoq\source_management::can_manage((int)$PAGE->cm->id)
     ) {
         return;

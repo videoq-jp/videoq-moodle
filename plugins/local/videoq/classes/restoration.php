@@ -44,8 +44,9 @@ final class restoration {
             [(int)$cm->course, $cmid, $cmid, $cmid]
         );
         foreach ($rows as $row) {
-            if ((int)$row->cmid === $cmid && $cm->modname === 'resource') {
-                return ['role' => 'source', 'enabled' => (int)(bool)$row->enabled];
+            $sourcekind = $row->sourcekind ?? 'file';
+            if ((int)$row->cmid === $cmid && $cm->modname === ($sourcekind === 'youtube' ? 'url' : 'resource')) {
+                return ['role' => 'source', 'enabled' => (int)(bool)$row->enabled, 'sourcekind' => $sourcekind];
             }
             if ((int)$row->lticmid === $cmid && $cm->modname === 'lti') {
                 return ['role' => 'transport', 'enabled' => 0];
@@ -102,8 +103,9 @@ final class restoration {
                 }
                 $metadata = (array)$mapped->info;
                 if ($metadata['role'] === 'source') {
-                    if ($cm->modname !== 'resource') {
-                        throw new \RuntimeException('Restored source is not a File');
+                    $sourcekind = $metadata['sourcekind'] ?? 'file';
+                    if ($cm->modname !== ($sourcekind === 'youtube' ? 'url' : 'resource')) {
+                        throw new \RuntimeException('Restored source kind does not match');
                     }
                     if (
                         $metadata['enabled']
@@ -163,6 +165,8 @@ final class restoration {
                     continue;
                 }
                 $DB->insert_record('local_videoq_sync', (object)['typeid' => (int)get_config('local_videoq', 'typeid'),
+                    'sourcekind' => $cm->modname === 'url' ? 'youtube' : 'file',
+                    'youtubeid' => source::read((int)$cm->id)['youtubeVideoId'] ?? '',
                     'cmid' => $cm->id, 'courseid' => $courseid, 'lticmid' => 0, 'ltiinstance' => 0, 'linkcmid' => 0,
                     'enabled' => 1, 'status' => 'restoring', 'timemodified' => time()]);
             }

@@ -92,6 +92,13 @@ namespace {
     require dirname(__DIR__).'/plugins/local/videoq/classes/course_entry.php';
     use local_videoq\course_entry as Entry;
     try {
+        rejects(fn()=>Entry::require_backend('youtubeSources'));
+        curl::$metadata['youtubeSourceProtocol'] = true;
+        curl::$metadata['youtubeSources'] = false;
+        Entry::require_backend('youtubeSourceProtocol');
+        rejects(fn()=>Entry::require_backend('youtubeSources'));
+        curl::$metadata['youtubeSources'] = true;
+        Entry::require_backend('youtubeSources');
         $capabilities['moodle/course:manageactivities'] = false;
         rejects(fn()=>Entry::configure(42,true));
         $capabilities['moodle/course:manageactivities'] = true;

@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><script>
+// Owned loopback test frame. No API credentials or provider connection.
+const parentOrigin = new URL(location.href).searchParams.get('parent');
+if (/^http:\/\/(?:localhost|127\.0\.0\.1):[0-9]+$/.test(parentOrigin || '')) {
+    window.addEventListener('message', event => {
+        if (event.source !== parent || event.origin !== parentOrigin || !event.data?.fixture) return;
+        parent.postMessage(event.data.fixture, parentOrigin);
+    });
+    parent.postMessage({ fixtureLoaded: true }, parentOrigin);
+}
+</script>

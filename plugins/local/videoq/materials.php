@@ -70,14 +70,16 @@ try {
             $courseid,
             (int)$type->id,
             $includeentries,
-            ($input['includeUserVisibility'] ?? false) === true
+            ($input['includeUserVisibility'] ?? false) === true,
+            ($input['includeYoutubeSources'] ?? false) === true
         ),
         'access' => \local_videoq\materials_service::access(
             $courseid,
             (int)$type->id,
              (string)($input['resourceLinkId'] ?? ''),
             (string)($input['subject'] ?? ''),
-            $includeentries
+            $includeentries,
+            ($input['includeYoutubeSources'] ?? false) === true
         ),
 
         'export' => \local_videoq\materials_service::export($courseid, (int)$type->id, $input),

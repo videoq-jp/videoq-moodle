@@ -94,6 +94,10 @@
 }
 
 #videoq-course-reports [role="status"]:empty { display: none; }
+.local-videoq-workspace [data-videoq-file][hidden],
+.local-videoq-workspace [data-videoq-youtube][hidden] { display: none !important; }
+.local-videoq-youtube iframe { width: 100%; height: auto; min-height: 200px; aspect-ratio: 16 / 9; border: 0; }
+.local-videoq-workspace [data-videoq-player-status]:empty { display: none; }
 .local-videoq-reports-open #videoq-native-chat,
 .local-videoq-reports-open #videoq-transcript { display: none !important; }
 .local-videoq-reports-open #videoq-questions {

@@ -119,6 +119,12 @@ if (hash('sha256', (string)get_config('local_videoq', 'accesssigningkey')) !== $
 }
 foreach ($state['rows'] as $table => $expected) {
     $actual = (array)$DB->get_record($table, ['id' => $expected['id']], '*', MUST_EXIST);
+    if ($table === 'local_videoq_sync') {
+        if (($actual['sourcekind'] ?? null) !== 'file' || ($actual['youtubeid'] ?? null) !== '') {
+            throw new RuntimeException('Existing File source acquired an invalid provider identity');
+        }
+        unset($actual['sourcekind'], $actual['youtubeid']);
+    }
     if ($actual !== $expected) {
         throw new RuntimeException('Synchronization record changed during upgrade: ' . $table);
     }

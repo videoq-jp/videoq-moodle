@@ -76,7 +76,8 @@ if ($courseid) {
                 $proof['custom_videoq_access'] ?? '',
                 (string)$USER->id,
                 (string)$courseid,
-                (string)$entry->ltiinstance
+                (string)$entry->ltiinstance,
+                true
             );
             $PAGE->requires->css(new moodle_url(
                 '/local/videoq/styles.css',
@@ -132,13 +133,13 @@ if ($courseid) {
 }
 $lessonid = $lesson['id'];
 [$course, $lticm] = get_course_and_cm_from_cmid($lesson['ltiCmid'], 'lti');
-[$videocourse, $videocm] = get_course_and_cm_from_cmid($lesson['videoCmid'], 'resource');
+[$videocourse, $videocm] = \local_videoq\source::course($lesson['videoCmid']);
 if ($course->id !== $videocourse->id || ($courseid && (int)$course->id !== $courseid)) {
     throw new moodle_exception('invalidmodules', 'local_videoq');
 }
 // Core checks enrolment, hidden activities, conditional availability and deletion.
 require_login($course, false, $videocm);
-require_capability('mod/resource:view', context_module::instance($videocm->id));
+require_capability(\local_videoq\source::view_capability($videocm), context_module::instance($videocm->id));
 require_login($course, false, $lticm);
 require_capability('mod/lti:view', context_module::instance($lticm->id));
 $entry = \local_videoq\course_entry::find((int)$course->id);
@@ -227,20 +228,31 @@ if ($canmanage || !isset($lesson['syncStatus']) || $lesson['syncStatus'] === 'co
         $launchproof['custom_videoq_access'],
         (string)$USER->id,
         (string)$course->id,
-        (string)$lti->id
+        (string)$lti->id,
+        true
     );
 }
 $catalog = [];
 $managedsources = [];
 foreach ($scope['resources'] as $allowed) {
     $item = \local_videoq\lesson::find($allowed['lesson']);
-    $media = \local_videoq\synchronizer::video_file((int)$item['videoCmid']);
+    $descriptor = \local_videoq\source::read((int)$item['videoCmid']);
+    if (!$descriptor) {
+        continue;
+    }
+    $media = $descriptor['file'] ?? null;
+    $module = $descriptor['kind'] === 'youtube' ? 'url' : 'resource';
     if (isset($allowed['management'])) {
         $managedsources[] = ['cmid' => (int)$item['videoCmid'], 'title' => $allowed['title']];
     }
-    $catalog[] = ['mime' => $media ? $media->get_mimetype() : 'video/mp4', 'lesson' => $item['id'], 'title' => $allowed['title'],
-        'url' => (new moodle_url('/mod/resource/view.php', ['id' => $item['videoCmid'], 'redirect' => 1]))->out(false),
-        'activityUrl' => (new moodle_url('/mod/resource/view.php', ['id' => $item['videoCmid']]))->out(false)];
+    $catalog[] = ['kind' => $descriptor['kind'], 'youtubeVideoId' => $descriptor['youtubeVideoId'] ?? null,
+        'sourceGeneration' => (int)($allowed['generation'] ?? 0),
+        'mime' => $media ? $media->get_mimetype() : 'video/mp4', 'lesson' => $item['id'], 'title' => $allowed['title'],
+        'url' => $media ? (new moodle_url(
+            '/mod/resource/view.php',
+            ['id' => $item['videoCmid'], 'redirect' => 1]
+        ))->out(false) : null,
+        'activityUrl' => (new moodle_url('/mod/' . $module . '/view.php', ['id' => $item['videoCmid']]))->out(false)];
 }
 if (
     has_capability('local/videoq:managecontent', context_course::instance($course->id))
@@ -253,6 +265,9 @@ if (
     );
 }
 echo html_writer::start_div('local-videoq-workspace', ['data-videoq-origin' => $toolorigin,
+    'data-videoq-youtube-error' => get_string('youtubeplaybackerror', 'local_videoq'),
+    'data-videoq-youtube-autoplay' => get_string('youtubeautoplay', 'local_videoq'),
+    'data-videoq-source-updated' => get_string('sourceupdated', 'local_videoq'),
     'data-videoq-lessons' => json_encode($catalog, JSON_THROW_ON_ERROR), 'data-videoq-lesson' => $lessonid]);
 echo html_writer::start_tag(
     'section',
@@ -270,15 +285,15 @@ foreach ($catalog as $item) {
 }
 echo html_writer::select($options, 'videoq-lesson', $lessonid, false, ['id' => 'videoq-lesson', 'class' => 'form-select']);
 echo html_writer::end_div();
-echo html_writer::start_div('local-videoq-media mediaplugin mediaplugin_videojs');
+echo html_writer::start_div('local-videoq-media mediaplugin mediaplugin_videojs', ['data-videoq-file' => '']);
 $sourcefile = \local_videoq\synchronizer::video_file((int)$videocm->id);
 echo html_writer::tag(
     'video',
-    html_writer::empty_tag(
+    $sourcefile ? html_writer::empty_tag(
         'source',
         ['src' => $videourl->out(false),
         'type' => $sourcefile ? $sourcefile->get_mimetype() : 'video/mp4']
-    ),
+    ) : '',
     [
     'id' => 'videoq-player', 'class' => get_config('media_videojs', 'videocssclass') ?: 'video-js',
     'controls' => 'controls', 'playsinline' => 'playsinline', 'preload' => 'metadata',
@@ -290,6 +305,14 @@ echo html_writer::tag(
     ]
 );
 echo html_writer::end_div();
+echo html_writer::start_div('local-videoq-youtube', ['data-videoq-youtube' => '', 'hidden' => 'hidden']);
+echo html_writer::end_div();
+echo html_writer::tag('p', '', ['data-videoq-player-status' => '', 'role' => 'status', 'class' => 'text-muted px-3']);
+echo html_writer::link(
+    new moodle_url('/mod/' . $videocm->modname . '/view.php', ['id' => $videocm->id]),
+    get_string('sourceactivity', 'local_videoq'),
+    ['data-videoq-player-activity' => '', 'class' => 'btn btn-link']
+);
 if ($managedsources) {
     echo html_writer::start_div('card-body py-3');
     echo html_writer::start_tag('details');
