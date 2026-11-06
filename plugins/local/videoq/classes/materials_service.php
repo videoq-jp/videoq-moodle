@@ -34,12 +34,17 @@ final class materials_service {
      *
      * @param int $courseid Moodle course identifier.
      * @param int $typeid Registered LTI tool identifier.
+     * @param bool $includeentries Whether the backend opted into course entries.
      * @return array
      */
-    public static function course(int $courseid, int $typeid): array {
+    public static function course(int $courseid, int $typeid, bool $includeentries = false): array {
         global $DB;
         $rows = $DB->get_records('local_videoq_sync', ['courseid' => $courseid, 'typeid' => $typeid], 'id ASC');
-        if (!$rows || count($rows) > 1000 || $typeid !== (int)get_config('local_videoq', 'typeid')) {
+        $entry = $includeentries ? course_entry::find($courseid) : null;
+        if (
+            (!$rows && (!$entry || (int)$entry->typeid !== $typeid)) || count($rows) > 1000
+            || $typeid !== (int)get_config('local_videoq', 'typeid')
+        ) {
             throw new \RuntimeException('Course not granted');
         }
         foreach ($rows as $row) {
@@ -55,16 +60,25 @@ final class materials_service {
      *
      * @param int $courseid Moodle course identifier.
      * @param int $typeid Registered LTI tool identifier.
+     * @param bool $includeentries Whether the backend opted into course entries.
      * @return array
      */
-    public static function manifest(int $courseid, int $typeid): array {
+    public static function manifest(int $courseid, int $typeid, bool $includeentries = false): array {
         $items = [];
-        foreach (self::course($courseid, $typeid) as $row) {
+        foreach (self::course($courseid, $typeid, $includeentries) as $row) {
             $manifest = synchronizer::run((int)$row->id, true);
             if (!$manifest) {
                 throw new \RuntimeException('Incomplete snapshot');
             }
             $items[] = ['externalId' => (string)$row->cmid, 'manifest' => $manifest];
+        }
+        $entry = $includeentries ? course_entry::find($courseid) : null;
+        if ($entry && (int)$entry->typeid === $typeid) {
+            $manifest = course_entry::run($courseid, true);
+            if (!$manifest) {
+                throw new \RuntimeException('Incomplete course entry');
+            }
+            $items[] = ['externalId' => 'course_' . $courseid, 'manifest' => $manifest];
         }
         return ['contextId' => (string)$courseid, 'complete' => true, 'resources' => $items];
     }
@@ -75,11 +89,21 @@ final class materials_service {
      * @param int $typeid Registered LTI tool identifier.
      * @param string $resource Launch resource identifier.
      * @param string $subject Moodle user identifier from the LTI launch.
+     * @param bool $includeentries Whether the backend opted into course entries.
      * @return array
      */
-    public static function access(int $courseid, int $typeid, string $resource, string $subject): array {
+    public static function access(
+        int $courseid,
+        int $typeid,
+        string $resource,
+        string $subject,
+        bool $includeentries = false
+    ): array {
         global $DB;
-        self::course($courseid, $typeid);
+        self::course($courseid, $typeid, $includeentries);
+        if (!$includeentries && course_entry::for_launch((int)$resource)) {
+            throw new \RuntimeException('Course entry opt-in required');
+        }
         if (
             !ctype_digit($resource) || !ctype_digit($subject) ||
                 (int)$DB->get_field('lti', 'typeid', ['id' => (int)$resource, 'course' => $courseid]) !== $typeid
@@ -210,6 +234,24 @@ final class materials_service {
      */
     public static function acknowledge(int $courseid, int $typeid, array $input): array {
         global $DB;
+        if (($input['includeCourseEntries'] ?? false) === true && ($input['externalId'] ?? '') === 'course_' . $courseid) {
+            self::course($courseid, $typeid, true);
+            $manifest = course_entry::run($courseid, true);
+            $entry = course_entry::find($courseid);
+            if (
+                !$entry || (int)$entry->typeid !== $typeid || !is_int($input['generation'] ?? null)
+                || $input['generation'] !== (int)$entry->generation
+                || ($input['status'] ?? '') !== (!empty($manifest['enabled']) ? 'completed' : 'disabled')
+            ) {
+                throw new \RuntimeException('Invalid course acknowledgement');
+            }
+            $DB->execute(
+                'UPDATE {local_videoq_courses} SET status = ?, errorcode = ?, lastsynced = ?
+                WHERE id = ? AND typeid = ? AND generation = ?',
+                [$input['status'], '', time(), $entry->id, $typeid, $input['generation']]
+            );
+            return ['acknowledged' => true];
+        }
         self::course($courseid, $typeid);
         if (
             !is_string($input['externalId'] ?? null) || !ctype_digit($input['externalId']) ||

@@ -44,6 +44,9 @@ try {
         $input['resourceLinkId']
     );
     // Older tools validate the original response strictly. Extend it only on opt-in.
+    if (($input['includeCourseEntries'] ?? false) !== true) {
+        unset($result['courseEntry']);
+    }
     if (($input['includePermissions'] ?? false) !== true) {
         unset($result['permissions']);
     }

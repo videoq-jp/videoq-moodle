@@ -81,6 +81,9 @@ if ($course->shortname !== 'VIDEOQ-MARKETPLACE-UPGRADE' || $cm->name !== 'Preser
     throw new RuntimeException('Teaching data or video bytes changed during lifecycle verification');
 }
 if ($phase === 'verify-reinstalled') {
+    if (!$DB->get_manager()->table_exists('local_videoq_courses') || $DB->count_records('local_videoq_courses') !== 0) {
+        throw new RuntimeException('Expected a fresh course-entry table after reinstall');
+    }
     $newkey = (string)get_config('local_videoq', 'accesssigningkey');
     if (!preg_match('/^[a-f0-9]{64}$/D', $newkey) || hash('sha256', $newkey) === $state['keyHash']) {
         throw new RuntimeException('Reinstallation must create a new access key after complete uninstall');

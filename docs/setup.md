@@ -16,6 +16,21 @@ plugins, their package build, this repository's lab or CI. The development-only
 Moodle coding check installs locked PHP tools in an isolated directory; those
 tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
 
+## Courses without videos (unreleased 0.18.0)
+
+Course editors with both `local/videoq:managecontent` and course-wide
+`moodle/course:manageactivities` can open **Manage VideoQ course entry** in course
+settings. **Enable course entry** creates a private LTI activity and a stable
+assistant URL without a dummy video. After synchronization, the empty course can
+use coursewide Q&A, own-history controls and teacher tag vocabulary with current
+Moodle permissions. AI chat still requires readable processed video material.
+
+This requires backend course-entry support and migration 0059. The setup refuses
+older backends; installing this companion alone does not provide that backend
+feature. Repair reuses a valid activity, and disabling the entry retains shared
+course data and other video activities. See [course-entry.md](course-entry.md)
+for access checks, compatibility, lifecycle and remaining acceptance gates.
+
 ## Course tags and filtering (unreleased 0.16.0)
 
 The course assistant offers **Course tags and materials** using the existing

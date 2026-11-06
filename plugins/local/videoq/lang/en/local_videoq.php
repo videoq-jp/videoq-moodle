@@ -24,6 +24,15 @@
  */
 
 $string['pluginname'] = 'VideoQ companion';
+$string['managecourseentry'] = 'Manage VideoQ course entry';
+$string['courseentrydescription'] = 'Enable a VideoQ entry for this course, including courses without videos. Course Q&A, personal history and tags use current Moodle permissions. AI chat requires available processed video material. Disabling this entry retains shared course data and video activities.';
+$string['courseentryerror'] = 'The course entry could not be updated. Check the VideoQ connection and that the backend supports course entries, then try again.';
+$string['courseentry_enable'] = 'Enable course entry';
+$string['courseentry_disable'] = 'Disable course entry';
+$string['courseentry_repair'] = 'Repair and synchronize entry';
+$string['courseentrypending'] = 'The course entry is synchronizing. Refresh this page shortly.';
+$string['courseentryempty'] = 'No video material is currently available here. Course Q&A and your history are available according to your permissions. AI chat becomes available when readable video material is ready.';
+$string['courseentryrefresh'] = 'Refresh course entry';
 $string['videoq:viewtranscript'] = 'View transcripts of accessible VideoQ lessons';
 $string['videoq:viewqa'] = 'View shared course Q&A';
 $string['videoq:postqa'] = 'Post and edit own course questions and replies';

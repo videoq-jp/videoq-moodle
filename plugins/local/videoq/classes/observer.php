@@ -52,5 +52,16 @@ final class observer {
                 ['queued', time(), $row->id]
             );
         }
+        if (course_entry::available()) {
+            $entries = str_starts_with($data['eventname'], '\core\event\course_module_')
+                ? $DB->get_records('local_videoq_courses', ['lticmid' => (int)$data['objectid']])
+                : $DB->get_records('local_videoq_courses', ['courseid' => (int)$data['objectid']]);
+            foreach ($entries as $entry) {
+                $DB->execute(
+                    'UPDATE {local_videoq_courses} SET generation = generation + 1, status = ?, timemodified = ? WHERE id = ?',
+                    ['queued', time(), $entry->id]
+                );
+            }
+        }
     }
 }

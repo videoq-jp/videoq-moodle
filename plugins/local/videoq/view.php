@@ -52,10 +52,70 @@ if ($courseid) {
             throw new moodle_exception('unknownlesson', 'local_videoq');
         }
     }
-    if (!$lesson) {
+    $courseentry = \local_videoq\course_entry::find($courseid);
+    $entryavailable = $courseentry && $courseentry->enabled && \local_videoq\course_entry::valid($courseentry);
+    if ($entryavailable) {
+        $entrycm = get_fast_modinfo($course)->get_cm((int)$courseentry->lticmid);
+        $entryavailable = $entrycm->uservisible && has_capability('mod/lti:view', context_module::instance($entrycm->id));
+    }
+    // The default selector prefers a ready lesson. With only pending sources,
+    // use the course entry's standalone UI rather than a video-bound bridge.
+    $pendingcourse = !$videoid && $lesson && isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'completed';
+    if (!$lesson || ($pendingcourse && $entryavailable)) {
+        $entry = $courseentry;
+        $canmanageentry = $courseid !== SITEID
+            && has_capability('local/videoq:managecontent', context_course::instance($courseid))
+            && has_capability('moodle/course:manageactivities', context_course::instance($courseid));
+        $launchentry = $entryavailable;
+        if ($launchentry) {
+            [$entrycourse, $entrycm] = get_course_and_cm_from_cmid((int)$entry->lticmid, 'lti');
+            require_login($entrycourse, false, $entrycm);
+            require_capability('mod/lti:view', context_module::instance($entrycm->id));
+            $proof = \local_videoq\course_access::launch((int)$entry->ltiinstance, (int)$USER->id);
+            \local_videoq\course_access::resolve(
+                $proof['custom_videoq_access'] ?? '',
+                (string)$USER->id,
+                (string)$courseid,
+                (string)$entry->ltiinstance
+            );
+            $PAGE->requires->css(new moodle_url(
+                '/local/videoq/styles.css',
+                ['rev' => substr(sha1_file(__DIR__ . '/styles.css'), 0, 12)]
+            ));
+        }
         header('Cache-Control: private, no-store');
         echo $OUTPUT->header();
-        echo $OUTPUT->notification(get_string('nocoursevideos', 'local_videoq'), 'info');
+        echo $OUTPUT->notification(get_string($launchentry ? 'courseentryempty' : 'nocoursevideos', 'local_videoq'), 'info');
+        if ($canmanageentry) {
+            echo html_writer::link(
+                new moodle_url('/local/videoq/course.php', ['course' => $courseid]),
+                get_string('managecourseentry', 'local_videoq'),
+                ['class' => 'btn btn-secondary mb-3']
+            );
+        }
+        if (has_capability('local/videoq:managecontent', context_course::instance($courseid))) {
+            echo html_writer::tag('p', get_string('accountmanagementhelp', 'local_videoq'));
+            echo html_writer::link(
+                new moodle_url('/local/videoq/account.php', ['course' => $courseid]),
+                get_string('accountmanagement', 'local_videoq'),
+                ['target' => '_blank', 'rel' => 'noopener noreferrer', 'class' => 'btn btn-secondary mb-3']
+            );
+        }
+        if ($launchentry) {
+            if ($entry->status === 'completed') {
+                echo html_writer::tag('iframe', '', ['class' => 'local-videoq-empty-frame',
+                    'title' => get_string('courseassistant', 'local_videoq'),
+                    'src' => (new moodle_url('/mod/lti/launch.php', ['id' => $entrycm->id]))->out(false),
+                    'allow' => 'clipboard-write', 'referrerpolicy' => 'strict-origin-when-cross-origin']);
+            } else {
+                echo $OUTPUT->notification(get_string('courseentrypending', 'local_videoq'), 'info');
+                echo html_writer::link(
+                    new moodle_url('/local/videoq/view.php', ['course' => $courseid]),
+                    get_string('courseentryrefresh', 'local_videoq'),
+                    ['class' => 'btn btn-secondary']
+                );
+            }
+        }
         echo $OUTPUT->footer();
         exit;
     }
@@ -76,6 +136,18 @@ require_login($course, false, $videocm);
 require_capability('mod/resource:view', context_module::instance($videocm->id));
 require_login($course, false, $lticm);
 require_capability('mod/lti:view', context_module::instance($lticm->id));
+$entry = \local_videoq\course_entry::find((int)$course->id);
+if (
+    $entry && $entry->enabled && $entry->status === 'completed' && \local_videoq\course_entry::valid($entry)
+    && (!isset($lesson['syncStatus']) || $lesson['syncStatus'] === 'completed')
+) {
+    $entrycm = get_fast_modinfo($course)->get_cm((int)$entry->lticmid);
+    if ($entrycm->uservisible && has_capability('mod/lti:view', context_module::instance($entrycm->id))) {
+        [$entrycourse, $lticm] = get_course_and_cm_from_cmid((int)$entry->lticmid, 'lti');
+        require_login($entrycourse, false, $lticm);
+        require_capability('mod/lti:view', context_module::instance($lticm->id));
+    }
+}
 // Legacy per-video bookmarks lead to the same course assistant, preselecting the video.
 if (!$courseid) {
     redirect(new moodle_url('/local/videoq/view.php', ['course' => $course->id, 'video' => $videocm->id]));
@@ -129,6 +201,13 @@ $toolorigin = 'https://' . strtolower($toolparts['host']) . (isset($toolparts['p
     && $toolparts['port'] !== 443 ? ':' . $toolparts['port'] : '');
 header('Cache-Control: private, no-store');
 echo $OUTPUT->header();
+if (isset($lesson['syncStatus']) && $lesson['syncStatus'] !== 'completed' && $entryavailable) {
+    echo html_writer::link(
+        new moodle_url('/local/videoq/view.php', ['course' => $course->id]),
+        get_string('courseassistant', 'local_videoq'),
+        ['class' => 'btn btn-secondary mb-3']
+    );
+}
 
 // Render only activities the current learner may view. API independently rechecks this on each question.
 $scope = ['resources' => [['lesson' => $lessonid, 'title' => $lesson['title']]]];
