@@ -24,6 +24,14 @@
  */
 
 $string['pluginname'] = 'VideoQ 動画・質問画面';
+$string['videoq:viewtranscript'] = 'アクセス可能なVideoQ教材の文字起こしを閲覧する';
+$string['transcript'] = '教材の文字起こし';
+$string['transcriptlesson'] = '教材';
+$string['transcriptrefresh'] = '教材一覧を更新';
+$string['transcriptmore'] = '続きを表示';
+$string['transcriptempty'] = '文字起こしはまだありません。';
+$string['transcripterror'] = '教材を取得できません。権限と接続を確認し、教材一覧を更新してください。';
+$string['privacy:metadata:transcript'] = '現在アクセスできる教材の文字起こし本文と時刻です。Moodle内で表示するためにVideoQから取得します。';
 $string['lessons'] = '動画と質問教材の紐付け';
 $string['lessons_desc'] = 'id・title・videoCmid（MP4を登録したファイル活動）・ltiCmid（同じコースのVideoQ LTI 1.3活動）を持つJSON配列を指定します。例：[{"id":"lesson-1","title":"第1回","videoCmid":10,"ltiCmid":11}]。/local/videoq/view.php?lesson=lesson-1 から開けます。両方の活動の閲覧制限が適用されます。';
 $string['invalidconfiguration'] = '動画と質問教材の紐付けが正しくありません。管理者にお問い合わせください。';
@@ -64,7 +72,7 @@ $string['state_awaiting_upload'] = '動画の転送待ち';
 $string['privacy:metadata:videofile'] = '質問機能を有効にした動画教材のファイル。';
 $string['privacy:metadata:title'] = '同期対象の教材名と、Moodleのコース・活動の識別情報。';
 
-$string['privacy:metadata:access'] = 'Moodleの受講者・コース・起動した活動に紐づく一時的な証明です。質問のたびに閲覧できる動画を再確認するために使用します。';
+$string['privacy:metadata:access'] = 'Moodleの受講者・コース・起動した活動に紐づく一時的な証明です。質問や文字起こしの取得のたびに閲覧できる動画と現在のコース権限を再確認するために使用します。';
 
 $string['coursequestions'] = '講座に質問';
 $string['chatempty'] = '講座内の動画をまとめて質問できます。';

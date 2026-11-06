@@ -54,7 +54,7 @@ foreach ($tables as $table) {
     }
 }
 $components = [
-    'local_videoq' => ['conversation', 'feedback', 'access', 'video', 'position', 'videofile', 'title'],
+    'local_videoq' => ['conversation', 'feedback', 'transcript', 'access', 'video', 'position', 'videofile', 'title'],
     'ltisource_videoq' => ['userid', 'courseid', 'resourceid'],
 ];
 $versions = [];

@@ -1,7 +1,13 @@
 # Data handling for Moodle administrators
 
 VideoQ is an external service chosen by the Moodle administrator. The plugins
-implement Moodle's metadata and request providers. This describes the current
+also retrieve transcript text and timestamps for permitted lessons when the
+unreleased transcript reader is enabled. Each list/page request rechecks the
+current user's permitted activities and transcript capability. The bearer
+credential remains inside the registered VideoQ iframe; Moodle receives the
+authorized text through an origin, source and channel checked bridge.
+
+The plugins implement Moodle's metadata and request providers. This describes the current
 implementation, not a legal compliance certification.
 
 ## Where data is held

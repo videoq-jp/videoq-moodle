@@ -128,8 +128,10 @@ CONFIG;
         $images[$mode === 'pg' ? 'db' : 'mysql'], ...$dbargs], $work . '/database-start.log');
     $ready = false;
     for ($attempt = 0; $attempt < 120; $attempt++) {
-        $probe = $mode === 'pg' ? ['psql', '-U', 'moodleaudit', '-d', 'moodleaudit_upgrade', '-Atc', 'SELECT 1']
-            : ['sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u "$MYSQL_USER" "$MYSQL_DATABASE" -Nse "SELECT 1"'];
+        // Database entrypoints use socket-only temporary servers during init.
+        // Wait for TCP, as the separate Moodle container cannot use that socket.
+        $probe = $mode === 'pg' ? ['psql', '-h', '127.0.0.1', '-U', 'moodleaudit', '-d', 'moodleaudit_upgrade', '-Atc', 'SELECT 1']
+            : ['sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysql --protocol=TCP --host=127.0.0.1 -u "$MYSQL_USER" "$MYSQL_DATABASE" -Nse "SELECT 1"'];
         if (matrix_run([...$docker, 'exec', $database, ...$probe], $work . '/database-ready.log', false) === 0) { $ready = true; break; }
         usleep(500000);
     }
@@ -156,6 +158,9 @@ CONFIG;
     matrix_diagnostics($work . '/candidate-upgrade.log');
     $check('upgraded-preservation', ['/src/lab/check-marketplace-upgrade.php', '/site', 'verify']);
     $check('upgraded-runtime', ['/src/lab/check-marketplace-runtime.php', '/site']);
+    foreach (['defaults', 'revoked', 'restored'] as $phase) {
+        $check('upgraded-capabilities-' . $phase, ['/src/lab/check-marketplace-capabilities.php', '/site', $phase]);
+    }
     $check('privacy-requests', ['/src/lab/check-marketplace-privacy.php', '/site']);
     echo "$mode: uninstall companion before local; preserve course and source bytes\n";
     foreach (['ltisource_videoq' => 'mod/lti/source', 'local_videoq' => 'local'] as $component => $relative) {
@@ -171,6 +176,9 @@ CONFIG;
     matrix_run([...$php, '/site/admin/cli/upgrade.php', '--non-interactive'], $work . '/candidate-reinstall.log');
     matrix_diagnostics($work . '/candidate-reinstall.log');
     $check('reinstalled-runtime', ['/src/lab/check-marketplace-runtime.php', '/site']);
+    foreach (['defaults', 'revoked', 'restored'] as $phase) {
+        $check('reinstalled-capabilities-' . $phase, ['/src/lab/check-marketplace-capabilities.php', '/site', $phase]);
+    }
     $check('reinstalled-preservation', ['/src/lab/check-marketplace-upgrade.php', '/site', 'verify-reinstalled']);
     $hashes = [];
     foreach (['local_videoq.zip', 'ltisource_videoq.zip'] as $file) $hashes[$file] = hash_file('sha256', $work . '/archives/' . $file);

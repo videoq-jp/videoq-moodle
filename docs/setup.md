@@ -18,6 +18,30 @@ tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
 
 ## Install and connect
 
+### Transcript reader (unreleased 0.12.0)
+
+This branch adds **Lesson transcripts** above the native course chat. It requires
+a VideoQ backend with `/api/lti/materials`, `/api/lti/transcript` and the
+`features.transcripts` bridge announcement. Installing the companion alone does
+not add those backend endpoints. Deploy the reviewed backend change and upgrade
+the companion through Moodle's normal database-upgrade screen.
+
+The reader lists currently permitted lessons, pages through their transcript
+cues and lets learners jump to a cue's playback position. The course capability
+`local/videoq:viewtranscript` defaults to allow for student, teacher,
+editingteacher and manager roles. Course role overrides can prevent transcript
+viewing while retaining the existing assistant. File and LTI activity visibility,
+availability conditions, user suspension and enrolment checks still apply to
+each request. Moodle administration privileges do not grant access to the
+connected VideoQ account's billing, keys or global library.
+
+Older backends do not announce the reader, so the new companion keeps it hidden.
+Permission fields are returned only when a backend requests
+`includePermissions: true`, preserving the previous strict access-response
+format for older tools. A new backend with an older companion receives no
+positive transcript permission and denies transcript reads; existing chat can
+continue. No source video or transcript is changed by the reader.
+
 ### Install through Moodle administration
 
 The official Marketplace listing is still being prepared and cannot be installed

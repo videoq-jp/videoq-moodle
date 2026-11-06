@@ -175,6 +175,13 @@ final class course_access {
         if (!$allowed) {
             throw new \RuntimeException('Invalid access');
         }
-        return ['contextId' => (string)$course->id, 'resourceLinkId' => $resource, 'resources' => $allowed];
+        return [
+            'contextId' => (string)$course->id,
+            'resourceLinkId' => $resource,
+            'resources' => $allowed,
+            'permissions' => [
+                'viewTranscript' => has_capability('local/videoq:viewtranscript', $coursecontext, $user),
+            ],
+        ];
     }
 }

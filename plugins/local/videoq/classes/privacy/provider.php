@@ -46,6 +46,7 @@ final class provider implements
         $collection->add_external_location_link('videoq', [
             'conversation' => 'privacy:metadata:conversation',
             'feedback' => 'privacy:metadata:feedback',
+            'transcript' => 'privacy:metadata:transcript',
             'access' => 'privacy:metadata:access',
             'video' => 'privacy:metadata:video',
             'position' => 'privacy:metadata:position',

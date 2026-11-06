@@ -37,15 +37,17 @@ try {
         throw new RuntimeException('Invalid access');
     }
     $input = json_decode($raw, true, 8, JSON_THROW_ON_ERROR);
-    echo json_encode(
-        \local_videoq\course_access::resolve(
-            $input['token'],
-            $input['subject'],
-            $input['contextId'],
-            $input['resourceLinkId']
-        ),
-        JSON_THROW_ON_ERROR
+    $result = \local_videoq\course_access::resolve(
+        $input['token'],
+        $input['subject'],
+        $input['contextId'],
+        $input['resourceLinkId']
     );
+    // Older tools validate the original response strictly. Extend it only on opt-in.
+    if (($input['includePermissions'] ?? false) !== true) {
+        unset($result['permissions']);
+    }
+    echo json_encode($result, JSON_THROW_ON_ERROR);
 } catch (Throwable $error) {
     http_response_code(403);
     echo '{"error":"ACCESS_DENIED"}';
