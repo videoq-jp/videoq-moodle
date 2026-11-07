@@ -16,8 +16,9 @@ not create VideoQ accounts. The posting interface explains course sharing;
 private AI conversations are not automatically published to this forum.
 Moodle's panel opens the authenticated tool frame; forum bodies and credentials
 remain in that frame. Only feature availability and display commands cross the
-parent bridge. External data requests must include this forum data as well as AI
-history; the plugin request callbacks do not yet perform that external work.
+parent bridge. The approved external-data request workflow described below
+includes this forum data and attributed AI history when the paired privacy
+service is enabled.
 
 The unreleased personal-conversation panel lets a learner list, resume, start,
 download or delete their own saved AI conversations when the current course
@@ -33,17 +34,19 @@ conversation if any lesson in its recorded resource scope is no longer allowed.
 The downloadable NDJSON contains that conversation's committed transcript,
 sources and feedback metadata. It is not an export of all external personal
 data. Deleting a conversation removes its linked logs, turns, attribution and
-model memory from the live database. There is no delete-all operation yet.
+model memory from the live database. This panel handles one conversation at a
+time; subject-wide export and erasure use Moodle's approved data requests below.
 
 With the coordinated backend and its existing pruning scheduler, saved
 conversations expire after thirty days of inactivity; new successful answers
 extend that period. Attributed logs without an active saved conversation expire
 after thirty days from creation. Older turns in an active conversation remain
 until it expires or is deleted. Earlier logs without durable attribution,
-backups, operational logs, AI-provider records and course Q&A require separate
-operator handling. A short-lived launch/history credential expiring does not
-erase those records. Moodle's Privacy API callbacks still do not call an
-external per-user export/deletion endpoint.
+backups, operational logs and AI-provider records require separate operator
+handling. A short-lived launch/history credential expiring does not erase those
+records. With the coordinated privacy service enabled, Moodle's Privacy API
+callbacks invoke the external subject export/deletion endpoint for approved
+contexts; attributed course Q&A is included in that workflow.
 
 ## Where data is held
 
