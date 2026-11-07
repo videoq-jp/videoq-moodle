@@ -31,6 +31,9 @@ if ($phase === 'uninstalled') {
     if (!$DB->record_exists('course', ['id' => SITEID])) {
         throw new RuntimeException('Core Moodle site was damaged');
     }
+    if ($DB->record_exists('external_functions', ['name' => 'local_videoq_request_learning'])) {
+        throw new RuntimeException('Native learning function remains after uninstall');
+    }
     echo json_encode(['passed' => true, 'phase' => $phase, 'database' => $CFG->dbtype,
         'tablesRemoved' => true, 'settingsRemoved' => true, 'coreSitePreserved' => true], JSON_PRETTY_PRINT) . "\n";
     exit;
@@ -105,6 +108,14 @@ $key = (string)get_config('local_videoq', 'accesssigningkey');
 if (!preg_match('/^[a-f0-9]{64}$/D', $key)) {
     throw new RuntimeException('Local access-proof signing key was not initialized');
 }
+$gateway = \core_external\external_api::external_function_info('local_videoq_request_learning');
+if (ltrim($gateway->classname, '\\') !== \local_videoq\external\request_learning::class ||
+        $gateway->methodname !== 'execute' || $gateway->allowed_from_ajax !== true || $gateway->loginrequired !== true ||
+        array_keys($gateway->parameters_desc->keys) !== ['courseid', 'operation', 'lesson', 'payload'] ||
+        array_keys($gateway->returns_desc->keys) !== ['status', 'body', 'contenttype']) {
+    throw new RuntimeException('Native Moodle learning function is not registered with its authenticated AJAX contract');
+}
 echo json_encode(['passed' => true, 'database' => $CFG->dbtype, 'moodle' => $release,
     'developerDebugging' => true, 'tables' => $tables, 'versions' => $versions,
-    'privacyMetadata' => true, 'schemaWithoutRepairs' => true, 'accessKeyInitialized' => true], JSON_PRETTY_PRINT) . "\n";
+    'privacyMetadata' => true, 'schemaWithoutRepairs' => true, 'accessKeyInitialized' => true,
+    'nativeAjaxRegistered' => true], JSON_PRETTY_PRINT) . "\n";
