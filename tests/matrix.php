@@ -12,11 +12,12 @@ if ($summary !== 'lib.php:123, course.php:456, probe.php:789, probe.php:812' || 
     throw new RuntimeException('Matrix diagnostics exposed fixture data or lost source locations');
 }
 foreach (["++ " . $private . " ++\n* line 123 of /site/public/lib.php",
-    "++ Multiline Moodle diagnostic\ncontinued ++\n", 'Debugging: ' . $private,
+    "++ Multiline Moodle diagnostic\ncontinued ++\n* line 123 of /site/public/lib.php", 'Debugging: ' . $private,
     '<div class="notifytiny debuggingmessage">' . $private . '</div>', 'PHP Warning: ' . $private] as $diagnostic) {
     if (!matrix_has_diagnostics($diagnostic)) throw new RuntimeException('Moodle developer diagnostic was not recognized');
 }
-foreach (["Backup completed\nRestore completed\n", '{"passed":true,"checks":["private data omitted"]}'] as $progress) {
+foreach (["Backup completed\nRestore completed\n", "++ Success (0.25 seconds) ++\n",
+    '{"passed":true,"checks":["private data omitted"]}'] as $progress) {
     if (matrix_has_diagnostics($progress)) throw new RuntimeException('Normal progress or JSON was classified as a diagnostic');
 }
 $root = dirname(__DIR__);
