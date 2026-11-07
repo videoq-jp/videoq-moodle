@@ -42,6 +42,7 @@
             question.id = 'videoq-native-question';
             question.maxLength = 4000;
             question.placeholder = uiCopy.placeholder;
+            send.id = 'videoq-native-send';
             send.type = 'button';
             send.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); form.requestSubmit(); });
             let messages = [], history = [], features = {}, nativeRequestId = null;
@@ -61,7 +62,7 @@
                 }
                 catch (error) {
                     const code = ['requireloginerror', 'invalidsesskey', 'notloggedin'].includes(error?.errorcode) ? 401 :
-                        error?.errorcode === 'nopermissions' ? 403 : 503;
+                        ['nopermissions', 'nativeaccessdenied'].includes(error?.errorcode) ? 403 : 503;
                     return new Response(JSON.stringify({ error: { code: 'MOODLE_REQUEST_FAILED' } }), { status: code, headers: { 'Content-Type': 'application/json' } });
                 }
             }
@@ -1185,6 +1186,7 @@
                 document.getElementById("videoq-tags-delete").disabled = locked;
                 document.getElementById("videoq-tags-refresh").disabled = tagsBusy;
                 document.getElementById("videoq-tags-create").disabled = locked;
+                document.getElementById("videoq-tags-close").hidden = !tagsPanel.open;
                 document.getElementById("videoq-tags-create").hidden = !tagsCanManage || tagsData?.canManage !== true;
                 for (const button of tagsCatalog.querySelectorAll('button'))
                     button.disabled = readlocked || (button.dataset.videoqTagWrite === 'true' && !tagsCanManage);
@@ -1399,7 +1401,8 @@
             });
             document.getElementById("videoq-tags-close").addEventListener('click', () => { tagsSetOpen(false); });
             tagsPanel.addEventListener('toggle', () => {
-                if (tagsPanel.open && !tagsData && !tagsBusy)
+                tagsLock();
+                if (tagsPanel.open && !tagsDirty() && !tagsBusy)
                     void tagsRun(tagsLoad);
             });
             async function tagsInit() {

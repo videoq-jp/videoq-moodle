@@ -26,9 +26,11 @@ namespace core\session {
 namespace local_videoq {
     final class native_context {
         public static bool $allowed = true;
+        public static bool $denied = false;
         public static string $subject = '7';
         public static function resolve(int $courseid, string $lesson): array {
             if (!self::$allowed) throw new \RuntimeException('private-test-context');
+            if (self::$denied) throw new \moodle_exception('nativeaccessdenied', 'local_videoq');
             return ['origin' => 'https://videoq.example', 'issuer' => 'https://moodle.example',
                 'clientId' => 'client-1', 'deploymentId' => '3', 'subject' => self::$subject,
                 'contextId' => (string)$courseid, 'resourceLinkId' => '501',
@@ -39,7 +41,7 @@ namespace local_videoq {
 }
 namespace {
     final class moodle_exception extends RuntimeException {
-        public function __construct(string $errorcode, string $component) { parent::__construct($errorcode); }
+        public function __construct(public string $errorcode, string $component) { parent::__construct($errorcode); }
     }
     function current_language(): string { return 'ja'; }
     function check(bool $valid, string $label): void { if (!$valid) throw new RuntimeException($label); }
@@ -116,6 +118,12 @@ namespace {
         rejects(fn() => Api::request(42, '', 'materials', []), 'Denied authority signed a request');
         check(count(curl::$requests) === $count, 'Denied authority reached upstream');
         local_videoq\native_context::$allowed = true;
+        local_videoq\native_context::$denied = true;
+        $beforedenial = count(curl::$requests);
+        $denied = Api::request(42, '', 'reports', []);
+        check($denied['status'] === 403 && json_decode($denied['body'], true)['error']['code'] === 'ACCESS_DENIED', 'Moodle refusal lost its authority status');
+        check(count(curl::$requests) === $beforedenial, 'Refused Moodle authority reached upstream');
+        local_videoq\native_context::$denied = false;
         curl::$mime = 'text/html';
         rejects(fn() => Api::request(42, '', 'materials', []), 'Upstream HTML exposed');
         curl::$mime = 'application/json'; curl::$body = '{broken';

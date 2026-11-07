@@ -113,6 +113,12 @@ final class native_api {
             }
             return ['status' => $status, 'body' => $body, 'contenttype' => $mime];
         } catch (\Throwable $error) {
+            if (
+                $error instanceof \moodle_exception &&
+                in_array($error->errorcode ?? null, ['nativeaccessdenied', 'nopermissions', 'requireloginerror'], true)
+            ) {
+                return ['status' => 403, 'body' => '{"error":{"code":"ACCESS_DENIED"}}', 'contenttype' => 'application/json'];
+            }
             // Construct a new exception here: private assertion/curl arguments
             // from nested calls must not appear in Moodle's developer traceback.
             throw new \moodle_exception('nativeunavailable', 'local_videoq');

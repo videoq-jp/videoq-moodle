@@ -374,3 +374,4 @@ $string['nativereports_empty'] = 'No matching AI questions in this period and ma
 $string['nativereports_loading'] = 'Loading…';
 $string['nativereports_error'] = 'The report is unavailable. Check the dates and your current Moodle permissions.';
 $string['nativereports_unavailable'] = 'Course reports are unavailable. Check your current Moodle permissions or relaunch.';
+$string['nativeaccessdenied'] = 'Your current Moodle permissions do not allow this action.';

@@ -374,3 +374,4 @@ $string['nativereports_empty'] = 'この期間と教材範囲に該当するAI�
 $string['nativereports_loading'] = '読み込み中…';
 $string['nativereports_error'] = 'レポートを取得できません。日付と現在のMoodle権限を確認してください。';
 $string['nativereports_unavailable'] = 'レポートを利用できません。現在のMoodle権限を確認するか、開き直してください。';
+$string['nativeaccessdenied'] = '現在のMoodleの権限では、この操作を行えません。';

@@ -2,7 +2,7 @@
 (function() {
     const copy = nativeFixtureConfig.copy;
     const fixture = window.nativeLearningFixture = {copy, calls: [], streams: [], errors: [], seeks: [], downloads: [], writes: 0,
-        failWrite: false, conflictWrite: false, denyManage: false, failStream: false, questions: [], conversations: [], tags: []};
+        failWrite: false, conflictWrite: false, denyManage: false, denyCoreReports: false, failStream: false, questions: [], conversations: [], tags: []};
     window.addEventListener('error', event => fixture.errors.push(event.message));
     window.addEventListener('unhandledrejection', event => fixture.errors.push(String(event.reason)));
     window.M = {cfg: {sesskey: 'owned-moodle-sesskey'}};
@@ -26,7 +26,7 @@
         sources: [{id: 1, video_id: 1, title: 'Owned Moodle File', start_time: '00:00:12'}]};
     const author = {source: 'moodle', name: 'Owned teacher', instructor: true};
     function metadata() { return {nativeProtocol: 1, features: {transcripts: true, qa: true, conversations: true, management: true, tags: true, reports: true},
-        permissions: {...permissions, manageContent: !fixture.denyManage}, videos, managementVideos: fixture.denyManage ? [] : videos, order: videos.map(v => v.videoId)}; }
+        permissions: {...permissions, manageContent: !fixture.denyManage, viewReports: !fixture.denyCoreReports}, videos, managementVideos: fixture.denyManage ? [] : videos, order: videos.map(v => v.videoId)}; }
     function forumData(input) {
         if (input.action === 'ask') { const question = {id: crypto.randomUUID(), title: input.title, body: input.body, videoId: input.videoId,
             videoTitle: videos[0]?.title, author, updatedAt: new Date().toISOString(), votes: 0, voted: false, featured: false, canEdit: true, canDelete: true, replyCount: 0}; fixture.questions.push(question); return {id: question.id}; }
@@ -77,6 +77,7 @@
         callback({call: requests => requests.map(async request => {
             const input = JSON.parse(request.args.payload); fixture.calls.push({method: request.methodname, args: request.args, input});
             if (request.methodname !== 'local_videoq_request_learning' || request.args.courseid !== 42) throw new Error('Unexpected Moodle authority input');
+            if (request.args.operation === 'reports' && fixture.denyCoreReports) throw {errorcode: 'nativeaccessdenied'};
             try {return {status: 200, body: JSON.stringify(handle(request.args.operation, input)), contenttype: 'application/json'};}
             catch (error) { if (error.status) return {status: error.status, body: '{"error":{}}', contenttype: 'application/json'}; throw error; }
         })});

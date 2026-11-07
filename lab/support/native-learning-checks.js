@@ -42,6 +42,10 @@
             input(byId('tags-name'), 'Owned course tag'); byId('tags-editor').requestSubmit();
             await wait(() => byId('tags-editor').hidden && f.tags.length === 1);
             check(byId('tags-vocabulary').textContent.includes('Owned course tag'), 'Course tag creation uses a native Moodle form');
+            byId('tags-close').click();
+            check(!byId('course-tags').open, 'Native tag panel closes without a frame command');
+            byId('course-tags').open = true;
+            await wait(() => button(byId('tags-materials'), c.tags.assign)?.disabled === false);
             button(byId('tags-materials'), c.tags.assign).click();
             await wait(() => byId('tags-fields').querySelector('input[type="checkbox"]'));
             const checkbox = byId('tags-fields').querySelector('input[type="checkbox"]');
@@ -90,6 +94,9 @@
             const download = f.downloads.find(item => item.name.endsWith('.csv'));
             const csv = await (await fetch(download.url)).text();
             check(csv.startsWith('date,questions,good,bad,unrated\n') && csv.split('\n').length >= 3, 'Native report exports valid aggregate CSV rows');
+            f.denyCoreReports = true; byId('reports-form').requestSubmit();
+            await wait(() => byId('course-reports').hidden && !byId('reports-content').children.length);
+            check(byId('reports-export').disabled, 'Moodle capability exception clears and disables the report');
             byId('personal-history').open = true;
             await wait(() => button(byId('personal-history-content'), c.personal.refresh)?.disabled === false);
             button(byId('personal-history-content'), c.personal.refresh).click();

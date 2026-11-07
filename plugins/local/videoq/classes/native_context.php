@@ -43,7 +43,7 @@ final class native_context {
         $course = get_course($courseid);
         require_login($course);
         if (empty($USER->id) || isguestuser() || !empty($USER->deleted) || !empty($USER->suspended)) {
-            throw new \moodle_exception('nativeunavailable', 'local_videoq');
+            throw new \moodle_exception('nativeaccessdenied', 'local_videoq');
         }
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
         $info = get_fast_modinfo($course, $USER->id);
@@ -70,7 +70,7 @@ final class native_context {
                 !has_capability(source::view_capability($source), \context_module::instance($source->id)) ||
                 !has_capability('mod/lti:view', \context_module::instance($candidate->id))
             ) {
-                throw new \moodle_exception('nativeunavailable', 'local_videoq');
+                throw new \moodle_exception('nativeaccessdenied', 'local_videoq');
             }
             $cm = $candidate;
             foreach (course_access::lessons($courseid) as $mapping) {
@@ -124,7 +124,7 @@ final class native_context {
         };
         foreach ($required as $permission) {
             if (($permissions[$permission] ?? false) !== true) {
-                throw new \moodle_exception('nativeunavailable', 'local_videoq');
+                throw new \moodle_exception('nativeaccessdenied', 'local_videoq');
             }
         }
         if ($operation === 'qa') {
@@ -136,13 +136,13 @@ final class native_context {
                 default => true,
             };
             if (!$allowed) {
-                throw new \moodle_exception('nativeunavailable', 'local_videoq');
+                throw new \moodle_exception('nativeaccessdenied', 'local_videoq');
             }
         }
         if (in_array($operation, ['messages', 'messages/stream'], true)) {
             $learning = array_filter($context['scope']['resources'], static fn($item) => ($item['learning'] ?? true) === true);
             if (!$learning) {
-                throw new \moodle_exception('nativeunavailable', 'local_videoq');
+                throw new \moodle_exception('nativeaccessdenied', 'local_videoq');
             }
         }
     }
