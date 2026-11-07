@@ -88,6 +88,7 @@ try {
     $destinationtype = $newtype('destination-' . $suffix);
     foreach (['course', 'activity', 'unauthorized'] as $mode) {
         \core\session\manager::set_user($teacher);
+        reload_all_capabilities();
         $full = $mode === 'course';
         $bc = new backup_controller($full ? backup::TYPE_1COURSE : backup::TYPE_1ACTIVITY,
             $full ? $source->id : $enabled->coursemodule, backup::FORMAT_MOODLE,
@@ -125,6 +126,9 @@ try {
         accesslib_clear_all_caches(true);
         set_config('typeid', $destinationtype, 'local_videoq');
         \core\session\manager::set_user($teacher);
+        // Simulate the teacher's next request after the administrator enrolled
+        // them in a new course; set_user alone retains the old accessdata.
+        reload_all_capabilities();
         $check(has_capability('local/videoq:managecontent', $destinationcontext) === ($mode !== 'unauthorized'),
             $mode . ': destination teacher authority is explicit');
         $rc = new restore_controller($directory, $destination, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $teacherid,
