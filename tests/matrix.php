@@ -16,6 +16,11 @@ $native = matrix_diagnostic_locations('VIDEOQ_NATIVE_PAGE_FAILURE ' . json_encod
 if ($native !== 'native-page-TypeError, view.php:67, codingerror' || str_contains($native, $private)) {
     throw new RuntimeException('Native page failure metadata was lost or exposed private fields');
 }
+$metadata = matrix_native_page_metadata('VIDEOQ_NATIVE_PAGE_FAILURE ' . json_encode([
+    'kind' => 'coding_exception', 'source' => 'pagelib.php', 'line' => 2211, 'code' => 'codingerror', 'body' => $private]));
+if ($metadata !== [['kind' => 'coding_exception', 'source' => 'pagelib.php', 'line' => 2211, 'code' => 'codingerror']]) {
+    throw new RuntimeException('Child page failure forwarding did not reconstruct bounded metadata');
+}
 if (matrix_diagnostic_locations('VIDEOQ_NATIVE_PAGE_FAILURE ' . json_encode([
     'kind' => $private, 'source' => $private, 'line' => -1, 'code' => $private])) !== '') {
     throw new RuntimeException('Unknown native page diagnostic fields were published');

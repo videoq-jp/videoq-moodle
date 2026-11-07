@@ -4,6 +4,43 @@ declare(strict_types=1);
 define('CLI_SCRIPT', true);
 define('PREFERRED_RENDERER_TARGET', 'general');
 if (($argv[1] ?? '') !== '/site') throw new RuntimeException('Use the isolated /site mount');
+require __DIR__ . '/support/matrix-diagnostics.php';
+if (($argv[2] ?? '') !== '--render') {
+    if (isset($argv[2])) throw new RuntimeException('Unknown native page fixture mode');
+    // Moodle may flush output buffers when starting a full page. Capture the
+    // whole child process instead of mixing its HTML with this JSON report.
+    $output = tempnam(sys_get_temp_dir(), 'videoq-native-page-');
+    $errors = tempnam(sys_get_temp_dir(), 'videoq-native-page-');
+    if ($output === false || $errors === false) throw new RuntimeException('Cannot create private render capture');
+    try {
+        $process = proc_open([PHP_BINARY, '-d', 'max_input_vars=5000', '-d', 'memory_limit=256M',
+            __FILE__, '/site', '--render'], [
+            0 => ['file', '/dev/null', 'r'], 1 => ['file', $output, 'w'], 2 => ['file', $errors, 'w'],
+        ], $pipes);
+        if (!is_resource($process)) throw new RuntimeException('Cannot start native page render');
+        $status = proc_close($process);
+        $stderr = file_get_contents($errors);
+        if ($status !== 0 || $stderr !== '') {
+            foreach (matrix_native_page_metadata($stderr) as $metadata) {
+                fwrite(STDERR, 'VIDEOQ_NATIVE_PAGE_FAILURE ' . json_encode($metadata, JSON_THROW_ON_ERROR) . "\n");
+            }
+            throw new RuntimeException('Native page child did not complete cleanly');
+        }
+        $html = file_get_contents($output);
+        if (!str_contains($html, 'data-videoq-native="1"') || !str_contains($html, 'id="videoq-native-form"')
+                || str_contains($html, '<iframe') || matrix_has_diagnostics($html)
+                || str_contains($html, 'Cannot modify header information')) {
+            throw new RuntimeException('Actual Moodle native page did not render its authenticated workspace cleanly');
+        }
+        echo json_encode(['passed' => true, 'nativePageRendered' => true,
+            'limits' => ['Actual PHP page and HTML renderer; synthetic media bytes, no browser/API/model execution.']],
+            JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
+    } finally {
+        unlink($output);
+        unlink($errors);
+    }
+    exit;
+}
 require '/site/config.php';
 if ($CFG->wwwroot !== 'https://marketplace-audit.invalid' || $CFG->dbhost !== 'audit-db'
         || $CFG->dbname !== 'moodleaudit_upgrade') {
@@ -54,7 +91,6 @@ $binding = $DB->get_record('local_videoq_sync', ['cmid' => $sourceid, 'courseid'
 $saved = [];
 foreach (['typeid', 'apiurl'] as $name) $saved[$name] = get_config('local_videoq', $name);
 $file = null;
-$level = ob_get_level();
 try {
     set_config('typeid', $binding->typeid, 'local_videoq');
     set_config('apiurl', 'https://videoq.example.invalid', 'local_videoq');
@@ -65,20 +101,8 @@ try {
     ], 'Synthetic page-render fixture; no playable video or AI response.');
     \core\session\manager::set_user($user);
     $_GET = ['course' => $courseid, 'video' => $sourceid];
-    ob_start();
     require $CFG->dirroot . '/local/videoq/view.php';
-    $html = ob_get_clean();
-    if (!str_contains($html, 'data-videoq-native="1"') || !str_contains($html, 'id="videoq-native-form"')
-            || str_contains($html, '<iframe') || str_contains($html, 'data-rel="debugging"')
-            || str_contains($html, 'Cannot modify header information')) {
-        throw new RuntimeException('Actual Moodle native page did not render its authenticated workspace cleanly');
-    }
-    echo json_encode(['passed' => true, 'database' => $CFG->dbtype, 'nativePageRendered' => true,
-        'limits' => ['Actual PHP page and HTML renderer; synthetic media bytes, no browser/API/model execution.']],
-        JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
 } finally {
-    while (ob_get_level() > $level) ob_end_clean();
-    \core\session\manager::set_user(get_admin());
     if ($file) $file->delete();
     foreach ($saved as $name => $value) {
         if ($value === false) unset_config($name, 'local_videoq'); else set_config($name, $value, 'local_videoq');
