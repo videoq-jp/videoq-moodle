@@ -9,6 +9,32 @@ if ($CFG->wwwroot !== 'https://marketplace-audit.invalid' || $CFG->dbhost !== 'a
         || $CFG->dbname !== 'moodleaudit_upgrade') {
     throw new RuntimeException('Refusing to mutate an unrelated Moodle database');
 }
+// Avoid replacing the original exception with a secondary HTML error page.
+set_exception_handler(static function(Throwable $error) use ($CFG): void {
+    while (ob_get_level()) ob_end_clean();
+    $sources = [];
+    foreach (['view', 'classes/native_context', 'classes/native_api', 'classes/output/workspace',
+            'classes/ui_strings', 'classes/source', 'classes/lesson'] as $path) {
+        $sources[$CFG->dirroot . '/local/videoq/' . $path . '.php'] = basename($path) . '.php';
+    }
+    $metadata = [];
+    if (in_array(get_class($error), ['Error', 'TypeError', 'RuntimeException', 'coding_exception',
+            'moodle_exception', 'dml_read_exception', 'dml_missing_record_exception'], true)) {
+        $metadata['kind'] = get_class($error);
+    }
+    foreach (array_merge([['file' => $error->getFile(), 'line' => $error->getLine()]], $error->getTrace()) as $frame) {
+        if (isset($frame['file'], $frame['line'], $sources[$frame['file']])) {
+            $metadata += ['source' => $sources[$frame['file']], 'line' => (int)$frame['line']];
+            break;
+        }
+    }
+    if ($error instanceof moodle_exception && in_array($error->errorcode,
+            ['codingerror', 'invalidmodules', 'unknownlesson', 'nativeaccessdenied', 'nativeunavailable'], true)) {
+        $metadata['code'] = $error->errorcode;
+    }
+    fwrite(STDERR, 'VIDEOQ_NATIVE_PAGE_FAILURE ' . json_encode($metadata, JSON_THROW_ON_ERROR) . "\n");
+    exit(1);
+});
 $state = json_decode(file_get_contents($CFG->dataroot . '/videoq-capabilities-state.json'), true, 16, JSON_THROW_ON_ERROR);
 $courseid = (int)$state['courses'][0];
 $sourceid = (int)$state['materials']['completed']['cmid'];

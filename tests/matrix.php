@@ -11,6 +11,15 @@ $summary = matrix_diagnostic_locations('PHP Warning: ' . $private . ' in /site/p
 if ($summary !== 'lib.php:123, course.php:456, probe.php:789, probe.php:812' || str_contains($summary, $private)) {
     throw new RuntimeException('Matrix diagnostics exposed fixture data or lost source locations');
 }
+$native = matrix_diagnostic_locations('VIDEOQ_NATIVE_PAGE_FAILURE ' . json_encode([
+    'kind' => 'TypeError', 'source' => 'view.php', 'line' => 67, 'code' => 'codingerror', 'proof' => $private]));
+if ($native !== 'native-page-TypeError, view.php:67, codingerror' || str_contains($native, $private)) {
+    throw new RuntimeException('Native page failure metadata was lost or exposed private fields');
+}
+if (matrix_diagnostic_locations('VIDEOQ_NATIVE_PAGE_FAILURE ' . json_encode([
+    'kind' => $private, 'source' => $private, 'line' => -1, 'code' => $private])) !== '') {
+    throw new RuntimeException('Unknown native page diagnostic fields were published');
+}
 foreach (["++ " . $private . " ++\n* line 123 of /site/public/lib.php",
     "++ Multiline Moodle diagnostic\ncontinued ++\n* line 123 of /site/public/lib.php", 'Debugging: ' . $private,
     '<div class="notifytiny debuggingmessage">' . $private . '</div>', 'PHP Warning: ' . $private] as $diagnostic) {
