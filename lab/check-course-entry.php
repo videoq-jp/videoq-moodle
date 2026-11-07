@@ -91,6 +91,18 @@ try {
     $check($native['subject']===(string)$users['student']->id && $native['resourceLinkId']===(string)$activity->instance
         && $native['scope']['resources']===[] && $native['scope']['permissions']===$access['permissions'],
         'native empty-course actor and current authority');
+    // Use Moodle's actual HTML renderer/helpers as well as its template files.
+    $PAGE->set_url('/local/videoq/view.php',['course'=>$courseid]);
+    $PAGE->set_context($context);
+    $renderer=$PAGE->get_renderer('core',null,RENDERER_TARGET_GENERAL);
+    foreach (['empty'=>[], 'file'=>[['kind'=>'file','lesson'=>'fixture_source','title'=>'Synthetic material',
+            'url'=>'https://marketplace-audit.invalid/mod/resource/view.php?id=1','mime'=>'video/mp4',
+            'activityUrl'=>'https://marketplace-audit.invalid/mod/resource/view.php?id=1']]] as $layout=>$catalog) {
+        $workspace=new \local_videoq\output\workspace($courseid,$catalog,$catalog?'fixture_source':'',[],true);
+        $html=$renderer->render_from_template('local_videoq/workspace',$workspace->export_for_template($renderer));
+        $check(str_contains($html,'data-videoq-native="1"') && str_contains($html,'id="videoq-native-form"')
+            && !str_contains($html,'<iframe'),$layout.' native workspace through actual Moodle HTML renderer');
+    }
     $rejects(fn()=>\local_videoq\course_entry::require_manager($courseid),'learner cannot configure entry');
     \core\session\manager::set_user($users['editingteacher']);
     \local_videoq\course_entry::require_manager($courseid);
