@@ -180,5 +180,6 @@ $string['catalogcoursedelete'] = 'Delete Moodle course…';
 
 $string['videoq:viewreports'] = 'View aggregate AI question usage for currently accessible course materials';
 $string['coursereports'] = 'AI question usage';
+$string['nativeunavailable'] = 'The learning service is unavailable or your current Moodle permissions do not allow this action.';
 $string['coursereportsunavailable'] = 'Course reports are unavailable. Check your current Moodle permissions or relaunch.';
 $string['privacy:metadata:coursereports'] = 'VideoQ stores verified course provenance for AI-answer attribution and identifier-only report access receipts (period, material-scope hash/count and time). Reports contain aggregate counts, without private message text or learner identities.';

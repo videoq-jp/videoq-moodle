@@ -112,5 +112,9 @@ function xmldb_local_videoq_upgrade($oldversion) {
         }
         upgrade_plugin_savepoint(true, 2026110704, 'local', 'videoq');
     }
+    if ($oldversion < 2026110801) {
+        // Moodle's upgrade installs the new core/ajax function declarations.
+        upgrade_plugin_savepoint(true, 2026110801, 'local', 'videoq');
+    }
     return true;
 }

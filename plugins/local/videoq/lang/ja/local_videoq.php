@@ -171,6 +171,7 @@ $string['catalogcoursedelete'] = 'Moodleコースを削除…';
 
 $string['videoq:viewreports'] = '現在閲覧できる教材のAI質問利用状況を集計して表示する';
 $string['coursereports'] = 'AI質問の利用状況';
+$string['nativeunavailable'] = '学習サービスに接続できないか、現在のMoodleの権限ではこの操作を行えません。';
 $string['catalogyoutube'] = 'YouTubeのURLを追加';
 $string['invalidyoutubeurl'] = 'YouTube動画を1本指定する、対応形式のURLを入力してください。';
 $string['youtubedisabled'] = '接続先のVideoQ環境ではYouTube連携を利用できません。';
