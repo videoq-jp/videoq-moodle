@@ -103,7 +103,11 @@ try {
         $bc->destroy();
         $directory = 'videoq-youtube-archive-' . bin2hex(random_bytes(12));
         $path = $CFG->tempdir . '/backup/' . $directory; $directories[] = $path;
-        $check($archive->extract_to_pathname(get_file_packer('application/vnd.moodle.backup'), $path), $mode . ': extract actual mbz into a fresh directory');
+        $extracted = $archive->extract_to_pathname(get_file_packer('application/vnd.moodle.backup'), $path);
+        // Moodle returns a per-file result map, including individual failures.
+        $check(is_array($extracted) && $extracted !== []
+            && !array_filter($extracted, static fn($status) => $status !== true)
+            && is_file($path . '/moodle_backup.xml'), $mode . ': extract actual mbz into a fresh directory');
         $xml = simplexml_load_file($path . '/activities/url_' . $enabled->coursemodule . '/module.xml');
         $markers = $xml->xpath('//plugin_local_videoq_module/binding');
         $check(count($markers) === 1 && array_keys((array)$markers[0]) === ['@attributes', 'role', 'enabled', 'sourcekind']
