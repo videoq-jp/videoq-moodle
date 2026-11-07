@@ -87,6 +87,10 @@ try {
     $check(\local_videoq\materials_service::acknowledge($courseid,$typeid,$ack)===['acknowledged'=>true],'course acknowledgement');
     $rejects(fn()=>\local_videoq\materials_service::acknowledge($courseid,$typeid,array_replace($ack,['generation'=>2])),'stale acknowledgement denied');
     \core\session\manager::set_user($users['student']);
+    $native=\local_videoq\native_context::resolve($courseid);
+    $check($native['subject']===(string)$users['student']->id && $native['resourceLinkId']===(string)$activity->instance
+        && $native['scope']['resources']===[] && $native['scope']['permissions']===$access['permissions'],
+        'native empty-course actor and current authority');
     $rejects(fn()=>\local_videoq\course_entry::require_manager($courseid),'learner cannot configure entry');
     \core\session\manager::set_user($users['editingteacher']);
     \local_videoq\course_entry::require_manager($courseid);

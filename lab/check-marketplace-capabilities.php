@@ -126,6 +126,24 @@ foreach ($state['users'] as $archetype => $userid) {
     $ready = array_values(array_filter($access['resources'], fn($item) => $item['lesson'] === 'sync_' . $state['materials']['completed']['cmid']));
     $check(count($ready) === 1 && !isset($ready[0]['learning']) && $ready[0]['generation'] === 7, $archetype . ' ready learning scope');
     $check(isset($ready[0]['management']) === $manage, $archetype . ' per-resource management metadata');
+    // Exercise the same real Moodle actor/context path used by the native page.
+    // No backend request or assertion is needed to resolve local authority.
+    $savednative = [];
+    foreach (['typeid', 'apiurl'] as $name) $savednative[$name] = get_config('local_videoq', $name);
+    try {
+        set_config('typeid', $DB->get_field('lti', 'typeid', ['id' => $launchid], MUST_EXIST), 'local_videoq');
+        set_config('apiurl', 'https://videoq.example.invalid', 'local_videoq');
+        \core\session\manager::set_user($DB->get_record('user', ['id' => $userid], '*', MUST_EXIST));
+        $native = \local_videoq\native_context::resolve($state['courses'][0], 'sync_' . $state['materials']['completed']['cmid']);
+        $check($native['subject'] === (string)$userid && $native['resourceLinkId'] === (string)$launchid,
+            $archetype . ' native actor and source anchor');
+        $check($native['scope']['permissions'] === $access['permissions'], $archetype . ' native current permissions');
+    } finally {
+        \core\session\manager::set_user(get_admin());
+        foreach ($savednative as $name => $value) {
+            if ($value === false) unset_config($name, 'local_videoq'); else set_config($name, $value, 'local_videoq');
+        }
+    }
 }
 $check(has_capability($contentcap, $secondary, $state['users']['editingteacher']), 'content override isolated to primary course');
 $check(has_capability($reportcap, $secondary, $state['users']['teacher']), 'report override isolated to primary course');
