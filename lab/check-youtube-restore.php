@@ -92,7 +92,11 @@ try {
         $bc = new backup_controller($full ? backup::TYPE_1COURSE : backup::TYPE_1ACTIVITY,
             $full ? $source->id : $enabled->coursemodule, backup::FORMAT_MOODLE,
             backup::INTERACTIVE_NO, backup::MODE_GENERAL, $teacherid);
-        $bc->get_plan()->get_setting('users')->set_value(false);
+        $usersetting = $bc->get_plan()->get_setting('users');
+        // A normal teacher cannot back up user data; core already locks this
+        // setting off. Keep that permission decision instead of overriding it.
+        if ($usersetting->get_value()) $usersetting->set_value(false);
+        $check(!$usersetting->get_value(), $mode . ': backup excludes user data without widening teacher authority');
         $basepath = $bc->get_plan()->get_basepath(); $directories[] = $basepath;
         $bc->execute_plan();
         $archive = $bc->get_results()['backup_destination']; $files[] = $archive;
@@ -121,7 +125,9 @@ try {
             $mode . ': destination teacher authority is explicit');
         $rc = new restore_controller($directory, $destination, backup::INTERACTIVE_NO, backup::MODE_GENERAL, $teacherid,
             $full ? backup::TARGET_NEW_COURSE : backup::TARGET_EXISTING_ADDING);
-        $rc->get_plan()->get_setting('users')->set_value(false);
+        $usersetting = $rc->get_plan()->get_setting('users');
+        if ($usersetting->get_value()) $usersetting->set_value(false);
+        $check(!$usersetting->get_value(), $mode . ': restore excludes user data without widening teacher authority');
         if (!$rc->execute_precheck() && !empty($rc->get_precheck_results()['errors'])) throw new RuntimeException('Owned archive restore precheck failed');
         $rc->execute_plan(); $rc->destroy();
         $rows = $DB->get_records('local_videoq_sync', ['courseid' => $destination]);
