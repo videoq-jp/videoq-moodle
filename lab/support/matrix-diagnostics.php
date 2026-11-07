@@ -17,7 +17,8 @@ function matrix_diagnostic_locations(string $raw): string {
             $locations[] = 'native-page-' . $metadata['kind'];
         }
         if (in_array($metadata['source'] ?? null, ['view.php', 'native_context.php', 'native_api.php',
-                'workspace.php', 'ui_strings.php', 'source.php', 'lesson.php'], true)
+                'workspace.php', 'ui_strings.php', 'source.php', 'lesson.php',
+                'native-page-fixture.php', 'pagelib.php', 'core_renderer.php'], true)
                 && is_int($metadata['line'] ?? null) && $metadata['line'] > 0 && $metadata['line'] <= 100000) {
             $locations[] = $metadata['source'] . ':' . $metadata['line'];
         }

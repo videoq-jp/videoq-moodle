@@ -37,15 +37,6 @@ if (!$courseid) {
 }
 $course = get_course($courseid);
 require_login($course);
-$PAGE->set_course($course);
-$PAGE->set_context(context_course::instance($courseid));
-$PAGE->set_url('/local/videoq/view.php', ['course' => $courseid] + ($videoid ? ['video' => $videoid] : []));
-$PAGE->set_title(get_string('courseassistant', 'local_videoq'));
-$PAGE->set_heading(format_string($course->fullname));
-$PAGE->activityheader->disable();
-$PAGE->navbar->ignore_active();
-$PAGE->navbar->add(format_string($course->shortname), new moodle_url('/course/view.php', ['id' => $courseid]));
-$PAGE->navbar->add(get_string('courseassistant', 'local_videoq'));
 
 $selected = \local_videoq\lesson::for_course($courseid);
 if ($videoid) {
@@ -86,6 +77,16 @@ try {
     $scope = ['resources' => []];
     $connected = false;
 }
+// Finish every login/course check before activityheader initializes the theme.
+$PAGE->set_course($course);
+$PAGE->set_context(context_course::instance($courseid));
+$PAGE->set_url('/local/videoq/view.php', ['course' => $courseid] + ($videoid ? ['video' => $videoid] : []));
+$PAGE->set_title(get_string('courseassistant', 'local_videoq'));
+$PAGE->set_heading(format_string($course->fullname));
+$PAGE->activityheader->disable();
+$PAGE->navbar->ignore_active();
+$PAGE->navbar->add(format_string($course->shortname), new moodle_url('/course/view.php', ['id' => $courseid]));
+$PAGE->navbar->add(get_string('courseassistant', 'local_videoq'));
 $catalog = [];
 $managedsources = [];
 $resources = $scope['resources'];

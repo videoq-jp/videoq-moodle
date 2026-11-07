@@ -9,7 +9,7 @@ it does not complete all VideoQ feature parity or canonical course deletion.
 ## Teacher setup
 
 1. Upgrade the backend with migration 0059, course-entry support and native
-   learning protocol 1, then upgrade `local_videoq` to 0.22.0 / 2026110801.
+   learning protocol 1, then upgrade `local_videoq` to 0.22.1 / 2026110802.
    Drain older backend writers before enabling
    entries. The configured backend must advertise `courseEntries: true` through
    materials discovery or the authenticated legacy connection response.

@@ -9,7 +9,7 @@ VideoQ remains an independently deployed application with its own runtime.
 
 ## Current native learning interface
 
-The 0.22.0 companion renders learning and teacher panels with Moodle templates.
+The 0.22.1 companion renders learning and teacher panels with Moodle templates.
 Ordinary requests use core/ajax; streaming uses a same-origin Moodle endpoint.
 PHP signs the private VideoQ API requests. No presentation/authentication frame or
 cross-window learning bridge is part of this transport.
@@ -55,7 +55,7 @@ a production capacity or full-duration multi-device guarantee.
 
 Older `lab/verify-chat.php`, browser-dependent background/restore checks and
 `lab/verify-load.php` assume the retired frame protocol. Do not use them to verify
-0.22.0 native learning. Reproduce the matching historical source revision when
+0.22.1 native learning. Reproduce the matching historical source revision when
 investigating those records; use current native contracts and the paired actual
 CPU/privacy workflow for this candidate. No original fixture, user content or
 historical result is replaced by a new report.

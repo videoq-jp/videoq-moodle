@@ -10,22 +10,26 @@ if ($CFG->wwwroot !== 'https://marketplace-audit.invalid' || $CFG->dbhost !== 'a
     throw new RuntimeException('Refusing to mutate an unrelated Moodle database');
 }
 // Avoid replacing the original exception with a secondary HTML error page.
-set_exception_handler(static function(Throwable $error) use ($CFG): void {
+set_exception_handler(static function(Throwable $error): void {
     while (ob_get_level()) ob_end_clean();
-    $sources = [];
+    $sources = ['/lab/check-marketplace-native-page.php' => 'native-page-fixture.php',
+        '/lib/pagelib.php' => 'pagelib.php', '/lib/classes/output/core_renderer.php' => 'core_renderer.php'];
     foreach (['view', 'classes/native_context', 'classes/native_api', 'classes/output/workspace',
             'classes/ui_strings', 'classes/source', 'classes/lesson'] as $path) {
-        $sources[$CFG->dirroot . '/local/videoq/' . $path . '.php'] = basename($path) . '.php';
+        $sources['/local/videoq/' . $path . '.php'] = basename($path) . '.php';
     }
     $metadata = [];
-    if (in_array(get_class($error), ['Error', 'TypeError', 'RuntimeException', 'coding_exception',
+    $kind = basename(str_replace('\\', '/', get_class($error)));
+    if (in_array($kind, ['Error', 'TypeError', 'RuntimeException', 'coding_exception',
             'moodle_exception', 'dml_read_exception', 'dml_missing_record_exception'], true)) {
-        $metadata['kind'] = get_class($error);
+        $metadata['kind'] = $kind;
     }
     foreach (array_merge([['file' => $error->getFile(), 'line' => $error->getLine()]], $error->getTrace()) as $frame) {
-        if (isset($frame['file'], $frame['line'], $sources[$frame['file']])) {
-            $metadata += ['source' => $sources[$frame['file']], 'line' => (int)$frame['line']];
-            break;
+        foreach ($sources as $suffix => $source) {
+            if (isset($frame['file'], $frame['line']) && str_ends_with($frame['file'], $suffix)) {
+                $metadata += ['source' => $source, 'line' => (int)$frame['line']];
+                break 2;
+            }
         }
     }
     if ($error instanceof moodle_exception && in_array($error->errorcode,

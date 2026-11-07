@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'local_videoq';
-$plugin->version = 2026110801;
+$plugin->version = 2026110802;
 $plugin->requires = 2025100600; // Moodle 5.1; other versions are not yet verified.
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.22.0';
+$plugin->release = '0.22.1';
