@@ -1,4 +1,4 @@
-// Contract checks use the actual player.js and real cross-origin loopback frames.
+// Contract checks use the actual player.js with direct Moodle material and seek events.
 (async function() {
     const checks = [], fixture = window.playerFixture;
     const check = (condition, label) => { if (!condition) throw new Error(label); checks.push(label); };
@@ -7,8 +7,8 @@
         while (!predicate()) { if (Date.now() > deadline) throw new Error('Owned player condition timed out'); await new Promise(resolve => setTimeout(resolve, 20)); }
     };
     try {
-        await wait(() => fixture.loaded.size === 2 && fixture.records.length === 1);
-        const ready = { type: 'videoq:ready', version: 1, channel: 'a'.repeat(32), videoId: 2,
+        await wait(() => fixture.records.length === 1);
+        const ready = {
             videos: [{ videoId: 1, lesson: 'file' }, { videoId: 2, lesson: 'youtube', sourceGeneration: 7 }] };
         fixture.send(ready);
         await wait(() => fixture.read()?.videoId === 2);
@@ -20,15 +20,14 @@
             && providerUrl.searchParams.get('enablejsapi') === '1', 'provider identifies only the Moodle site origin');
         fixture.root.dispatchEvent(new CustomEvent('videoq:seek-citation', { detail: { videoId: 2, lesson: 'youtube', seconds: 38 } }));
         check(first.position === 38 && first.plays === 1, 'native citation seeks and plays the provider');
-        const seek = { type: 'videoq:seek', version: 1, channel: ready.channel, videoId: 2, lesson: 'youtube', seconds: 75 };
-        fixture.send(seek, 'rogue');
+        const seek = { type: 'videoq:seek', version: 1, channel: 'a'.repeat(32), videoId: 2, lesson: 'youtube', seconds: 75 };
         window.postMessage(seek, location.origin);
-        fixture.send({ ...seek, channel: 'b'.repeat(32) });
+        window.postMessage({...seek, channel: 'b'.repeat(32)}, '*');
         await new Promise(resolve => setTimeout(resolve, 100));
-        check(first.position === 38, 'wrong source, origin and channel cannot seek');
-        fixture.send(seek);
+        check(first.position === 38, 'old window-message commands cannot seek the native player');
+        fixture.root.dispatchEvent(new CustomEvent('videoq:seek-citation', {detail: {videoId: 2, lesson: 'youtube', seconds: 75}}));
         await wait(() => first.position === 75);
-        check(first.plays === 2, 'authorized private-frame seek works');
+        check(first.plays === 2, 'authorized local Moodle seek works');
         first.options.events.onAutoplayBlocked();
         check(fixture.read()?.videoId === 2 && fixture.root.querySelector('[role="status"]').textContent.includes('press Play'),
             'blocked scripted playback keeps seeking available and explains Play');
@@ -63,7 +62,7 @@
         const unproven = fixture.records.at(-1);
         fixture.send({ ...ready, videos: undefined });
         await wait(() => fixture.read() === null && unproven.destroyed);
-        check(unproven.destroyed, 'URL playback never falls back to an unproved legacy video binding');
+        check(unproven.destroyed, 'URL playback context requires a current matching material grant');
         fixture.send(ready);
         await wait(() => fixture.read()?.videoId === 2);
         check(fixture.records.at(-1) !== unproven, 'restored matching scope can reopen the provider');

@@ -20,7 +20,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/* Follow the active Moodle theme; only the learning workspace layout is custom. */
+/* The Moodle theme supplies fonts, colours, controls and message templates. */
 .local-videoq-workspace {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(350px, 1fr);
@@ -30,77 +30,52 @@
 }
 .local-videoq-panel { min-width: 0; overflow: hidden; border-radius: .5rem; }
 .local-videoq-media { margin: 0; width: 100%; max-width: none; }
-.local-videoq-questions { display: flex; flex-direction: column; box-sizing: border-box; }
-.local-videoq-questions iframe { display: block; flex: 1; min-height: 0; width: 100%; border: 0; }
+.local-videoq-questions { display: flex; flex-direction: column; box-sizing: border-box; min-height: 480px; max-height: 85dvh; }
+.local-videoq-tools { grid-column: 1 / -1; }
+.local-videoq-empty { grid-template-columns: minmax(0, 1fr); }
+#page-local-videoq-view .page-header-headings { min-width: 0; max-width: 100%; }
+#page-local-videoq-view .page-header-headings h1 { white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
+#videoq-native-chat { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.local-videoq-message-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; overflow-wrap: anywhere; }
+.local-videoq-tool { max-height: 75dvh; overflow: auto; overflow-wrap: anywhere; }
+.local-videoq-tool summary { cursor: pointer; font-weight: 600; margin-bottom: .75rem; }
+.local-videoq-tool [role="status"]:empty, #videoq-native-status:empty { display: none; }
+.local-videoq-workspace [hidden] { display: none !important; }
+.local-videoq-workspace .qa-row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .5rem 0; }
+.local-videoq-workspace .qa-card { border: 1px solid var(--bs-border-color, #dee2e6); padding: 1rem; margin: 1rem 0; border-radius: .375rem; }
+.local-videoq-workspace .qa-body, .local-videoq-workspace .personal-turn { white-space: pre-wrap; overflow-wrap: anywhere; }
+.local-videoq-workspace .qa-hint, .local-videoq-workspace .qa-meta { font-size: .875rem; opacity: .8; }
+.local-videoq-workspace .qa-field { display: flex; flex-direction: column; gap: .25rem; margin: .75rem 0; }
+.local-videoq-workspace input, .local-videoq-workspace select, .local-videoq-workspace textarea { max-width: 100%; min-width: 0; }
+.local-videoq-workspace textarea { resize: vertical; }
+.local-videoq-workspace [data-error="true"], .local-videoq-workspace .feedback-error { color: var(--bs-danger, #b02a37); }
+.local-videoq-workspace .qa-link { border: 0; background: transparent; color: var(--bs-link-color, #0d6efd); padding: 0; text-decoration: underline; text-align: left; }
+.local-videoq-workspace .qa-badge { font-size: .875rem; font-weight: 600; }
+.local-videoq-workspace .local-videoq-confirm { border: 1px solid var(--bs-border-color, #dee2e6); border-radius: .5rem; padding: 1.5rem; max-width: min(32rem, 90vw); }
+.local-videoq-confirm::backdrop { background: rgba(0, 0, 0, .35); }
+.local-videoq-workspace #videoq-management-transcript { font-family: ui-monospace, monospace; }
+.local-videoq-workspace table { width: 100%; table-layout: fixed; }
+.local-videoq-workspace th, .local-videoq-workspace td { overflow-wrap: anywhere; }
+.local-videoq-workspace #videoq-reports-form { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; }
+.local-videoq-workspace #videoq-reports-form label { display: flex; flex-direction: column; }
+.local-videoq-workspace #videoq-reports-content dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem 1rem; }
+.local-videoq-workspace .course-tag-chip { border: 1px solid currentColor; border-radius: 1rem; padding: .1rem .5rem; }
+.local-videoq-workspace .course-tag-chip[data-color="red"] { color: #b02a37; }
+.local-videoq-workspace .course-tag-chip[data-color="blue"] { color: #0a58ca; }
+.local-videoq-workspace .course-tag-chip[data-color="light-blue"] { color: #087caa; }
+.local-videoq-workspace .course-tag-chip[data-color="cyan"] { color: #087990; }
+.local-videoq-workspace .course-tag-chip[data-color="green"] { color: #146c43; }
+.local-videoq-workspace .course-tag-chip[data-color="lime"] { color: #506b00; }
+.local-videoq-workspace .course-tag-chip[data-color="purple"] { color: #6f42c1; }
+.local-videoq-workspace .course-tag-chip[data-color="orange"] { color: #984c0c; }
+.local-videoq-workspace .course-tag-chip[data-color="yellow"] { color: #805e00; }
+.local-videoq-workspace .course-tag-chip[data-color="magenta"] { color: #ab296a; }
+.local-videoq-workspace [data-videoq-player-status]:empty { display: none; }
+.local-videoq-youtube iframe { width: 100%; height: auto; min-height: 200px; aspect-ratio: 16 / 9; border: 0; }
 @media (max-width: 1100px) {
     .local-videoq-workspace { grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr); gap: 16px; }
 }
 @media (max-width: 900px) {
     .local-videoq-workspace { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-}
-/* A local lesson title must remain readable in Moodle's narrow header. */
-#page-local-videoq-view .page-header-headings { min-width: 0; max-width: 100%; }
-#page-local-videoq-view .page-header-headings h1 { white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
-
-/* Native core_message templates inherit the active Moodle theme; only sizing is local. */
-.local-videoq-questions { position: relative; }
-.local-videoq-questions .local-videoq-transport {
-    position: absolute; width: 1px; height: 1px; min-height: 0; max-height: none;
-    left: 0; top: 0; clip-path: inset(50%); pointer-events: none;
-}
-#videoq-native-chat { flex: 1; min-height: 0; }
-.local-videoq-message-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; overflow-wrap: anywhere; }
-#videoq-native-status:empty { display: none; }
-#videoq-transcript { flex-shrink: 0; max-height: 45dvh; overflow-y: auto; }
-#videoq-transcript-cues { max-height: 28dvh; }
-#videoq-transcript-status:empty { display: none; }
-.local-videoq-transcript-text { white-space: pre-wrap; }
-#videoq-course-qa [role="status"]:empty { display: none; }
-#videoq-personal-history [role="status"]:empty { display: none; }
-#videoq-material-management [role="status"]:empty { display: none; }
-.local-videoq-management-open #videoq-native-chat,
-.local-videoq-management-open #videoq-transcript { display: none !important; }
-.local-videoq-management-open #videoq-questions {
-    position: static; flex: 1; width: 100%; height: 100%; min-height: 0;
-    clip-path: none; pointer-events: auto;
-}
-.local-videoq-personal-open #videoq-native-chat,
-.local-videoq-personal-open #videoq-transcript { display: none !important; }
-.local-videoq-personal-open #videoq-questions {
-    position: static; flex: 1; width: 100%; height: 100%; min-height: 0;
-    clip-path: none; pointer-events: auto;
-}
-.local-videoq-qa-open #videoq-native-chat,
-.local-videoq-qa-open #videoq-transcript { display: none !important; }
-.local-videoq-qa-open #videoq-questions {
-    position: static; flex: 1; width: 100%; height: 100%; min-height: 0;
-    clip-path: none; pointer-events: auto;
-}
-@media (max-width: 900px) {
     .local-videoq-questions { height: 640px; max-height: 85dvh; min-height: 480px; }
-}
-
-#videoq-course-tags [role="status"]:empty { display: none; }
-.local-videoq-tags-open #videoq-native-chat,
-.local-videoq-tags-open #videoq-transcript { display: none !important; }
-.local-videoq-tags-open #videoq-questions {
-    position: static; flex: 1; width: 100%; height: 100%; min-height: 0;
-    clip-path: none; pointer-events: auto;
-}
-.local-videoq-empty-frame {
-    width: 100%;
-    min-height: 75vh;
-    border: 0;
-}
-
-#videoq-course-reports [role="status"]:empty { display: none; }
-.local-videoq-workspace [data-videoq-file][hidden],
-.local-videoq-workspace [data-videoq-youtube][hidden] { display: none !important; }
-.local-videoq-youtube iframe { width: 100%; height: auto; min-height: 200px; aspect-ratio: 16 / 9; border: 0; }
-.local-videoq-workspace [data-videoq-player-status]:empty { display: none; }
-.local-videoq-reports-open #videoq-native-chat,
-.local-videoq-reports-open #videoq-transcript { display: none !important; }
-.local-videoq-reports-open #videoq-questions {
-    position: static; flex: 1; width: 100%; height: 100%; min-height: 0;
-    clip-path: none; pointer-events: auto;
 }

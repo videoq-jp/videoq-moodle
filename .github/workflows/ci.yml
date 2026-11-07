@@ -74,7 +74,7 @@ jobs:
           fixture="$RUNNER_TEMP/videoq-moodle-privacy"
           git init "$fixture"
           git -C "$fixture" sparse-checkout init --no-cone
-          git -C "$fixture" sparse-checkout set /public/privacy/classes/ /public/lib/setuplib.php /public/lib/weblib.php
+          git -C "$fixture" sparse-checkout set /public/privacy/classes/ /public/lib/setuplib.php /public/lib/weblib.php /public/lib/mustache/ /public/lib/templates/ /public/message/templates/
           git -C "$fixture" fetch --depth=1 --filter=blob:none https://github.com/moodle/moodle.git "$MOODLE_REVISION"
           git -C "$fixture" checkout --detach FETCH_HEAD
           test "$(git -C "$fixture" rev-parse HEAD)" = "$MOODLE_REVISION"
@@ -83,6 +83,8 @@ jobs:
         run: php scripts/native-browser.php /tmp/videoq-native-browser >> "$GITHUB_ENV"
       - name: Compile browser assets through PHP WebDriver
         run: php lab/check-browser.php
+      - name: Exercise Moodle-rendered native learning panels
+        run: php lab/check-native-learning.php "$RUNNER_TEMP/videoq-moodle-privacy"
       - name: Verify native File and YouTube player contracts
         run: php lab/check-youtube-player.php
       - name: Check Moodle Compose configuration

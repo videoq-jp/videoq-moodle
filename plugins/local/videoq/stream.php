@@ -32,7 +32,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Accel-Buffering: no');
 
 try {
-    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 524288) {
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 2097152) {
         throw new RuntimeException('Invalid stream request');
     }
     require_login();

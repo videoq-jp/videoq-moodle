@@ -33,6 +33,21 @@ final class native_api {
         'conversations', 'qa', 'management', 'tags', 'reports'];
 
     /**
+     * Returns fresh Moodle authority to the PHP page renderer without credentials.
+     *
+     * @param int $courseid Current course.
+     * @param string $lessonid Optional legacy anchor.
+     * @return array Current Moodle resources and capabilities.
+     */
+    public static function scope(int $courseid, string $lessonid = ''): array {
+        try {
+            return native_context::resolve($courseid, $lessonid)['scope'];
+        } catch (\Throwable $error) {
+            throw new \moodle_exception('nativeunavailable', 'local_videoq');
+        }
+    }
+
+    /**
      * Accepts a bounded JSON object, preserving nested object/array distinctions.
      *
      * @param string $operation Operation name.

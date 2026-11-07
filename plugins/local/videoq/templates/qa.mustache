@@ -2,14 +2,9 @@
     @template local_videoq/qa
     @copyright 2026 VideoQ contributors
     @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-    Opens course Q&A through the existing authenticated LTI frame.
+    Native Moodle learning panel.
 
-    Example context (json):
-    {"heading": "Course Q&A", "unavailable": "Course Q&A is unavailable."}
+    Example context (json): {}
 }}
-<div id="videoq-course-qa" class="p-3 border-bottom bg-body" data-heading="{{heading}}" data-unavailable="{{unavailable}}" hidden>
-    <details>
-        <summary aria-controls="videoq-questions">{{heading}}</summary>
-    </details>
-    <p role="status" class="small text-danger mt-2 mb-0"></p>
-</div>
+<details class="local-videoq-tool p-3 border-bottom" id="videoq-course-qa" hidden><summary>{{#str}}nativeqa_title, local_videoq{{/str}}</summary><p class="qa-hint">{{#str}}nativeqa_shared, local_videoq{{/str}}</p>
+<p id="videoq-qa-status" role="status" aria-live="polite"></p><div id="videoq-qa-content"></div></details>

@@ -1,5 +1,5 @@
 <?php
-/** Actual player asset and cross-origin browser contracts with an owned provider substitute. */
+/** Actual native player asset and current-material browser contracts with an owned provider substitute. */
 declare(strict_types=1);
 require __DIR__ . '/support/browser.php';
 use VideoQLab\Browser;
@@ -10,8 +10,7 @@ $router = $work . '/router.php';
 $support = __DIR__ . '/support';
 $plugin = dirname(__DIR__) . '/plugins/local/videoq';
 $routes = ['/fixture.js' => $support . '/youtube-player-fixture.js', '/player.js' => $plugin . '/player.js',
-    '/checks.js' => $support . '/youtube-player-checks.js', '/styles.css' => $plugin . '/styles.css',
-    '/frame' => $support . '/youtube-player-frame.html'];
+    '/checks.js' => $support . '/youtube-player-checks.js', '/styles.css' => $plugin . '/styles.css'];
 $html = '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     . '<link rel="stylesheet" href="/styles.css"><body><script src="/fixture.js"></script>'
     . '<script src="/player.js"></script><script defer src="/checks.js"></script>';

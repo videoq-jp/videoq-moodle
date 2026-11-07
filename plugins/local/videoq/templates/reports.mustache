@@ -2,12 +2,11 @@
     @template local_videoq/reports
     @copyright 2026 VideoQ contributors
     @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-    Opens course usage reports in the existing authenticated tool.
+    Native Moodle learning panel.
 
-    Example context (json):
-    {"heading": "AI question usage", "unavailable": "Course reports are unavailable."}
+    Example context (json): {}
 }}
-<div id="videoq-course-reports" class="p-3 border-bottom bg-body" data-heading="{{heading}}" data-unavailable="{{unavailable}}" hidden>
-    <details><summary aria-controls="videoq-questions">{{heading}}</summary></details>
-    <p role="status" class="small text-danger mt-2 mb-0"></p>
-</div>
+<details class="local-videoq-tool p-3 border-bottom" id="videoq-course-reports" hidden><summary>{{#str}}nativereports_title, local_videoq{{/str}}</summary><p>{{#str}}nativereports_notice, local_videoq{{/str}}</p>
+<form id="videoq-reports-form"><label>{{#str}}nativereports_from, local_videoq{{/str}}<input class="form-control" id="videoq-reports-from" type="date" required></label><label>{{#str}}nativereports_to, local_videoq{{/str}}<input class="form-control" id="videoq-reports-to" type="date" required></label>
+<button type="submit" class="btn btn-outline-secondary btn-sm">{{#str}}nativereports_load, local_videoq{{/str}}</button><button id="videoq-reports-export" type="button" class="btn btn-outline-secondary btn-sm" disabled>{{#str}}nativereports_csv, local_videoq{{/str}}</button>
+<button id="videoq-reports-close" type="button" class="btn btn-outline-secondary btn-sm" hidden>{{#str}}nativereports_close, local_videoq{{/str}}</button></form><p id="videoq-reports-status" role="status" aria-live="polite"></p><div id="videoq-reports-content"></div></details>

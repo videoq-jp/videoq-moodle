@@ -199,24 +199,28 @@ the existing standard messaging UI, not an installation of the legacy activity.
 The AI conversation is not a human direct-message thread: VideoQ still handles
 answer generation, course-wide evidence and question records. No bot user,
 Moodle message record or notification is created. Standalone LTI launches retain
-the VideoQ question interface when the companion is not present. Older backends
-or course-only bindings without a playback grant automatically fall back to
-the visible LTI interface if the native renderer handshake is unavailable.
+the VideoQ question interface when the companion is not present. The companion's learning interface requires the native learning API protocol. It
+uses Moodle templates, JavaScript and current Moodle capabilities for every
+operation, including empty-course tools. It does not launch a VideoQ presentation
+iframe or an authentication/transport iframe. The existing standalone LTI
+interface remains available as a separate integration.
 
-The companion's LTI iframe now acts as an off-screen authenticated transport.
-Only the allowed Moodle parent, exact source window, protocol version, per-launch
-channel and permitted video can activate the `videoq:ui` renderer protocol. Native
-`videoq:question` commands have bounded text and unique request IDs. Replies carry
-only display status, question text or structured answer data; session tokens,
-ID tokens, browser proof and owner log capabilities never leave the API frame.
-The parent applies the same source/origin/channel checks before rendering. Model
-HTML remains literal text; formatting and citations use safe DOM nodes. Source
-clicks use the existing restricted seek bridge and server-rendered media catalog.
+Normal requests use Moodle's session-authenticated `core/ajax` external function.
+Moodle PHP resolves the actor, course, current source visibility and operation
+capabilities, then sends a short-lived, operation/body-bound signed assertion to
+VideoQ over verified HTTPS. Assertions, access proofs and native server-session
+identifiers remain in PHP. An unexpired refused session is never silently
+replaced. Answers use a same-origin, sesskey-checked Moodle stream endpoint that
+releases the Moodle session lock before relaying events incrementally.
+
+Model HTML remains literal text; formatting and citations use safe DOM nodes.
+Source clicks operate the local Moodle player directly, using the current
+server-authorized material list and the Moodle-rendered media catalog.
 
 Only the message list scrolls. The composer stays below it; Enter sends,
 Shift+Enter adds a line and Japanese IME composition does not send. Failed
 questions keep their input for retry, and connection failures show a message and
-the existing separate-view link. Standard theme changes affect the chat directly,
+the current Moodle status. Standard theme changes affect the chat directly,
 without copying colors or loading a separate imitation of Moodle CSS.
 
 The companion also uses the standard Moodle page header, breadcrumbs, cards and

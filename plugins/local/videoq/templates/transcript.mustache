@@ -2,25 +2,12 @@
     @template local_videoq/transcript
     @copyright 2026 VideoQ contributors
     @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-    Lesson transcript reader; the authenticated LTI frame supplies scoped text.
+    Native Moodle learning panel.
 
-    Example context (json):
-    {
-        "heading": "Lesson transcripts",
-        "lesson": "Lesson",
-        "refresh": "Refresh lessons",
-        "more": "Show more",
-        "empty": "No transcript available.",
-        "error": "Unable to load the lesson.",
-        "seek": "Jump to"
-    }
+    Example context (json): {}
 }}
-<details id="videoq-transcript" class="p-3 border-bottom bg-body" data-empty="{{empty}}" data-error="{{error}}" data-seek="{{seek}}" hidden>
-    <summary class="mb-2">{{heading}}</summary>
-    <label for="videoq-transcript-lesson">{{lesson}}</label>
-    <select id="videoq-transcript-lesson" class="form-select mb-2"></select>
-    <button id="videoq-transcript-refresh" type="button" class="btn btn-sm btn-outline-secondary">{{refresh}}</button>
-    <p id="videoq-transcript-status" role="status" class="small mt-2"></p>
-    <ol id="videoq-transcript-cues" class="list-unstyled overflow-auto mb-2"></ol>
-    <button id="videoq-transcript-more" type="button" class="btn btn-sm btn-outline-secondary" hidden>{{more}}</button>
-</details>
+<details class="local-videoq-tool p-3 border-bottom" id="videoq-course-materials" hidden><summary>{{#str}}nativechat_transcript, local_videoq{{/str}}</summary>
+<label for="videoq-material-video">{{#str}}nativechat_material, local_videoq{{/str}}</label><select class="form-select" id="videoq-material-video"></select>
+<button class="btn btn-outline-secondary btn-sm" id="videoq-material-refresh" type="button">{{#str}}nativechat_refreshmaterials, local_videoq{{/str}}</button>
+<p id="videoq-material-status" role="status"></p><ol id="videoq-material-cues"></ol>
+<button class="btn btn-outline-secondary btn-sm" id="videoq-material-more" type="button" hidden>{{#str}}nativechat_moretranscript, local_videoq{{/str}}</button></details>
