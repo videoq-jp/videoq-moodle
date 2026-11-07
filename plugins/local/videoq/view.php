@@ -140,7 +140,12 @@ if ($course->id !== $videocourse->id || ($courseid && (int)$course->id !== $cour
 // Core checks enrolment, hidden activities, conditional availability and deletion.
 require_login($course, false, $videocm);
 require_capability(\local_videoq\source::view_capability($videocm), context_module::instance($videocm->id));
-require_login($course, false, $lticm);
+// Keep this page attached to the source activity. Calling require_login with a
+// second activity switches PAGE's module context and emits developer warnings.
+// The launch has its own core login; check its current core visibility here.
+if ($lticm->deletioninprogress || !$lticm->uservisible) {
+    throw new moodle_exception('invalidmodules', 'local_videoq');
+}
 require_capability('mod/lti:view', context_module::instance($lticm->id));
 $entry = \local_videoq\course_entry::find((int)$course->id);
 if (
@@ -148,9 +153,14 @@ if (
     && (!isset($lesson['syncStatus']) || $lesson['syncStatus'] === 'completed')
 ) {
     $entrycm = get_fast_modinfo($course)->get_cm((int)$entry->lticmid);
-    if ($entrycm->uservisible && has_capability('mod/lti:view', context_module::instance($entrycm->id))) {
+    if (
+        !$entrycm->deletioninprogress && $entrycm->uservisible
+        && has_capability('mod/lti:view', context_module::instance($entrycm->id))
+    ) {
         [$entrycourse, $lticm] = get_course_and_cm_from_cmid((int)$entry->lticmid, 'lti');
-        require_login($entrycourse, false, $lticm);
+        if ((int)$entrycourse->id !== (int)$course->id || $lticm->deletioninprogress || !$lticm->uservisible) {
+            throw new moodle_exception('invalidmodules', 'local_videoq');
+        }
         require_capability('mod/lti:view', context_module::instance($lticm->id));
     }
 }
@@ -173,7 +183,6 @@ if (
 $PAGE->activityheader->disable();
 $pagetitle = $courseid ? get_string('courseassistant', 'local_videoq') : format_string($lesson['title']);
 $PAGE->set_title($pagetitle);
-$PAGE->set_context(context_course::instance($course->id));
 $PAGE->set_heading($courseid ? format_string($course->fullname) : format_string($lesson['title']));
 $PAGE->requires->css(new moodle_url('/local/videoq/styles.css', ['rev' => substr(sha1_file(__DIR__ . '/styles.css'), 0, 12)]));
 $PAGE->requires->js(new moodle_url('/local/videoq/player.js', ['rev' => substr(sha1_file(__DIR__ . '/player.js'), 0, 12)]));
