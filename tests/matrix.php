@@ -11,6 +11,15 @@ $summary = matrix_diagnostic_locations('PHP Warning: ' . $private . ' in /site/p
 if ($summary !== 'lib.php:123, course.php:456, probe.php:789, probe.php:812' || str_contains($summary, $private)) {
     throw new RuntimeException('Matrix diagnostics exposed fixture data or lost source locations');
 }
+foreach (["++ " . $private . " ++\n* line 123 of /site/public/lib.php",
+    "++ Multiline Moodle diagnostic\ncontinued ++\n* line 123 of /site/public/lib.php", 'Debugging: ' . $private,
+    '<div class="notifytiny debuggingmessage">' . $private . '</div>', 'PHP Warning: ' . $private] as $diagnostic) {
+    if (!matrix_has_diagnostics($diagnostic)) throw new RuntimeException('Moodle developer diagnostic was not recognized');
+}
+foreach (["Backup completed\nRestore completed\n", "++ Success (0.25 seconds) ++\n",
+    '{"passed":true,"checks":["private data omitted"]}'] as $progress) {
+    if (matrix_has_diagnostics($progress)) throw new RuntimeException('Normal progress or JSON was classified as a diagnostic');
+}
 $root = dirname(__DIR__);
 $temporary = sys_get_temp_dir() . '/videoq-matrix-guard-' . bin2hex(random_bytes(6));
 mkdir($temporary, 0700);

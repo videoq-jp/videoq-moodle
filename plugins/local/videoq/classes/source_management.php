@@ -36,8 +36,8 @@ final class source_management {
      * @return bool
      */
     public static function can_manage(int $cmid): bool {
-        $cm = get_coursemodule_from_id('resource', $cmid, 0, false, IGNORE_MISSING);
-        return $cm && !$cm->deletioninprogress && (int)$cm->course !== SITEID
+        $cm = get_coursemodule_from_id('', $cmid, 0, false, IGNORE_MISSING);
+        return $cm && source::supports($cm) && !$cm->deletioninprogress && (int)$cm->course !== SITEID
             && has_capability('local/videoq:managecontent', \context_course::instance($cm->course))
             && has_capability('moodle/course:manageactivities', \context_module::instance($cmid));
     }
@@ -49,8 +49,8 @@ final class source_management {
      * @return void
      */
     public static function require_manager(int $cmid): void {
-        $cm = get_coursemodule_from_id('resource', $cmid, 0, false, MUST_EXIST);
-        if ($cm->deletioninprogress || (int)$cm->course === SITEID) {
+        $cm = get_coursemodule_from_id('', $cmid, 0, false, MUST_EXIST);
+        if (!source::supports($cm) || $cm->deletioninprogress || (int)$cm->course === SITEID) {
             throw new \moodle_exception('unknownlesson', 'local_videoq');
         }
         require_capability('local/videoq:managecontent', \context_course::instance($cm->course));

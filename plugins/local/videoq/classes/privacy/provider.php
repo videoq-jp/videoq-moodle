@@ -58,6 +58,9 @@ final class provider implements
             'videofile' => 'privacy:metadata:videofile',
             'title' => 'privacy:metadata:title',
         ], 'privacy:metadata:videoq');
+        $collection->add_external_location_link('youtube', [
+            'playback' => 'privacy:metadata:youtubeplayback',
+        ], 'privacy:metadata:youtube');
         $collection->add_subsystem_link('core', [], 'privacy:metadata:core');
         return $collection;
     }

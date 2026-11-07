@@ -25,7 +25,7 @@
 
 require_once(__DIR__ . '/../../config.php');
 $cmid = required_param('cmid', PARAM_INT);
-[$course, $cm] = get_course_and_cm_from_cmid($cmid, 'resource');
+[$course, $cm] = \local_videoq\source::course($cmid);
 require_login($course, false, $cm);
 $context = context_module::instance($cmid);
 \local_videoq\source_management::require_manager($cmid);
@@ -64,7 +64,8 @@ echo html_writer::tag(
     )
 );
 if ($row && $row->errorcode) {
-    echo $OUTPUT->notification(get_string('syncerror', 'local_videoq'), 'warning');
+    $message = $row->errorcode === 'YOUTUBE_DISABLED' ? 'youtubedisabled' : 'syncerror';
+    echo $OUTPUT->notification(get_string($message, 'local_videoq'), 'warning');
 }
 foreach ($row && $row->enabled ? ['retry', 'disable'] : ['enable'] as $action) {
     echo $OUTPUT->single_button(new moodle_url($url, ['action' => $action]), get_string('sync_' . $action, 'local_videoq'), 'post');

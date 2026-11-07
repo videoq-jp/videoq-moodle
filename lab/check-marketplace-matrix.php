@@ -39,8 +39,10 @@ function matrix_run(array $args, string $log, bool $required = true): int {
 }
 function matrix_diagnostics(string $log): void {
     $output = file_get_contents($log) . file_get_contents($log . '.stderr');
-    if (preg_match('/Warning:|Deprecated:|Notice:|Debug info:|Stack trace:|!!!|XMLDB has detected/i', $output)) {
-        throw new RuntimeException('Developer diagnostics found: ' . basename($log));
+    if (matrix_has_diagnostics($output)) {
+        $locations = matrix_diagnostic_locations($output);
+        throw new RuntimeException('Developer diagnostics found: ' . basename($log)
+            . ($locations !== '' ? ' (' . $locations . ')' : ''));
     }
 }
 function matrix_source(string $repo, string $revision, string $target, ?string $cache, string $work, string $label): void {
@@ -153,7 +155,12 @@ CONFIG;
             $locations = matrix_diagnostic_locations($diagnostic);
             throw new RuntimeException('Unexpected check diagnostics: ' . $name . ($locations !== '' ? ' (' . $locations . ')' : ''));
         }
-        $report = json_decode(file_get_contents($log), true, 64, JSON_THROW_ON_ERROR);
+        matrix_diagnostics($log);
+        try {
+            $report = json_decode(file_get_contents($log), true, 64, JSON_THROW_ON_ERROR);
+        } catch (JsonException $error) {
+            throw new RuntimeException('Invalid fixture JSON: ' . $name, 0, $error);
+        }
         if (($report['passed'] ?? false) !== true) throw new RuntimeException('Runtime check failed: ' . $name);
         $reports[$name] = $report;
     };
@@ -172,6 +179,8 @@ CONFIG;
     $check('privacy-requests', ['/src/lab/check-marketplace-privacy.php', '/site']);
     $check('upgraded-course-entry', ['/src/lab/check-course-entry.php', '/site']);
     $check('upgraded-course-catalog', ['/src/lab/check-course-catalog.php', '/site']);
+    $check('upgraded-youtube-sources', ['/src/lab/check-youtube-source.php', '/site']);
+    $check('upgraded-youtube-restore', ['/src/lab/check-youtube-restore.php', '/site']);
     echo "$mode: uninstall companion before local; preserve course and source bytes\n";
     foreach (['ltisource_videoq' => 'mod/lti/source', 'local_videoq' => 'local'] as $component => $relative) {
         $log = $work . '/uninstall-' . $component . '.log';
@@ -192,6 +201,8 @@ CONFIG;
     $check('reinstalled-preservation', ['/src/lab/check-marketplace-upgrade.php', '/site', 'verify-reinstalled']);
     $check('reinstalled-course-entry', ['/src/lab/check-course-entry.php', '/site']);
     $check('reinstalled-course-catalog', ['/src/lab/check-course-catalog.php', '/site']);
+    $check('reinstalled-youtube-sources', ['/src/lab/check-youtube-source.php', '/site']);
+    $check('reinstalled-youtube-restore', ['/src/lab/check-youtube-restore.php', '/site']);
     $hashes = [];
     foreach (['local_videoq.zip', 'ltisource_videoq.zip'] as $file) $hashes[$file] = hash_file('sha256', $work . '/archives/' . $file);
     $summary = ['passed' => true, 'database' => $mode, 'moodleRevision' => $pins['moodleRevision'],

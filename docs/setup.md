@@ -318,6 +318,56 @@ File activities manually. Whole-database/object-store
 recovery and individual `.mbz` restore are separate capabilities. See the
 [verification scope](verification.md) before relying on a particular workflow.
 
+## YouTube URL activities (unreleased 0.21.0)
+
+On a connected VideoQ cloud deployment, the account owner must configure the
+existing YouTube transcript provider in their independently authenticated VideoQ
+settings. Moodle teachers and learners do not receive that API credential. The
+on-prem edition retains its existing restriction on YouTube integration.
+
+Create a standard Moodle **URL** activity with one supported YouTube video URL,
+save it, then use **Manage VideoQ synchronization** to enable it explicitly.
+The course catalog also links to **Add a YouTube URL** when core URL creation is
+permitted. Enabling requires current course content and source activity-management
+rights, as does disabling or retrying. Viewing requires current course access,
+`mod/url:view` and access to the generated LTI activity.
+
+The URL activity owns title, visibility, availability, order and source identity.
+Changing its video invalidates the old source generation. The native player uses
+the YouTube IFrame API for playback and citation seeking, and supports switching
+between File and URL sources. A stale page asks for a reload rather than sending
+the old video's playhead with a new video binding. A blocked or unavailable
+provider does not supply playback state. YouTube receives browser/network and
+playback information; no VideoQ credential or conversation text is sent to its
+player. Browser access to YouTube remains necessary.
+The player identifies the Moodle site origin to YouTube and sends no Moodle path
+or VideoQ credential in its referrer. Moodle controls access to the VideoQ course;
+YouTube controls the external video's own viewing permissions.
+
+This source uses the native VideoQ provider-transcript, processing-duration quota,
+job lease and indexing flow; no File upload or synthetic zero-byte reservation
+is used. A job is not ready until actual processing and synchronization finish.
+Use the existing owner connection flow for provider/account settings and the
+teacher controls for eligible retry. The plugin remains free and existing cloud
+Stripe billing is unchanged.
+
+Apply the paired backend migration 0061 and deploy the compatible API/worker
+before upgrading the local plugin to 2026110704. Both File and course-entry
+compatibility remain; YouTube requires explicit protocol negotiation. Older
+servers refuse new opt-in, and older callers receive no URL-source manifests or
+permission grants. Before downgrading, disable URL integrations and finish their
+cleanup with a compatible backend. Keep the migration and managed/native access
+guards; an older API cannot process YouTube tombstones.
+An older Moodle plugin also needs its compatible database recovery state; follow
+the coordinated backup/recovery plan when rolling back the installed version.
+
+Backups carry source kind and opt-in; Moodle core carries the URL. Restore uses
+the destination connection and requires the restoring user's current management
+rights. It does not copy backend video IDs or conversations. Full archive/recycle
+bin restoration and actual provider/AI/native acceptance remain release gates.
+Current local parser, database and substituted-player tests do not prove those
+end-to-end behaviors.
+
 ## Teacher material editing (unreleased 0.15.0)
 
 The course assistant's **Manage course materials** panel edits the AI description

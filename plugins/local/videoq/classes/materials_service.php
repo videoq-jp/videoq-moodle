@@ -62,11 +62,21 @@ final class materials_service {
      * @param int $typeid Registered LTI tool identifier.
      * @param bool $includeentries Whether the backend opted into course entries.
      * @param bool $uservisibility Whether the backend enforces fresh per-user access.
+     * @param bool $includeyoutube Whether this caller supports YouTube sources.
      * @return array
      */
-    public static function manifest(int $courseid, int $typeid, bool $includeentries = false, bool $uservisibility = false): array {
+    public static function manifest(
+        int $courseid,
+        int $typeid,
+        bool $includeentries = false,
+        bool $uservisibility = false,
+        bool $includeyoutube = false
+    ): array {
         $items = [];
         foreach (self::course($courseid, $typeid, $includeentries) as $row) {
+            if (($row->sourcekind ?? 'file') === 'youtube' && !$includeyoutube) {
+                continue;
+            }
             $manifest = synchronizer::run((int)$row->id, true, $uservisibility);
             if (!$manifest) {
                 throw new \RuntimeException('Incomplete snapshot');
@@ -91,6 +101,7 @@ final class materials_service {
      * @param string $resource Launch resource identifier.
      * @param string $subject Moodle user identifier from the LTI launch.
      * @param bool $includeentries Whether the backend opted into course entries.
+     * @param bool $includeyoutube Whether this caller supports YouTube sources.
      * @return array
      */
     public static function access(
@@ -98,7 +109,8 @@ final class materials_service {
         int $typeid,
         string $resource,
         string $subject,
-        bool $includeentries = false
+        bool $includeentries = false,
+        bool $includeyoutube = false
     ): array {
         global $DB;
         self::course($courseid, $typeid, $includeentries);
@@ -112,7 +124,13 @@ final class materials_service {
             throw new \RuntimeException('Access denied');
         }
         $proof = course_access::launch((int)$resource, (int)$subject);
-        $access = course_access::resolve($proof['custom_videoq_access'] ?? '', $subject, (string)$courseid, $resource);
+        $access = course_access::resolve(
+            $proof['custom_videoq_access'] ?? '',
+            $subject,
+            (string)$courseid,
+            $resource,
+            $includeyoutube
+        );
         foreach ($access['resources'] as &$item) {
             $row = $DB->get_record(
                 'local_videoq_sync',
@@ -204,7 +222,7 @@ final class materials_service {
             );
             $uservisibility = ($input['includeUserVisibility'] ?? false) === true;
             $manifest = synchronizer::run((int)$row->id, true, $uservisibility);
-            if (!$manifest['enabled'] || $manifest['generation'] !== $generation) {
+            if (($row->sourcekind ?? 'file') !== 'file' || !$manifest['enabled'] || $manifest['generation'] !== $generation) {
                 throw new \RuntimeException('Stale source');
             }
             $hash = hash('sha256', $typeid . ':' . $courseid . ':' . $cmid . ':' . $generation . ':' . $input['idempotencyKey']);
@@ -275,7 +293,7 @@ final class materials_service {
         }
         $error = in_array(
             $input['error'] ?? '',
-            ['STORAGE_LIMIT_EXCEEDED',
+            ['YOUTUBE_DISABLED', 'STORAGE_LIMIT_EXCEEDED',
              'MONTHLY_UPLOAD_LIMIT_EXCEEDED'],
             true
         ) ? $input['error'] : '';

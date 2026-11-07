@@ -47,9 +47,10 @@ final class lesson {
             $video = $info->cms[$item['videoCmid']];
             $lti = $info->cms[$item['ltiCmid']];
             if (
-                !$video->uservisible || !$lti->uservisible || $video->deletioninprogress || $lti->deletioninprogress
+                !source::matches($video, $item, true) || !$video->uservisible || !$lti->uservisible
+                    || $video->deletioninprogress || $lti->deletioninprogress
                     || ($typeid && (int)$DB->get_field('lti', 'typeid', ['id' => $lti->instance]) !== $typeid)
-                    || !has_capability('mod/resource:view', \context_module::instance($video->id))
+                    || !has_capability(source::view_capability($video), \context_module::instance($video->id))
                     || !has_capability('mod/lti:view', \context_module::instance($lti->id))
             ) {
                 continue;
@@ -108,8 +109,17 @@ final class lesson {
             if (!$row) {
                 throw new \moodle_exception('unknownlesson', 'local_videoq');
             }
-            $resource = $DB->get_record('course_modules', ['id' => $row->cmid, 'deletioninprogress' => 0], '*', MUST_EXIST);
-            $title = $DB->get_field('resource', 'name', ['id' => $resource->instance], MUST_EXIST);
+            $kind = $row->sourcekind ?? 'file';
+            $module = $kind === 'youtube' ? 'url' : 'resource';
+            $resource = get_coursemodule_from_id($module, $row->cmid, (int)$row->courseid, false, MUST_EXIST);
+            if (
+                $resource->deletioninprogress || !source::matches($resource, [
+                'sourceKind' => $kind, 'youtubeVideoId' => $row->youtubeid ?? '',
+                ], true)
+            ) {
+                throw new \moodle_exception('unknownlesson', 'local_videoq');
+            }
+            $title = $DB->get_field($module, 'name', ['id' => $resource->instance], MUST_EXIST);
             return ['id' => $id,
                  'title' => $title,
                  'videoCmid' => (int)$row->cmid,

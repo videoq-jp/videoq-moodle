@@ -96,18 +96,19 @@ final class course_entry {
         require_capability('moodle/course:manageactivities', $context);
     }
     /**
-     * Requires explicit support from the configured backend before creating an entry.
+     * Requires explicit support from the configured backend before source creation.
      *
+     * @param string $capability Required public backend capability.
      * @return void
      */
-    private static function require_backend(): void {
+    public static function require_backend(string $capability = 'courseEntries'): void {
         global $CFG;
         if (get_config('local_videoq', 'servicemode') !== 'lti') {
             // Legacy push need not have S3/materials-service discovery enabled.
             // Use its already authenticated, approved connection instead.
             $connection = (new client())->request('GET', 'connection');
-            if (($connection['courseEntries'] ?? false) !== true) {
-                throw new \RuntimeException('Course entries unavailable');
+            if (($connection[$capability] ?? false) !== true) {
+                throw new \RuntimeException('Requested source feature unavailable');
             }
             return;
         }
@@ -129,11 +130,11 @@ final class course_entry {
         };
         $curl->get($origin . '/api/lms/pairing/discovery', [], $options);
         if ($curl->get_errno() || (int)($curl->get_info()['http_code'] ?? 0) !== 200) {
-            throw new \RuntimeException('Course entries unavailable');
+            throw new \RuntimeException('Requested source feature unavailable');
         }
         $metadata = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
-        if (($metadata['toolOrigin'] ?? '') !== $origin || ($metadata['courseEntries'] ?? false) !== true) {
-            throw new \RuntimeException('Course entries unavailable');
+        if (($metadata['toolOrigin'] ?? '') !== $origin || ($metadata[$capability] ?? false) !== true) {
+            throw new \RuntimeException('Requested source feature unavailable');
         }
     }
     /**

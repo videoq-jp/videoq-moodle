@@ -171,5 +171,14 @@ $string['catalogcoursedelete'] = 'Moodleコースを削除…';
 
 $string['videoq:viewreports'] = '現在閲覧できる教材のAI質問利用状況を集計して表示する';
 $string['coursereports'] = 'AI質問の利用状況';
+$string['catalogyoutube'] = 'YouTubeのURLを追加';
+$string['invalidyoutubeurl'] = 'YouTube動画を1本指定する、対応形式のURLを入力してください。';
+$string['youtubedisabled'] = '接続先のVideoQ環境ではYouTube連携を利用できません。';
+$string['sourceactivity'] = 'Moodleの元教材を開く';
+$string['sourceupdated'] = '元教材が変更されました。更新後の動画を使うには、このMoodleページを再読み込みしてください。';
+$string['youtubeplaybackerror'] = 'YouTube動画を読み込めませんでした。Moodleの元教材を開いて、動画を利用できるか確認してください。';
+$string['youtubeautoplay'] = 'この引用箇所から再生を続けるには、YouTubeプレーヤーの再生ボタンを押してください。';
+$string['privacy:metadata:youtube'] = '連携を有効にしたYouTubeのURL教材を再生すると、閲覧者のブラウザでYouTubeプレーヤーとJavaScript APIを読み込みます。そのプレーヤーへVideoQの認証情報や会話本文を送信しません。';
+$string['privacy:metadata:youtubeplayback'] = 'プレーヤーの読み込みや操作に伴い、動画ID、ネットワーク・ブラウザ情報、再生操作に関する情報がYouTubeへ送信されます。接続先のVideoQサービスは、アカウント所有者のプロバイダー設定を使い、別途字幕を取得します。';
 $string['coursereportsunavailable'] = 'レポートを利用できません。現在のMoodle権限を確認するか、開き直してください。';
 $string['privacy:metadata:coursereports'] = 'VideoQはAI回答の所属コース情報と、レポート閲覧の期間・教材範囲ハッシュ・件数・時刻を含む識別情報のみの監査記録を保存します。レポートには個人の質問・回答本文や学習者の識別情報を表示しません。';

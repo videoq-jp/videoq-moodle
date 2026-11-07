@@ -224,12 +224,16 @@ final class synchronizer {
             source_management::require_manager($cmid);
         }
         require_once($CFG->dirroot . '/course/modlib.php');
-        [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'resource');
+        [$course, $cm] = source::course($cmid);
         if ($cm->deletioninprogress) {
             throw new \moodle_exception('unknownlesson', 'local_videoq');
         }
-        if (!self::video_file($cmid)) {
-            throw new \moodle_exception('novideofile', 'local_videoq');
+        $source = source::read($cmid);
+        if (!$source) {
+            throw new \moodle_exception($cm->modname === 'url' ? 'invalidyoutubeurl' : 'novideofile', 'local_videoq');
+        }
+        if ($source['kind'] === 'youtube') {
+            course_entry::require_backend($repair ? 'youtubeSourceProtocol' : 'youtubeSources');
         }
         $type = self::check_connection();
         $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('enable-' . $cmid, 10);
@@ -238,6 +242,9 @@ final class synchronizer {
         }
         try {
             $row = $DB->get_record('local_videoq_sync', ['cmid' => $cmid]);
+            if ($row && ($row->sourcekind ?? 'file') !== $source['kind']) {
+                throw new \RuntimeException('Source kind changed');
+            }
             if ($repair && (!$row || !$row->enabled)) {
                 return;
             }
@@ -274,6 +281,7 @@ final class synchronizer {
                 'display' => 0, 'printintro' => 0, 'parameters' => [],
             ]), $course);
             $values = (object)['typeid' => (int)$type->id,
+                 'sourcekind' => $source['kind'], 'youtubeid' => $source['youtubeVideoId'] ?? '',
                  'cmid' => $cmid,
                  'courseid' => $course->id,
                  'lticmid' => $lti->coursemodule,
@@ -328,7 +336,12 @@ final class synchronizer {
         }
         try {
             $row = $DB->get_record('local_videoq_sync', ['id' => $id], '*', MUST_EXIST);
-            $cm = get_coursemodule_from_id('resource', $row->cmid, 0, false, IGNORE_MISSING);
+            $sourcekind = (string)($row->sourcekind ?? 'file');
+            if (!in_array($sourcekind, ['file', 'youtube'], true)) {
+                throw new \RuntimeException('Unsupported source kind');
+            }
+            $module = $sourcekind === 'youtube' ? 'url' : 'resource';
+            $cm = get_coursemodule_from_id($module, $row->cmid, 0, false, IGNORE_MISSING);
             $course = $DB->get_record('course', ['id' => $row->courseid]);
             $lti = get_coursemodule_from_id('lti', $row->lticmid, 0, false, IGNORE_MISSING);
             $link = get_coursemodule_from_id('url', $row->linkcmid, 0, false, IGNORE_MISSING);
@@ -340,7 +353,8 @@ final class synchronizer {
             if ($row->enabled && $row->status === 'restoring') {
                 return null;
             }
-            if ($row->enabled && (!$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress)) {
+            $source = $cm && !$cm->deletioninprogress ? source::read((int)$row->cmid) : null;
+            if ($row->enabled && $source && (!$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress)) {
                 // Section cleanup or deletion of an internal activity must not
                 // delete the source's processed media, transcript or embeddings.
                 // Failure to repair is retryable; only source deletion/explicit
@@ -401,14 +415,20 @@ final class synchronizer {
                     rebuild_course_cache($row->courseid, true);
                 }
             }
-            $file = $cm && !$cm->deletioninprogress ? self::video_file((int)$row->cmid) : null;
+            if ($source && $source['kind'] !== $sourcekind) {
+                throw new \RuntimeException('Source kind changed');
+            }
+            $file = $source['file'] ?? null;
             if (!$snapshot) {
                 // Reconcile local disable/deletion first, even when the server is
                 // unavailable. Legacy push then negotiates authenticated support.
                 $connection = (new client())->request('GET', 'connection');
                 $uservisibility = ($connection['userVisibility'] ?? false) === true;
+                if ($sourcekind === 'youtube' && ($connection['youtubeSourceProtocol'] ?? false) !== true) {
+                    throw new \RuntimeException('YouTube sources unavailable');
+                }
             }
-            $enabled = (bool)($row->enabled && $file && $course && $cm
+            $enabled = (bool)($row->enabled && $source && $course && $cm
                 && (int)$cm->course === (int)$row->courseid && $lti && (int)$lti->course === (int)$row->courseid
                 && $link && (int)$link->course === (int)$row->courseid
                 && !$cm->deletioninprogress && !$lti->deletioninprogress && !$link->deletioninprogress
@@ -417,9 +437,16 @@ final class synchronizer {
                  'courseTitle' => $course ? $course->fullname : 'Moodle',
                  'resourceLinkId' => (string)$row->ltiinstance,
 
-                'deleted' => (bool)(!$row->enabled || !$file || !$cm || $cm->deletioninprogress || !$course
+                'deleted' => (bool)(!$row->enabled || !$source || !$cm || $cm->deletioninprogress || !$course
                     || !$lti || $lti->deletioninprogress || !$link || $link->deletioninprogress),
                 'enabled' => $enabled, 'title' => $cm ? \core_text::substr(strip_tags($cm->name), 0, 255) : 'Deleted video'];
+            if ($sourcekind === 'youtube') {
+                $manifest['kind'] = 'youtube';
+                $youtubeid = $source['youtubeVideoId'] ?? $row->youtubeid;
+                if ($youtubeid !== '') {
+                    $manifest['youtubeVideoId'] = $youtubeid;
+                }
+            }
             if ($file) {
                 $manifest['file'] = ['filename' => $file->get_filename(), 'contentType' => $file->get_mimetype(),
                 'size' => (int)$file->get_filesize(), 'contentHash' => $file->get_contenthash()];
@@ -432,20 +459,28 @@ final class synchronizer {
                 $link->availability ?? null,
                 $course->visible ?? null, $cm->visible ?? null, $lti->visible ?? null, $link->visible ?? null])
             );
-            if ($row->fingerprint !== $fingerprint) {
+            $unchanged = $row->fingerprint === $fingerprint;
+            if (!$unchanged) {
                 $DB->execute(
-                    'UPDATE {local_videoq_sync} SET generation = generation + 1, fingerprint = ?, status = ? WHERE id = ?',
-                    [$fingerprint,
-                     'queued',
-                    $id]
+                    'UPDATE {local_videoq_sync} SET generation = generation + 1,'
+                        . ' fingerprint = ?, status = ?, youtubeid = ? WHERE id = ?',
+                    [$fingerprint, 'queued', $source['youtubeVideoId'] ?? $row->youtubeid, $id]
                 );
                 $row = $DB->get_record('local_videoq_sync', ['id' => $id], '*', MUST_EXIST);
-            } else if (!$snapshot && in_array($row->status, ['completed', 'disabled'], true)) {
-                return null;
             }
             $manifest['generation'] = (int)$row->generation;
             if ($snapshot) {
                 return $manifest;
+            }
+            if ($sourcekind === 'youtube' && $enabled && ($connection['youtubeSources'] ?? false) !== true) {
+                $DB->execute(
+                    'UPDATE {local_videoq_sync} SET status = ?, errorcode = ? WHERE id = ? AND generation = ?',
+                    ['blocked', 'YOUTUBE_DISABLED', $id, $row->generation]
+                );
+                return null;
+            }
+            if ($unchanged && in_array($row->status, ['completed', 'disabled'], true)) {
+                return null;
             }
             $client = new client();
             $path = 'resources/' . $row->cmid;
@@ -464,7 +499,7 @@ final class synchronizer {
             ) ? $result['status'] : 'error';
             $error = in_array(
                 $result['error'] ?? '',
-                ['STORAGE_LIMIT_EXCEEDED',
+                ['YOUTUBE_DISABLED', 'STORAGE_LIMIT_EXCEEDED',
                  'MONTHLY_UPLOAD_LIMIT_EXCEEDED'],
                 true
             ) ? $result['error'] : '';

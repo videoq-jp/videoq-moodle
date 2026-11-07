@@ -62,11 +62,19 @@ foreach ($components as $component => $expected) {
     $class = '\\' . $component . '\\privacy\\provider';
     $collection = $class::get_metadata(new \core_privacy\local\metadata\collection($component));
     $entries = $collection->get_collection();
-    $entries = array_filter($entries, static fn($item) => $item instanceof \core_privacy\local\metadata\types\external_location);
-    if (count($entries) !== 1) {
-        throw new RuntimeException('Expected one external service declaration');
+    $external = array_filter($entries, static fn($item) => $item instanceof \core_privacy\local\metadata\types\external_location);
+    $locations = [];
+    foreach ($external as $location) {
+        if (isset($locations[$location->get_name()])) {
+            throw new RuntimeException('Duplicate external service declaration');
+        }
+        $locations[$location->get_name()] = $location;
     }
-    $entry = reset($entries);
+    $names = array_keys($locations); sort($names);
+    if ($names !== ($component === 'local_videoq' ? ['videoq', 'youtube'] : ['videoq'])) {
+        throw new RuntimeException('Unexpected external service declarations');
+    }
+    $entry = $locations['videoq'];
     if (!$entry instanceof \core_privacy\local\metadata\types\external_location || $entry->get_name() !== 'videoq') {
         throw new RuntimeException('Missing external service declaration');
     }
@@ -74,7 +82,16 @@ foreach ($components as $component => $expected) {
     if (array_diff($expected, array_keys($fields))) {
         throw new RuntimeException('Incomplete privacy fields: ' . $component);
     }
-    foreach ([$entry->get_summary(), ...array_values($fields)] as $identifier) {
+    $identifiers = [$entry->get_summary(), ...array_values($fields)];
+    if ($component === 'local_videoq') {
+        $youtube = $locations['youtube'];
+        $playback = $youtube->get_privacy_fields();
+        if (array_keys($playback) !== ['playback']) {
+            throw new RuntimeException('Incomplete YouTube playback declaration');
+        }
+        $identifiers = [...$identifiers, $youtube->get_summary(), ...array_values($playback)];
+    }
+    foreach ($identifiers as $identifier) {
         if (!get_string_manager()->string_exists($identifier, $component)) {
             throw new RuntimeException('Missing privacy language string');
         }

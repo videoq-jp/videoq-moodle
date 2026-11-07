@@ -58,6 +58,7 @@ final class course_access {
             ) as $row
         ) {
             $items[] = ['id' => 'sync_' . $row->cmid, 'videoCmid' => (int)$row->cmid, 'ltiCmid' => (int)$row->lticmid,
+                'sourceKind' => $row->sourcekind ?? 'file', 'youtubeVideoId' => $row->youtubeid ?? '',
                 'generation' => (int)$row->generation, 'syncStatus' => $row->status];
         }
         // The materials service grants only explicitly synchronized sources.
@@ -156,9 +157,16 @@ final class course_access {
      * @param string $subject Moodle user identifier from the LTI launch.
      * @param string $context Course identifier bound to the proof.
      * @param string $resource Launch resource identifier.
+     * @param bool $includeyoutube Whether this caller supports YouTube sources.
      * @return array
      */
-    public static function resolve(string $token, string $subject, string $context, string $resource): array {
+    public static function resolve(
+        string $token,
+        string $subject,
+        string $context,
+        string $resource,
+        bool $includeyoutube = false
+    ): array {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
         if (
@@ -220,9 +228,10 @@ final class course_access {
                 continue;
             }
             if (
-                $video->modname !== 'resource' || $lti->modname !== 'lti' || !$video->uservisible || !$lti->uservisible
+                !source::matches($video, $item, $includeyoutube) || $lti->modname !== 'lti'
+                    || !$video->uservisible || !$lti->uservisible
                     || $video->deletioninprogress || $lti->deletioninprogress
-                    || !has_capability('mod/resource:view', \context_module::instance($video->id), $user)
+                    || !has_capability(source::view_capability($video), \context_module::instance($video->id), $user)
                     || !has_capability('mod/lti:view', \context_module::instance($lti->id), $user)
             ) {
                 continue;
