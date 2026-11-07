@@ -175,8 +175,8 @@ CONFIG;
     $check('upgraded-runtime', ['/src/lab/check-marketplace-runtime.php', '/site']);
     foreach (['defaults', 'revoked', 'restored'] as $phase) {
         $check('upgraded-capabilities-' . $phase, ['/src/lab/check-marketplace-capabilities.php', '/site', $phase]);
+        if ($phase === 'revoked') $check('upgraded-native-page', ['/src/lab/check-marketplace-native-page.php', '/site']);
     }
-    $check('upgraded-native-page', ['/src/lab/check-marketplace-native-page.php', '/site']);
     $check('privacy-requests', ['/src/lab/check-marketplace-privacy.php', '/site']);
     $check('upgraded-course-entry', ['/src/lab/check-course-entry.php', '/site']);
     $check('upgraded-course-catalog', ['/src/lab/check-course-catalog.php', '/site']);
@@ -198,8 +198,8 @@ CONFIG;
     $check('reinstalled-runtime', ['/src/lab/check-marketplace-runtime.php', '/site']);
     foreach (['defaults', 'revoked', 'restored'] as $phase) {
         $check('reinstalled-capabilities-' . $phase, ['/src/lab/check-marketplace-capabilities.php', '/site', $phase]);
+        if ($phase === 'revoked') $check('reinstalled-native-page', ['/src/lab/check-marketplace-native-page.php', '/site']);
     }
-    $check('reinstalled-native-page', ['/src/lab/check-marketplace-native-page.php', '/site']);
     $check('reinstalled-preservation', ['/src/lab/check-marketplace-upgrade.php', '/site', 'verify-reinstalled']);
     $check('reinstalled-course-entry', ['/src/lab/check-course-entry.php', '/site']);
     $check('reinstalled-course-catalog', ['/src/lab/check-course-catalog.php', '/site']);
