@@ -1,85 +1,64 @@
 # PHP-only verification
 
-All executable tooling maintained here is PHP or the small scoped shell cron
-runner. The two plugin scripts and browser test fixtures are JavaScript executed
-inside the browser, with no server-side JavaScript runtime or build step. There are no
-Node/Python manifests, package installations, Selenium bindings or hidden runtime
-GitHub actions. PHP communicates with native ChromeDriver or GeckoDriver over HTTP and uses
-cURL, OpenSSL, pgsql and ZipArchive directly.
+The companion repository uses PHP and the scoped shell cron runner for executable
+server tooling. Browser assets and fixtures run as JavaScript in native browsers;
+there is no server-side JavaScript runtime, application build or Node/Python
+package installation in this repository. PHP communicates with ChromeDriver or
+GeckoDriver and uses cURL, OpenSSL, database extensions and ZipArchive directly.
+VideoQ remains an independently deployed application with its own runtime.
 
-VideoQ remains an independently deployed application. Its implementation and
-runtime dependencies belong to that project; this repository neither imports
-its source nor starts its API, frontend, scheduler or processing workers.
+## Current native learning interface
 
-The unreleased teacher-material increment (local_videoq 0.15.0) passed the
-official Moodle coding scan with zero errors/warnings and installed Moodle 5.1
-PostgreSQL/MySQL lifecycle checks on 2026-11-06: 14 reports per database and zero
-candidate developer diagnostics. Real access proofs verify four archetypes,
-course-level content-capability revocation/restoration, independent module-level
-activity-management revocation and generation-bound processing resources excluded
-from learner access. Upgrade/uninstall/reinstall preserve the original source.
-The paired VideoQ browser tests exercise the actual companion scripts, processing
-and Moodle acknowledgement delay, draft conflicts/revocation, delayed initialization,
-panel switching, private-frame isolation and mobile layout with HTTP/processing
-fixtures. Full live Moodle + VideoQ + AI and source lifecycle/retry acceptance are
-still required before release. Marketplace artifacts have not been replaced.
-
-The unreleased personal-conversation increment (local_videoq 0.14.0) passed the
-official Moodle coding scan with zero errors/warnings and installed Moodle 5.1
-PostgreSQL/MySQL lifecycle checks on 2026-11-06: 14 reports per database, zero
-candidate developer diagnostics. The checks cover all four standard archetypes,
-course-local history-capability revocation/restoration, guest denial, upgrade,
-reinstall, Privacy API callbacks and source-material preservation. VideoQ's
-separate browser tests exercised the actual companion history/Q&A/chat scripts,
-native transcript replacement, delayed initialization and iframe/session
-preservation with fixture HTTP responses. They do not establish a complete live
-Moodle + VideoQ + AI workflow or automatic external Privacy API handling.
+The 0.22.0 companion renders learning and teacher panels with Moodle templates.
+Ordinary requests use core/ajax; streaming uses a same-origin Moodle endpoint.
+PHP signs the private VideoQ API requests. No presentation/authentication frame or
+cross-window learning bridge is part of this transport.
 
 | Check | What it proves |
-|---|---|
-| `php tests/packages.php` | Offline standard Moodle ZIPs, required assets, safe boundaries, checksums |
-| `php tests/tool-keys.php` | Private file permissions, overwrite refusal, RSA key components and actual sign/verify |
-| `php tests/lab.php` | SSE UTF-8/CRLF byte boundaries, ordered segments/citations, incomplete/error rejection; real PHP mock HTTP transcription/embedding/tool-call/stream schemas |
-| `php tests/dependencies.php` | No additional language source/dependency trees, hidden runtime actions or application services owned by the lab |
-| `php lab/check-browser.php` | Static plugin and fixture scripts compile in native Chrome through PHP WebDriver |
-| `php lab/verify-chat.php` | Real LTI launch, native Moodle composer, IME, partial stream, safe rich text, theme inheritance, forged-message rejection, feedback retry, citation seek, responsive widths, interrupted-stream retry |
-| `php lab/verify-chat.php --live` | Real model streaming/sources, incremental native display, persisted Good/Bad/reset and timestamp seek |
-| `php lab/check-materials.php` | Disposable PHP service-auth/export/access contracts including replay, scope/audience, hidden source and unenrolled-account rejection; transactional/cache restoration |
-| `php lab/verify-connection.php` | Code UI, issuer binding, exchange retry, cancellation/disconnect/revocation, preserved connections/data |
-| `php lab/verify-background.php FILE` | Normal scheduler/cron/worker export, transcription/indexing, same-course membership, two-video citation/selector switching without losing chat, replacement processing in the same course, source deletion and physical media cleanup |
-| `php lab/verify-course-restore.php` | Actual Moodle `.mbz` backup/restore, disabled-source opt-in and destination links, preserved source and existing videos |
-| `php lab/verify-live-restore.php` | Actual same-site course copy and fresh archive extraction/restore; independent indexing, real scoped AI answers, private history separation, current-site connection, isolated deletion and physical media cleanup |
-| `php lab/verify-load.php --count 100 --live` | 100 distinct real Moodle/LTI logins, simultaneous real questions and authenticated video ranges, native browser playback observer; test questions/users removed, existing logs preserved |
-| `php lab/verify-load.php --count 100 --media-only --full-video` | Full-file authenticated transfers and content hashes, one native decoder, three scheduled real questions, first text/completion timings and host-memory guard; incomplete transfers fail |
-| `php lab/verify-media-delivery.php` | Core X-Sendfile authorization, matching media bytes/MIME, anonymous/unenrolled/direct-path/forged-header rejection |
-| `php lab/verify-backup.php` | Consistent database snapshots restored to scratch DBs, matching counts/foreign keys; scratch DBs removed |
-| `php lab/verify-media-backup.php` | Moodle filedir restore/content hashes and disposable S3 upload/download restore; actual Moodle/VideoQ media bytes match |
-| `php lab/verify-readiness.php` | Bounded DB outage/readiness recovery without restarting the API |
-| Web-user `lab/check-materials-tls.php` | Untrusted TLS rejected and readable public CA accepted |
+| --- | --- |
+| `php tests/packages.php` | Standard Moodle ZIP boundaries, required assets, reproducibility and checksums |
+| `php tests/native-api.php` | Request/body binding, immutable PHP session windows, status/error bounds and releasing the session lock before upstream streaming; signer/cURL substitutes |
+| `php tests/native-context.php` | Server-derived actor/course/activity scope and operation capabilities; controlled Moodle state |
+| `php lab/check-browser.php` | Current browser assets compile in native Chrome through PHP WebDriver |
+| `php lab/check-native-learning.php MOODLE_SOURCE` | Real pinned Moodle templates with controlled session/API/model data: chat, feedback, history, Q&A, material/tag drafts, reports, permission refusal and empty-course panels |
+| `php lab/check-youtube-player.php` | File playback, current-grant YouTube behavior, local playback/citation events and malformed provider input; controlled media/provider SDK |
+| `php tests/privacy.php MOODLE_SOURCE` | Real pinned Moodle Privacy API interfaces and metadata classes, without a database or external service |
+| `php tests/privacy-requests.php` | Approved scope intersection, former users, Unicode/large export integrity and transport limits; controlled transport |
+| `php lab/check-marketplace-matrix.php pg OUTPUT` | Actual PostgreSQL Moodle install/upgrade/uninstall/reinstall, permissions, source preservation, Privacy API and native AJAX registration/removal |
+| `php lab/check-marketplace-matrix.php mysql OUTPUT` | The corresponding actual MySQL lifecycle |
 
-`BROWSER=firefox php lab/verify-chat.php` selects native Firefox/GeckoDriver.
-Browser receipts record the actual user agent and Moodle stylesheet.
+The source-pinned companion CI runs these checks, the official Moodle coding
+standard, the remaining PHP contracts, Compose validation and installer/AMOS
+builds. The aggregate requires both actual database lifecycles. Browser contract
+responses are substitutes; a green companion run does not establish actual
+VideoQ signature interoperability, incremental network relay or AI/erasure.
 
-These integration checks require the isolated trial and an independently deployed
-compatible VideoQ service. The offline PHP checks need neither that service nor
-native browser binaries. Real inference requires valid provider settings on
-VideoQ and may incur charges. The [100-learner trial](evidence/capacity-100.json)
-completed all 100 questions (median 17.8 s, p95 23.4 s; first-text p95 22.0 s).
-All 100 authenticated 4 MiB video ranges succeeded, paced at a receive limit of
-256 KiB/s per learner. The playback observer had no waiting events, errors or
-dropped frames. This is one burst on the current deployment, not a full-duration
-video test on 100 physical devices or a production capacity/latency guarantee.
+The paired VideoQ repository owns the **Moodle installed acceptance** workflow.
+Its pinned Moodle image includes this companion and runs against actual VideoQ,
+storage, databases and local CPU inference. The native journey requires real
+Moodle PHP-to-VideoQ authentication, File export/ASR/indexing, AI answers,
+citations/media seeking, feedback, conversations, transcripts, teacher edits,
+tags, Q&A, reports, same-session capability/source/enrolment changes and standard
+core-approved subject export/deletion with model-memory comparison. The browser
+must use Moodle endpoints without VideoQ frames, direct VideoQ/storage requests
+or browser Authorization headers. Inspect the source identities, phase report,
+privacy evidence and cleanup before accepting the result. Installer sources must
+match the accepted companion runtime.
 
-The previous JavaScript harness was replaced in v0.8.0, then the intermediate
-Python harness was replaced with PHP. Earlier source remains in Git history;
-`docs/evidence/` contains dated historical runs, not current certification. New
-reports are stored outside the checkout. No old result is relabeled as a PHP run.
+## Historical frame trials
 
-CI fetches the exact revision using Git, runs offline PHP contracts and PHP syntax,
-downloads a paired native Chrome/ChromeDriver through PHP, compiles browser assets,
-validates Compose and builds installers. The trusted tag job rebuilds from verified
-source and publishes ZIPs/checksums using the PHP GitHub API publisher. Live integration tests are
-executed against the trial and are not misrepresented as hosted CI checks.
+Earlier personal-history/material-editor reports, iframe browser checks and the
+100-learner trial in `docs/evidence/` describe their dated older transports. They
+are not acceptance evidence for this native UI. The historical trial completed
+100 questions and authenticated paced video ranges on one deployment; it is not
+a production capacity or full-duration multi-device guarantee.
+
+Older `lab/verify-chat.php`, browser-dependent background/restore checks and
+`lab/verify-load.php` assume the retired frame protocol. Do not use them to verify
+0.22.0 native learning. Reproduce the matching historical source revision when
+investigating those records; use current native contracts and the paired actual
+CPU/privacy workflow for this candidate. No original fixture, user content or
+historical result is replaced by a new report.
 
 ## Release recovery
 

@@ -1,11 +1,12 @@
 # Data handling for Moodle administrators
 
-VideoQ is an external service chosen by the Moodle administrator. The plugins
-also retrieve transcript text and timestamps for permitted lessons when the
-unreleased transcript reader is enabled. Each list/page request rechecks the
-current user's permitted activities and transcript capability. The bearer
-credential remains inside the registered VideoQ iframe; Moodle receives the
-authorized text through an origin, source and channel checked bridge.
+VideoQ is an external service chosen by the Moodle administrator. The companion
+renders the learning interface on Moodle and retrieves permitted transcripts,
+answers and course data through Moodle's session-authenticated endpoints. PHP
+signs private operation/body-bound requests to VideoQ over verified HTTPS. Each
+request rechecks current Moodle activity access and the relevant capability.
+Assertions, access proofs and private server-session identifiers remain in PHP;
+there is no VideoQ presentation or authentication iframe.
 
 The plugins implement Moodle's metadata and request providers. This describes the current
 implementation, not a legal compliance certification.
@@ -14,9 +15,8 @@ The unreleased course Q&A stores published questions/replies, votes and
 moderation identifiers in VideoQ. Its author pseudonyms differ by course and do
 not create VideoQ accounts. The posting interface explains course sharing;
 private AI conversations are not automatically published to this forum.
-Moodle's panel opens the authenticated tool frame; forum bodies and credentials
-remain in that frame. Only feature availability and display commands cross the
-parent bridge. The approved external-data request workflow described below
+Moodle's panel displays authorized forum data returned through the PHP gateway;
+the browser receives no VideoQ credential. The approved external-data request workflow described below
 includes this forum data and attributed AI history when the paired privacy
 service is enabled.
 
@@ -26,7 +26,7 @@ grants `local/videoq:manageownhistory`. Each operation, including pagination,
 rechecks current enrolment, activity visibility and capability. Teaching roles
 do not grant access to another learner's conversations. The connected VideoQ
 account owner remains able to manage stored answer logs. Conversation contents
-are displayed by the existing authenticated tool iframe; credentials stay there.
+are displayed by the Moodle panel through the authenticated PHP gateway.
 
 The corresponding VideoQ backend atomically attributes new LTI logs to an opaque
 verified subject key without creating VideoQ learner accounts. It hides a saved
@@ -57,7 +57,7 @@ contexts; attributed course Q&A is included in that workflow.
 | Moodle core | Administrator connection session, configuration audit records, and pending restore tasks associated with the initiating user. Moodle core's Privacy API handles its records. |
 | Configured VideoQ server | Transferred video/title, course and activity identifiers, launch/access proof identifiers, questions, answers, feedback and available playback position. Hosting, AI processing, operational logs and retention depend on that deployment. |
 
-The learner bridge does not create a Moodle bot account or human-message
+The learning interface does not create a Moodle bot account or human-message
 conversation. Using Moodle messaging templates does not put the AI conversation
 in Moodle's messaging database. The companion LTI source declares user, course
 and resource identifiers; generated LTI activities disable name/email sharing.
@@ -123,7 +123,14 @@ and uninstalling do not themselves certify external deletion.
 - Synchronization bindings persist for material lifecycle/reconciliation; they are
   not learner profiles. Do not delete shared bindings to service one learner's request.
 
-VideoQ's short-lived launch/history credentials are distinct from durable chat
+Native learning sessions have an immutable window of at most one hour. PHP caches
+the random session identifier and original window together. An unexpired refused
+session is not silently replaced. Erasure revokes the data session while a
+short-lived started marker with no subject payload prevents recreation with that
+same window.
+Legacy browser-LTI credentials use their separate authentication path.
+
+VideoQ's short-lived learning credentials are distinct from durable chat
 logs, source storage and backups. A credential expiring does not establish that
 all related external data was deleted. Deployment operators must document those
 retention and cleanup policies separately.
@@ -137,18 +144,18 @@ reads create an external receipt with a pseudonymous actor key, course/context,
 requested dates, resource count, scope hash and time. A receipt stores no report
 or message contents. These records are included in core-approved external privacy
 export/erasure and optional configured audit retention. Older servers are queried
-for `report_accesses` only when they advertise that collection. Report data and
-credentials stay in the private LTI frame; the native bridge carries availability
-and open/close controls only. Legacy unattributed answers are excluded from counts.
+for `report_accesses` only when they advertise that collection. The authorized
+aggregates and CSV pass through Moodle PHP to the report panel; credentials stay
+server-side. Legacy unattributed answers are excluded from counts.
 
 ## Verification
 
 The unreleased 0.15.0 material editor also sends teachers' AI descriptions, SRT
 edits and processing requests to VideoQ. Its metadata declaration includes the
 external audit receipts: a pseudonymous actor key, source identifiers, operation,
-revision hashes and time. Audit receipts contain no draft text. The draft stays
-inside the authenticated tool frame; the Moodle bridge receives only availability
-and an unsaved-draft boolean. After a permission revocation, an existing draft can
+revision hashes and time. Audit receipts contain no draft text. Unsaved drafts
+remain in the Moodle page until submitted through the authenticated PHP gateway.
+After a permission revocation, an existing draft can
 be copied from read-only fields; no new protected data is requested for that draft.
 The new external privacy callbacks include these personal receipts. Shared edited
 content still requires the operator workflow above; receipt cleanup must be

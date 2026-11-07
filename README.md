@@ -5,6 +5,13 @@ Watch Moodle course videos and ask VideoQ questions across the course.
 Requires Moodle 5.1 and a compatible VideoQ deployment. Development preview,
 tested with the Boost theme.
 
+Learning and teacher screens use Moodle templates, login and course permissions.
+The browser talks to Moodle; PHP calls VideoQ's shared AI/search/storage services
+over verified HTTPS. No VideoQ presentation or authentication iframe is used.
+This preview requires the paired backend with native learning protocol 1.
+Public sharing, billing and global VideoQ administration remain outside the
+Moodle interface. See [current verification](docs/verification.md).
+
 ## Installation
 
 Marketplace submission is being prepared. These plugins are not yet listed or

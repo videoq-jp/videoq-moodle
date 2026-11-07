@@ -1,6 +1,6 @@
 # Course entry without videos
 
-The local plugin can create a course-owned VideoQ LTI entry without adding a
+The local plugin can create a course-owned VideoQ entry without adding a
 dummy video File activity. It enables coursewide Q&A, personal-history controls
 and teacher tag vocabulary according to current Moodle capabilities. AI chat and
 transcripts still require readable, processed material. This is unreleased work;
@@ -8,8 +8,9 @@ it does not complete all VideoQ feature parity or canonical course deletion.
 
 ## Teacher setup
 
-1. Upgrade the backend with migration 0059 and course-entry support, then upgrade
-   `local_videoq` to 0.18.0 / 2026110701. Drain older backend writers before enabling
+1. Upgrade the backend with migration 0059, course-entry support and native
+   learning protocol 1, then upgrade `local_videoq` to 0.22.0 / 2026110801.
+   Drain older backend writers before enabling
    entries. The configured backend must advertise `courseEntries: true` through
    materials discovery or the authenticated legacy connection response.
    Use a regular course; the site frontpage is not a supported course entry.
@@ -20,9 +21,10 @@ it does not complete all VideoQ feature parity or canonical course deletion.
 3. Select **Enable course entry**. The POST checks the Moodle session key, validates
    the approved connection and creates a real private LTI activity and the stable
    course assistant URL. No media file, learner account or backend upload is made.
-4. Wait for synchronization, then open the course assistant. An empty course shows
-   the standard private LTI UI. With readable videos it reuses the native player
-   and controls. No fake playback ID is assigned.
+4. Wait for synchronization, then open the course assistant URL. Both empty and
+   populated courses use Moodle templates and the PHP-to-VideoQ native learning
+   API, without a presentation or authentication iframe. Readable videos enable
+   the Moodle player and source-specific controls. No fake playback ID is assigned.
 
 Repair reuses a valid owned activity. If an old activity was deleted, moved or
 changed to a different tool/destination, an explicit teacher repair creates a new
@@ -36,7 +38,7 @@ The retained `local_videoq_courses` row contains activity/course identifiers,
 integration state, generation and synchronization status, with no learner data.
 It survives core activity/course deletion long enough to send a tombstone.
 
-A signed launch proof includes `entryGeneration`. On every access, Moodle checks
+A signed course-access proof includes `entryGeneration`. On every access, Moodle checks
 the current entry, course, actual LTI module/type/destination, generation, user
 suspension, enrolment, hidden-course rights, activity availability and `mod/lti:view`.
 Current course capabilities govern each Q&A/history/content action. A disabled or
