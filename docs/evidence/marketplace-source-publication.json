@@ -1,0 +1,36 @@
+{
+  "status": "source-branches-published-not-marketplace-approved",
+  "checkedDate": "2026-11-06",
+  "repository": "https://github.com/videoq-jp/videoq-moodle.git",
+  "sourceRevision": "d5a2663e9bb432fca9e73625905dacf0bc8369a9",
+  "formSupportsRepositoryBranch": true,
+  "components": {
+    "local_videoq": {
+      "branch": "marketplace/local_videoq",
+      "commit": "18bc2af76e134b66a60260d06744566a3d811f38",
+      "parent": "d5a2663e9bb432fca9e73625905dacf0bc8369a9",
+      "tree": "8bec5631f9a263e0b6ef99fa66c8c1bdd66df020",
+      "fileCount": 39,
+      "archiveSha256": "4ca0504a053cda66e64dc7fea885bd26e64be002c7fcf48a86054b130184e7ff"
+    },
+    "ltisource_videoq": {
+      "branch": "marketplace/ltisource_videoq",
+      "commit": "5729b1dada70e53795a40396219b6d4e62200745",
+      "parent": "d5a2663e9bb432fca9e73625905dacf0bc8369a9",
+      "tree": "c4fc621014c21e9ca92c57b0a4d5890683a827e7",
+      "fileCount": 6,
+      "archiveSha256": "92cbb616311b548d4f67acb5318a219449822babb2af9ff37c7d3762bf6b5815"
+    }
+  },
+  "verification": {
+    "zipEntriesMatchExportedGitBlobs": true,
+    "publishedTreeIdentitiesMatchExportedTrees": true,
+    "publishedCommitParentsRecheckedThroughGitHub": true,
+    "onlyNewBranchRefsCreated": true,
+    "forcePushUsed": false
+  },
+  "limits": [
+    "Source publication does not establish Marketplace submission, review, approval or listing publication.",
+    "Final paid-service sales setup, reviewer access and live-service evidence remain outstanding."
+  ]
+}

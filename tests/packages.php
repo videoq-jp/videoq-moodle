@@ -23,8 +23,18 @@ try {
             $name = $zip->getNameIndex($index);
             verify(str_starts_with($name, 'videoq/') && !str_contains($name, '../'), 'Unsafe archive path');
             verify(!preg_match('/(?:node_modules|api\.env|compose\.env|\.mp4|\.pem|credential)/', $name), 'Non-plugin content in installer');
+            if (in_array(strtolower(pathinfo($name, PATHINFO_EXTENSION)), ['php', 'js', 'css', 'mustache'], true)) {
+                $contents = $zip->getFromIndex($index);
+                verify(str_contains($contents, '@copyright') && (str_contains($contents, 'GNU GPL')
+                    || str_contains($contents, 'SPDX-License-Identifier: GPL-3.0-or-later')), 'Missing source copyright/license: ' . $name);
+            }
         }
-        if ($component === 'local_videoq') foreach (['connect.php','classes/lti_connection_setup.php','classes/browser_connection.php','templates/chat.mustache','player.js','chat.js',
+        if ($component === 'local_videoq') foreach (['connect.php','classes/lti_connection_setup.php','classes/browser_connection.php',
+            'templates/workspace.mustache', 'templates/chat.mustache', 'player.js', 'learning.js',
+            'classes/native_context.php', 'classes/native_api.php', 'classes/output/workspace.php', 'classes/ui_strings.php',
+            'classes/external/request_learning.php', 'db/services.php', 'stream.php',
+            'templates/personal_history.mustache', 'templates/management.mustache',
+            'templates/reports.mustache', 'templates/qa.mustache', 'templates/tags.mustache', 'templates/transcript.mustache',
             'backup/moodle2/backup_local_videoq_plugin.class.php', 'backup/moodle2/restore_local_videoq_plugin.class.php',
             'classes/restoration.php', 'classes/task/restore_material.php'] as $file) {
             verify($zip->locateName('videoq/' . $file) !== false, 'Missing runtime asset: ' . $file);

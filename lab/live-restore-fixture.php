@@ -109,7 +109,8 @@ if (in_array($action, ['copy', 'restore', 'partial', 'import'], true)) {
         $xml = file_get_contents($path . '/activities/resource_' . $state['sources']['source'] . '/module.xml');
         if (!str_contains($xml, '<role>source</role>') || !str_contains($xml, '<enabled>1</enabled>')) throw new RuntimeException('Opt-in marker missing');
         $marker = simplexml_load_string($xml)->xpath('//plugin_local_videoq_module/binding');
-        if (!$marker || array_keys((array)$marker[0]) !== ['@attributes', 'role', 'enabled']) throw new RuntimeException('Unexpected portable metadata');
+        if (!$marker || array_keys((array)$marker[0]) !== ['@attributes', 'role', 'enabled', 'sourcekind']
+                || (string)$marker[0]->sourcekind !== 'file') throw new RuntimeException('Unexpected portable metadata');
         $destination = restore_dbops::create_new_course('Archive acceptance ' . $state['run'], $shortname, 1);
         $state['courses'][$action] = (int)$destination; $save();
         if ($action === 'partial') update_course((object)['id' => $destination, 'visible' => 1]);

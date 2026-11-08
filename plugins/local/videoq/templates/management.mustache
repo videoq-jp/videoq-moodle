@@ -1,0 +1,20 @@
+{{!
+    @template local_videoq/management
+    @copyright 2026 VideoQ contributors
+    @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+    Native Moodle learning panel.
+
+    Example context (json): {}
+}}
+<details class="local-videoq-tool p-3 border-bottom" id="videoq-material-management" hidden><summary>{{#str}}nativemanagement_title, local_videoq{{/str}}</summary>
+<p class="qa-hint">{{#str}}nativemanagement_notice, local_videoq{{/str}}</p><div class="qa-row"><button id="videoq-management-close" type="button" class="btn btn-outline-secondary btn-sm" hidden>{{#str}}nativemanagement_close, local_videoq{{/str}}</button>
+<button id="videoq-management-refresh" type="button" class="btn btn-outline-secondary btn-sm">{{#str}}nativemanagement_refresh, local_videoq{{/str}}</button></div>
+<label for="videoq-management-video">{{#str}}nativemanagement_lesson, local_videoq{{/str}}</label><select class="form-select" id="videoq-management-video"></select>
+<p id="videoq-management-status" role="status" aria-live="polite"></p><p id="videoq-management-progress"></p>
+<form id="videoq-management-form"><div class="qa-field"><label for="videoq-management-description">{{#str}}nativemanagement_description, local_videoq{{/str}}</label>
+<textarea class="form-control" id="videoq-management-description" maxlength="20000" rows="4" readonly></textarea></div>
+<div class="qa-field"><label for="videoq-management-transcript">{{#str}}nativemanagement_transcript, local_videoq{{/str}}</label>
+<textarea class="form-control" id="videoq-management-transcript" maxlength="2097152" rows="12" spellcheck="false" readonly></textarea></div>
+<div class="qa-row"><button id="videoq-management-save" type="submit" class="btn btn-primary" disabled>{{#str}}nativemanagement_save, local_videoq{{/str}}</button>
+<button id="videoq-management-reindex" type="button" class="btn btn-outline-secondary btn-sm" disabled>{{#str}}nativemanagement_reindex, local_videoq{{/str}}</button>
+<button id="videoq-management-retry" type="button" class="btn btn-outline-secondary btn-sm" disabled>{{#str}}nativemanagement_retry, local_videoq{{/str}}</button></div></form></details>

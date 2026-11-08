@@ -11,42 +11,186 @@
 - An administrator on Moodle and the owning account on VideoQ.
 
 Moodle runs PHP and serves the browser JavaScript directly. No Node.js runtime,
-package manager or JavaScript compilation step is needed for these plugins,
-their package build, this repository's lab or CI.
+JavaScript package manager or JavaScript compilation step is needed for these
+plugins, their package build, this repository's lab or CI. The development-only
+Moodle coding check installs locked PHP tools in an isolated directory; those
+tools are not shipped in the plugin ZIPs and are not needed on a Moodle server.
+
+## Courses without videos (unreleased 0.18.0)
+
+Course editors with both `local/videoq:managecontent` and course-wide
+`moodle/course:manageactivities` can open **Manage VideoQ course entry** in course
+settings. **Enable course entry** creates a private LTI activity and a stable
+assistant URL without a dummy video. After synchronization, the empty course can
+use coursewide Q&A, own-history controls and teacher tag vocabulary with current
+Moodle permissions. AI chat still requires readable processed video material.
+
+This requires backend course-entry support and migration 0059. The setup refuses
+older backends; installing this companion alone does not provide that backend
+feature. Repair reuses a valid activity, and disabling the entry retains shared
+course data and other video activities. See [course-entry.md](course-entry.md)
+for access checks, compatibility, lifecycle and remaining acceptance gates.
+
+## Course tags and filtering (unreleased 0.16.0)
+
+The course assistant offers **Course tags and materials** using the existing
+private tool frame. Learners can search permitted material titles, filter by tag
+or untagged materials, open a ready source and read its transcript when separately
+allowed. Names, counts and IDs from hidden materials are not returned.
+
+Course content editors can create course-specific vocabulary and change tags on
+sources they currently manage. Renaming or deleting a tag requires management
+rights over every source using it. These tags are separate from the connected
+account's global VideoQ tags. Moodle capability/module access is rechecked on each
+request; LTI launch-role names alone grant no tag editing rights.
+
+A failed or conflicted save keeps the draft. A revoked draft is read only and can
+still be selected/copied. Saving again after an uncertain response uses the same
+operation ID; refreshing or switching the editor asks before discarding changes.
+The native bridge transfers availability/draft flags, without tag text or account
+credentials. Older backends keep this control hidden; older companions can use
+the embedded interface. Deploy API migration 0056 and its restricted-role grants
+before enabling this companion. This increment does not complete imports,
+course-order management or external privacy export/deletion and retention.
+
+## Connected account management (unreleased 0.15.1)
+
+After connecting, site administrators can open **Manage the connected VideoQ
+account** on the connection page. Course content editors can open the same link
+from their authorized source controls. VideoQ asks for its own login and matches
+the exact Moodle registration to the signed-in account. Moodle roles alone do not
+grant account ownership, billing access or VideoQ system-administrator authority.
+
+The separate page links to the existing global video/tag library, independent
+VideoQ courses, profile, connected apps and API-key settings. Cloud account owners
+also get billing navigation; on-premises deployments keep cloud billing disabled.
+VideoQ system administration requires the current VideoQ administrator role.
+Opening these links does not reconnect a disabled Moodle connection or change a
+subscription. No credential is transferred through the URL or private iframe.
+
+This requires matching API and web deployments advertising the management page.
+An older backend gives a local unavailable message instead of guessing a web URL.
+Course-scoped tag editing, canonical Moodle imports and the remaining external
+privacy workflows are separate work; this page provides independent account
+operations rather than granting course users those privileges.
 
 ## Install and connect
 
-1. Download `local_videoq.zip`, `ltisource_videoq.zip` and `SHA256SUMS` from the
-   [releases](https://github.com/videoq-jp/videoq-moodle/releases). Verify
-   checksums with `sha256sum -c SHA256SUMS` in the download directory.
-2. Install `local_videoq.zip` through Moodle's plugin installer, then install
-   `ltisource_videoq.zip`. Complete the Moodle database upgrade. Each archive
-   contains Moodle's expected `videoq/` root. For a manual installation, put the
-   folders under `public/local/videoq` and `public/mod/lti/source/videoq` on
-   Moodle 5.1, then run Moodle's normal CLI upgrade.
-3. As Moodle administrator, open **Site administration → Plugins → Local plugins
+### Course Q&A (unreleased 0.13.0)
+
+With a compatible backend, **Course Q&A** opens the shared forum inside Moodle's
+existing LTI connection. Learners use their Moodle login and a course-specific
+pseudonym; no VideoQ account is created. The interface identifies questions and
+replies as shared with the course. It supports search, lesson/unanswered filters,
+paging, questions/replies, own text edits/deletion, voting and teacher featuring
+or deletion. It uses the same authenticated forum interface as the tool view,
+following Moodle's supplied font/colors. Closing it returns to the native Moodle
+assistant without reloading the tool session.
+
+The course capabilities `local/videoq:viewqa`, `postqa`, `voteqa` and `deleteownqa`
+default to allow for student/teacher/editingteacher/manager archetypes.
+`moderateqa` and `instructorqa` default to teacher/editingteacher/manager. The
+instructor badge records the permission at the latest post/edit; it does not
+grant moderation power. Override these capabilities independently for custom
+roles. Each request rechecks current access; a cached Instructor/Administrator
+launch claim cannot grant an operation. A moderator can delete another person's
+post and feature a question; only the author edits their text.
+
+Deploy the reviewed backend including its Q&A migrations, and run Moodle's
+normal upgrade for 0.13.0. Older backends do not announce the panel; older
+companions supply no Q&A permissions, so a new backend denies those operations.
+Published forum data and moderation records are stored in VideoQ. The separate
+external privacy/retention workflow remains required.
+
+### Transcript reader (unreleased 0.12.0)
+
+This branch adds **Lesson transcripts** above the native course chat. It requires
+a VideoQ backend with `/api/lti/materials`, `/api/lti/transcript` and the
+`features.transcripts` bridge announcement. Installing the companion alone does
+not add those backend endpoints. Deploy the reviewed backend change and upgrade
+the companion through Moodle's normal database-upgrade screen.
+
+The reader lists currently permitted lessons, pages through their transcript
+cues and lets learners jump to a cue's playback position. The course capability
+`local/videoq:viewtranscript` defaults to allow for student, teacher,
+editingteacher and manager roles. Course role overrides can prevent transcript
+viewing while retaining the existing assistant. File and LTI activity visibility,
+availability conditions, user suspension and enrolment checks still apply to
+each request. Moodle administration privileges do not grant access to the
+connected VideoQ account's billing, keys or global library.
+
+Older backends do not announce the reader, so the new companion keeps it hidden.
+Permission fields are returned only when a backend requests
+`includePermissions: true`, preserving the previous strict access-response
+format for older tools. A new backend with an older companion receives no
+positive transcript permission and denies transcript reads; existing chat can
+continue. No source video or transcript is changed by the reader.
+
+### Install through Moodle administration
+
+The official Marketplace listing is still being prepared and cannot be installed
+from the directory yet. After approval and publication, use Moodle's **Site
+administration → Plugins → Install plugins → Find plugins in Moodle Marketplace** and install both VideoQ components, including the declared
+companion dependency. No Git or server-shell operation is needed for this path.
+
+For a review/evaluation build, a developer can provide the two component ZIPs
+built with the [submission profile](translations.md). Upload `local_videoq.zip`
+first and then `ltisource_videoq.zip` through Moodle's standard ZIP installer and
+complete the database upgrade. The optional manual connection settings are not
+required during installation. Then open **Connect to VideoQ** as described below. Do not upload the repository source ZIP or the
+AMOS translation ZIP. Web installation must be enabled by the Moodle host.
+Historical prereleases are not automatically the current submission candidate.
+
+### Optional Git installation for server operators
+
+Clone the repository outside Moodle's public directory. For Moodle 5.1, place
+both plugin directories under its `public/` directory. Replace the example paths
+below with your actual installation paths:
+
+```sh
+git clone https://github.com/videoq-jp/videoq-moodle.git /opt/videoq-moodle
+cp -R /opt/videoq-moodle/plugins/local/videoq /var/www/moodle/public/local/videoq
+cp -R /opt/videoq-moodle/plugins/ltisource/videoq /var/www/moodle/public/mod/lti/source/videoq
+sudo -u www-data php /var/www/moodle/admin/cli/upgrade.php --non-interactive
+```
+
+Run the upgrade as your Moodle web-server user. The destination plugin directories
+must not already exist for this initial-install example. For updates, back up the
+site, enable maintenance mode, fetch the reviewed release, replace both plugin
+directories and run the upgrade again. Do not copy over existing directories and
+leave removed plugin files behind. ZIP installation through Moodle's plugin
+installer is an alternative when release archives are available; it is not required.
+
+### Connect from Moodle
+
+1. As Moodle administrator, open **Site administration → Plugins → Local plugins
    → Connect to VideoQ** (or `/local/videoq/connect.php`). Enter your **VideoQ
    HTTPS URL**: use `https://videoq.jp` for the compatible cloud release or your
    own on-premises URL, including its custom HTTPS port if needed.
-4. Choose **Connect to VideoQ**. Sign in to the owning VideoQ account, confirm
+2. Choose **Connect to VideoQ**. Sign in to the owning VideoQ account, confirm
    the displayed Moodle URL and account quota permissions, then allow the
    connection. You return to Moodle automatically. Complete the flow within ten
-   minutes; no code copying or manual LTI/key registration is needed. This flow
-   requires the compatible backend in [VideoQ PR #1319](https://github.com/videoq-jp/videoq/pull/1319),
-   which is not yet deployed to the public service. An older compatible backend
-   can still use **Connect using a code**: issue a code in VideoQ settings and
-   paste it into that collapsed section.
-5. Add a video through Moodle's ordinary **File** activity. Enable **VideoQ
+   minutes; no code copying or manual LTI/key registration is needed. The current cloud service at `https://videoq.jp` supports
+   this flow. For an on-premises deployment, use a release containing
+   [VideoQ PR #1319](https://github.com/videoq-jp/videoq/pull/1319).
+   No setup form or connection-code generation in VideoQ settings is needed.
+3. Add a video through Moodle's ordinary **File** activity. Enable **VideoQ
    questions** in its settings. Wait for background processing to finish.
-6. Open the course-wide VideoQ assistant. Moodle plays the selected video and
+4. Open the course-wide VideoQ assistant. Moodle plays the selected video and
    renders the chat using its native messaging templates. VideoQ generates
    streamed answers and supplies citations. Clicking a citation selects its
    permitted video and seeks to the cited time.
 
 Do not paste AI-provider keys, private signing keys or server configuration into
-the connection-code field. The [materials-service guide](materials-service.md)
+the connection form. The [materials-service guide](materials-service.md)
 describes operator configuration and migration from legacy `VIDEOQ1.` connections.
 Normal setup requires no separate synchronization credential or connector server.
+
+## Data requests and retention
+
+Review [data handling](privacy.md) before enabling the service. The unreleased
+0.17.0 provider can process external requests when the paired service is enabled.
+Legacy data, shared content, backups and provider records still need an operator process.
 
 ## Responsibilities and access
 
@@ -83,7 +227,32 @@ For platform-side trust revocation as well, disable/remove the registered VideoQ
 external tool in Moodle through its standard tool administration. The remote
 VideoQ disconnect does not delete Moodle's tool registration.
 
+## Uninstall
+
+Disconnect and revoke the tool's trust as described above before removing plugins.
+Use Moodle's plugin overview to uninstall `ltisource_videoq` first, then remove
+its `public/mod/lti/source/videoq` code directory. Only then uninstall
+`local_videoq` and remove `public/local/videoq`. Moodle can still block removal
+of the local plugin while dependent companion code remains on disk, even after
+its database uninstall succeeds.
+
+Uninstalling removes plugin configuration and synchronization tables. Source
+File activities and course videos remain in Moodle. It does not erase VideoQ's
+processed copies or question history; manage those separately in the owning
+VideoQ account. Reinstallation requires connecting and enabling questions again.
+
 ## Operations and troubleshooting
+
+The unreleased local_videoq 0.14.0 adds **My AI conversations** to the existing
+assistant workspace when the backend supports saved conversations. Upgrade the
+backend and run its migrations before relying on this feature. It provides
+list/read/resume, new conversation, per-conversation NDJSON download and deletion.
+The independent course capability `local/videoq:manageownhistory` defaults to
+students, teachers, editing teachers and managers; course overrides can remove
+it without disabling ordinary AI chat. Missing capability support denies saved
+history. A teacher can manage only their own conversations through this panel.
+See [data handling](privacy.md) for ownership, retention and external privacy
+request limits. Opening history or course Q&A reuses the current tool session.
 
 Keep Moodle cron/ad-hoc tasks, the VideoQ processing worker and materials scheduler
 running. Configure PHP/web upload and request limits, storage capacity and Moodle
@@ -148,3 +317,148 @@ generated VideoQ activities/links, then enable **VideoQ questions** on the resto
 File activities manually. Whole-database/object-store
 recovery and individual `.mbz` restore are separate capabilities. See the
 [verification scope](verification.md) before relying on a particular workflow.
+
+## YouTube URL activities (unreleased 0.21.0)
+
+On a connected VideoQ cloud deployment, the account owner must configure the
+existing YouTube transcript provider in their independently authenticated VideoQ
+settings. Moodle teachers and learners do not receive that API credential. The
+on-prem edition retains its existing restriction on YouTube integration.
+
+Create a standard Moodle **URL** activity with one supported YouTube video URL,
+save it, then use **Manage VideoQ synchronization** to enable it explicitly.
+The course catalog also links to **Add a YouTube URL** when core URL creation is
+permitted. Enabling requires current course content and source activity-management
+rights, as does disabling or retrying. Viewing requires current course access,
+`mod/url:view` and access to the generated LTI activity.
+
+The URL activity owns title, visibility, availability, order and source identity.
+Changing its video invalidates the old source generation. The native player uses
+the YouTube IFrame API for playback and citation seeking, and supports switching
+between File and URL sources. A stale page asks for a reload rather than sending
+the old video's playhead with a new video binding. A blocked or unavailable
+provider does not supply playback state. YouTube receives browser/network and
+playback information; no VideoQ credential or conversation text is sent to its
+player. Browser access to YouTube remains necessary.
+The player identifies the Moodle site origin to YouTube and sends no Moodle path
+or VideoQ credential in its referrer. Moodle controls access to the VideoQ course;
+YouTube controls the external video's own viewing permissions.
+
+This source uses the native VideoQ provider-transcript, processing-duration quota,
+job lease and indexing flow; no File upload or synthetic zero-byte reservation
+is used. A job is not ready until actual processing and synchronization finish.
+Use the existing owner connection flow for provider/account settings and the
+teacher controls for eligible retry. The plugin remains free and existing cloud
+Stripe billing is unchanged.
+
+Apply the paired backend migration 0061 and deploy the compatible API/worker
+before upgrading the local plugin to 2026110704. Both File and course-entry
+compatibility remain; YouTube requires explicit protocol negotiation. Older
+servers refuse new opt-in, and older callers receive no URL-source manifests or
+permission grants. Before downgrading, disable URL integrations and finish their
+cleanup with a compatible backend. Keep the migration and managed/native access
+guards; an older API cannot process YouTube tombstones.
+An older Moodle plugin also needs its compatible database recovery state; follow
+the coordinated backup/recovery plan when rolling back the installed version.
+
+Backups carry source kind and opt-in; Moodle core carries the URL. Restore uses
+the destination connection and requires the restoring user's current management
+rights. It does not copy backend video IDs or conversations. Full archive/recycle
+bin restoration and actual provider/AI/native acceptance remain release gates.
+Current local parser, database and substituted-player tests do not prove those
+end-to-end behaviors.
+
+## Teacher material editing (unreleased 0.15.0)
+
+The course assistant's **Manage course materials** panel edits the AI description
+and SRT transcript, rebuilds the search index and retries eligible processing
+failures. It requires both `local/videoq:managecontent` in the course and
+`moodle/course:manageactivities` on the source File activity. The new capability
+defaults to editing teachers and managers; students and non-editing teachers do
+not receive it. Current permissions and source visibility are rechecked for every
+operation. A launch's Instructor/Administrator claim grants no editing authority.
+
+**Manage Moodle source activities** links authorized sources to Moodle's title,
+file and visibility editor, the existing synchronization page, and core course
+activity controls (including deletion). Use these flows for source changes.
+The derived editor does not replace the Moodle source file or change enrolments.
+
+The synchronization page, its activity navigation link, and direct enable,
+disable and retry actions also require both grants. A module-level activity
+management grant alone does not authorize VideoQ synchronization when the course
+content capability is denied. Restore only carries a source's opt-in forward
+when the restoring user has both grants in the destination. Existing enabled
+sources continue synchronizing in the background; removing a teacher's management
+right does not remove learners' access or silently disable a course integration.
+
+Unfinished materials remain available to authorized teachers for management;
+learners and AI search receive only ready materials. SRT changes temporarily take
+the material out of AI search until its index finishes. Empty SRT requires an
+explicit clear confirmation. Conflicting edits and lost responses retain the
+draft; copy a revoked draft from the read-only editor before leaving the page.
+Processing is polled at most 60 times at five-second intervals, then needs manual
+refresh. For an old/unsupported or already-completed processing receipt, use
+**Manage VideoQ synchronization** to retry. Processing limits still apply.
+
+Upgrade the compatible VideoQ worker before enabling the new API's explicit-clear
+jobs, then apply the API's migrations/grants and deploy the API before upgrading
+the companion. Older peers retain learning but cannot infer the new write grant.
+This version remains unreleased pending the verification gates; no Marketplace
+archive or public source branch is updated by this feature work.
+
+## Course AI usage reports (unreleased 0.20.0)
+
+**AI question usage** displays daily question/feedback counts and aggregate CSV.
+It requires current `local/videoq:viewreports` in the course, granted by default
+to teachers, editing teachers and managers. Students and guests do not receive
+it. Overrides can remove reports independently of Q&A and content editing.
+
+Only Moodle answers with verified installation/course provenance and an entirely
+currently readable original material scope are included. Older unattributed
+answers are excluded. Hidden or removed materials can reduce earlier counts.
+Dates use UTC, with at most 366 inclusive days per request. Individual questions,
+answers and learner identities are not shown. Refresh and CSV download each
+recheck permissions. Report data and credentials stay in the private VideoQ frame.
+
+Coordinate the paired backend: drain old API/sync writers, apply generated report
+migration 0060 and updated API grants, deploy the API, then upgrade local_videoq
+to 2026110703. This adds no Moodle tables. Older peers keep reports unavailable.
+Successful reads create metadata-only access receipts, included in approved
+privacy export/erasure and optional backend `auditRetentionDays` cleanup.
+Existing privacy rollout requirements apply. This feature is unreleased;
+Marketplace archives and public source branches remain separate.
+
+## External privacy service (unreleased 0.17.0)
+
+Deploy the paired VideoQ privacy branch and this plugin together. In the existing
+VideoQ `LTI_CONFIG` JSON, enable `privacyEnabled: true` only after all API writer
+processes are upgraded and drained. Keep the existing canonical tool origin,
+registrations and database-registration settings. The service defaults to off.
+Apply the complete existing migrations, official conversation checkpoint setup
+and API security profile. No new secret or Moodle schema migration is required.
+
+Old recent-history caches without subject attribution must expire (24-hour TTL)
+and the normal expired-credential cleanup must run. Until then the service
+rejects privacy operations rather than guessing whose data a cache contains.
+Do not enable the service during a mixed-version rollout. Old/unavailable
+backends fail requests; coordinate the rollout before accepting real requests.
+
+Use Moodle's normal privacy requests and approval workflow. No additional web
+endpoint lets a learner select another person's ID or sign assertions. Requests
+remain possible for inactive/over-quota connections while the registered
+platform identity and key remain. Keep these until outstanding requests are
+finished, and test export/delete with synthetic records before learner use.
+
+## Optional audit retention
+
+The paired audit-retention backend adds `auditRetentionDays` (integer 1–3650) to
+VideoQ's existing `LTI_CONFIG` JSON. Omit it to disable automatic cleanup; no
+implicit retention period is chosen. Apply the complete schema/data migration
+chain (0057/0058) and security profile, then drain/upgrade every API writer before
+enabling this setting. Older APIs reject the new setting. This metadata-only
+plugin update is 0.17.1 / 2026110700; it needs no new Moodle schema or secret.
+
+Cleanup removes expired material/tag operation receipts and clears expired LTI
+moderation actor keys. It retains minimal operation-ID hashes so retrying an old
+request cannot repeat a write. Normal core-approved personal data requests do
+not depend on this optional cleanup setting. See [data handling](privacy.md).

@@ -1,9 +1,34 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB PATH="local/videoq/db" VERSION="2026110403" COMMENT="VideoQ synchronization state">
+<XMLDB PATH="local/videoq/db" VERSION="2026110704" COMMENT="VideoQ synchronization state">
   <TABLES>
+    <TABLE NAME="local_videoq_courses" COMMENT="Course LTI entries and synchronization state, with no learner data">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="typeid" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="lticmid" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="ltiinstance" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
+        <FIELD NAME="generation" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" />
+        <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" />
+        <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="queued" />
+        <FIELD NAME="errorcode" TYPE="char" LENGTH="64" NOTNULL="true" />
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="lastsynced" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_unique" UNIQUE="true" FIELDS="courseid" />
+        <INDEX NAME="launch_unique" UNIQUE="true" FIELDS="ltiinstance" />
+      </INDEXES>
+    </TABLE>
     <TABLE NAME="local_videoq_sync" COMMENT="Source activities and durable synchronization state, with no learner data">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+        <FIELD NAME="sourcekind" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="file" />
+        <FIELD NAME="youtubeid" TYPE="char" LENGTH="11" NOTNULL="true" />
         <FIELD NAME="typeid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
         <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" />
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" />
@@ -12,9 +37,9 @@
         <FIELD NAME="linkcmid" TYPE="int" LENGTH="10" NOTNULL="true" />
         <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" />
         <FIELD NAME="generation" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" />
-        <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" />
+        <FIELD NAME="fingerprint" TYPE="char" LENGTH="64" NOTNULL="true" />
         <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="queued" />
-        <FIELD NAME="errorcode" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="" />
+        <FIELD NAME="errorcode" TYPE="char" LENGTH="64" NOTNULL="true" />
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" />
         <FIELD NAME="lastsynced" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" />
       </FIELDS>

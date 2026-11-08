@@ -1,0 +1,60 @@
+{{!
+    @template local_videoq/workspace
+    @copyright 2026 VideoQ contributors
+    @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+    Moodle owns the player, learning panels and session-authenticated requests.
+
+    Example context (json):
+    {"hasplayer": false, "connected": false, "catalog": "[]", "config": "{}"}
+}}
+<div class="local-videoq-workspace {{^hasplayer}}local-videoq-empty{{/hasplayer}}"
+    {{#connected}}data-videoq-native="1"{{/connected}} data-videoq-config="{{config}}"
+    data-videoq-lessons="{{catalog}}" data-videoq-lesson="{{lesson}}"
+    data-videoq-youtube-error="{{#str}}youtubeplaybackerror, local_videoq{{/str}}"
+    data-videoq-youtube-autoplay="{{#str}}youtubeautoplay, local_videoq{{/str}}"
+    data-videoq-source-updated="{{#str}}sourceupdated, local_videoq{{/str}}">
+    {{#hasplayer}}
+    <section class="local-videoq-panel local-videoq-video card" aria-label="{{#str}}video, local_videoq{{/str}}">
+        <div class="card-body py-3">
+            <label for="videoq-lesson" class="form-label">{{#str}}video, local_videoq{{/str}}</label>
+            <select id="videoq-lesson" class="form-select">
+                {{#videos}}<option value="{{lesson}}" {{#selected}}selected{{/selected}}>{{title}}</option>{{/videos}}
+            </select>
+        </div>
+        <div class="local-videoq-media mediaplugin mediaplugin_videojs" data-videoq-file {{#youtube}}hidden{{/youtube}}>
+            <video id="videoq-player" class="{{videoclass}}" controls playsinline preload="metadata"
+                data-setup-lazy="{{videosetup}}" aria-label="{{#str}}video, local_videoq{{/str}}">
+                {{#videourl}}<source src="{{videourl}}" type="{{videomime}}">{{/videourl}}
+            </video>
+        </div>
+        <div class="local-videoq-youtube" data-videoq-youtube hidden></div>
+        <p data-videoq-player-status role="status" class="text-muted px-3"></p>
+        <a href="{{activityurl}}" data-videoq-player-activity class="btn btn-link">{{#str}}sourceactivity, local_videoq{{/str}}</a>
+        {{#hasmanagedsources}}
+        <details class="card-body py-3">
+            <summary>{{#str}}sourcematerialactions, local_videoq{{/str}}</summary>
+            <ul class="list-unstyled mt-3">
+                {{#managedsources}}
+                <li class="mb-3"><p class="fw-semibold mb-1">{{title}}</p>
+                    {{#links}}<a class="btn btn-outline-secondary btn-sm me-2 mb-2" href="{{url}}">{{label}}</a>{{/links}}
+                </li>
+                {{/managedsources}}
+            </ul>
+        </details>
+        {{/hasmanagedsources}}
+    </section>
+    {{/hasplayer}}
+    {{#connected}}
+    <section class="local-videoq-panel local-videoq-questions card" aria-label="{{#str}}questions, local_videoq{{/str}}">
+        {{> local_videoq/chat }}
+    </section>
+    <section class="local-videoq-panel local-videoq-tools card" aria-label="{{#str}}courseassistant, local_videoq{{/str}}">
+        {{> local_videoq/transcript }}
+        {{> local_videoq/personal_history }}
+        {{> local_videoq/qa }}
+        {{> local_videoq/management }}
+        {{> local_videoq/tags }}
+        {{> local_videoq/reports }}
+    </section>
+    {{/connected}}
+</div>

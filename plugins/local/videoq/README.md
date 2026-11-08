@@ -1,5 +1,52 @@
 # VideoQ companion for Moodle
 
+## Moodle interface and shared VideoQ services
+
+The companion owns the learning and teacher interface, using Moodle templates,
+theme styles, login, enrolment and capabilities. The browser calls Moodle's
+`core/ajax` function or the same-origin answer stream. Moodle PHP signs private
+requests to the paired VideoQ native learning API over verified HTTPS. VideoQ
+provides shared AI, search, processing, persistence and erasure services.
+
+Neither a VideoQ presentation iframe nor a hidden authentication iframe is used,
+including in courses without videos. VideoQ assertions, access proofs and private
+server-session identifiers stay in PHP. The optional YouTube content player uses
+the provider's iframe; it is separate from learning authentication and screens.
+Deploy the compatible backend with native learning protocol 1 before this
+0.22.1 companion. Standalone browser-LTI remains a separate integration.
+
+The companion includes course learning, Q&A, personal conversations, transcripts,
+material management, tags and reports according to current permissions. Course
+editing and enrolment remain Moodle workflows. Billing, public sharing and global
+VideoQ administration are not companion screens.
+
+## Course material management
+
+Course content managers with activity-management rights can open **Manage VideoQ
+course materials** from the course navigation or assistant. The read-only catalog
+lists manageable video File activities in current Moodle section/activity order,
+including videos not yet opted into VideoQ. Add a video using the core File form,
+save it, then enable its VideoQ integration. The catalog links to the permitted
+core course settings, organization, participant and enrolment workflows; each
+destination enforces its own authority and confirmation. Category course creation
+or course deletion is offered only when Moodle permits it.
+
+Use Moodle's activity editing controls to move sources or change sections.
+VideoQ selectors, transcripts, Q&A filters and material tags follow the current
+permitted source sequence. This does not change independent VideoQ library or
+course order. YouTube/direct-to-VideoQ imports and aggregate reporting are not
+implemented by this catalog.
+
+With a capable backend, hidden courses/materials stay integrated but every access
+request checks the current user's Moodle hidden-view and activity rights. Hiding
+is separate from explicit disable/deletion. New service callers negotiate
+`includeUserVisibility:true`; legacy push checks the authenticated connection's
+`userVisibility` flag. Older callers retain global visibility suppression. Source
+visibility changes still advance generation and cancel stale queued transfers.
+The asynchronous export preserves its negotiated mode without storing learner
+identity. Deploy the backend course-authority/entry stack before this companion;
+do not coexist with older unprotected native readers.
+
 ## Automatic video synchronization
 
 Use a single existing school-owned VideoQ account for its billing and allowances.
@@ -8,22 +55,18 @@ separate organization model.
 
 For a new connection:
 
-1. Install both `local_videoq` and `ltisource_videoq` and finish Moodle's plugin upgrade.
-2. In the school account's VideoQ **Settings → Connect Moodle**, enter this Moodle's
-   base URL and generate a connection code.
-3. In Moodle **Site administration → Plugins → Local plugins → Connect to VideoQ**,
-   paste the code and click **Connect**. LTI registration and sync settings are automatic.
+1. Install `local_videoq` and `ltisource_videoq` and finish Moodle's plugin upgrade.
+2. In Moodle **Site administration → Plugins → Local plugins → Connect to VideoQ**,
+   enter the cloud or on-premises VideoQ HTTPS URL.
+3. Sign in to the owning VideoQ account, approve the connection and return to Moodle.
+   No connection-code copying, manual LTI registration or separate API key is needed.
 
-Codes last ten minutes and bind only the Moodle URL entered in VideoQ. After a
-network error, retry with the same code. Existing connections are preserved.
-Run Moodle cron every minute. The operator must first apply current VideoQ
-migrations, enable database LTI registrations, and run its worker/queue/storage
-and recovery scheduler. See the
-[materials-service setup guide](../../../docs/materials-service.md).
-A compatible server with tool signing keys issues `VIDEOQ2.` codes and uses LTI
-service authentication without a sync API key. Existing connections can update
-or reconnect from the collapsed section of the Moodle connection page. Legacy
-`VIDEOQ1.` setup and manual provisioning remain compatible.
+The cloud service at https://videoq.jp supports this flow. An on-premises deployment
+must include the compatible LTI materials backend, processing worker, storage and
+scheduler. A VideoQ account and processing allowance are required; the Moodle
+plugins are GPL software and do not include hosting or paid AI service usage.
+Run Moodle cron every minute. See the
+[setup guide](https://github.com/videoq-jp/videoq-moodle/blob/main/docs/setup.md).
 
 Teachers can then enable **VideoQ questions** in a video File activity's settings
 navigation. The plugin creates the question activity and combined lesson link,
@@ -48,7 +91,7 @@ Connection keys stay in administrator settings and are never sent to learner
 browsers or object storage. TLS and Moodle's outbound HTTP policy apply. Status
 messages do not expose credentials, signed upload URLs or provider diagnostics.
 
-The [synchronization lab](../../../lab/README.md#automatic-synchronization-acceptance-test)
+The [synchronization lab](https://github.com/videoq-jp/videoq-moodle/blob/main/lab/README.md#automatic-synchronization-acceptance-test)
 verifies the full lifecycle with real storage/queue/worker processing and
 deterministic inference providers on Moodle 5.1.8+.
 
@@ -59,12 +102,11 @@ JSON associations. See the setup guide for supported course layout and lifecycle
 limits.
 
 
-A Moodle 5.1 local plugin that places an existing Moodle video File activity next
-to an existing VideoQ LTI 1.3 activity. Desktop uses two columns; screens up to
-900 px stack video above questions. The video stays on Moodle and the question
-view stays on the VideoQ origin. With a configured VideoQ video binding, the companion exchanges playback
-position and citation-seek commands with the question frame. Question text, API
-credentials and learner identity never cross this player bridge.
+A manual association connects a Moodle video File activity to an existing
+registered VideoQ LTI resource. The resource supplies the server-side identity
+and binding; the companion renders the questions on the Moodle origin through
+the native learning API. Desktop uses two columns; screens up to 900 px stack
+video above questions. Playback context and citation seeking use local events.
 
 This initial plugin has been tested with Moodle 5.1.8+ and the Boost theme.
 It does not modify Moodle core. It is licensed GPL-3.0-or-later, as indicated in
@@ -76,8 +118,9 @@ the PHP source headers, independently of the VideoQ application license.
    `plugins/ltisource/videoq` to `public/mod/lti/source/videoq`.
 2. Run `php admin/cli/upgrade.php --non-interactive` from the Moodle root.
 3. In the same course, create a standard **File** activity containing an MP4 and
-   an **External tool** activity configured for VideoQ LTI 1.3. The external tool
-   must use embedded display, not a new-window or replace-window launch.
+   an **External tool** activity configured for VideoQ LTI 1.3. The companion uses
+   its registered identity and current Moodle availability; it does not embed or
+   launch that activity to display the assistant.
 4. For manual associations, bind that external-tool resource to the correct VideoQ
    course in `LTI_CONFIG` and set `courseAccess: "moodle"` on the registration.
    The plugin does not upload the Moodle video or its transcript to VideoQ.
@@ -116,8 +159,9 @@ activities and the existing `mod/resource:view` and `mod/lti:view` capabilities.
 Moodle's File activity serves its own media through its normal redirect and
 `pluginfile.php` handling, including access checks for subsequent media requests.
 The companion does not read or expose another component's raw file-storage path.
-The question frame launches through Moodle's normal LTI endpoint; VideoQ verifies
-the platform signature and configured resource binding as usual.
+Moodle PHP derives the current actor and resource context and signs the exact
+operation and request body. VideoQ verifies the registered platform signature,
+binding, current Moodle authority and connected VideoQ course membership.
 
 This plugin stores only administrator-owned lesson associations. Moodle and
 VideoQ continue to manage their own activity, session, question and quota records.
@@ -125,12 +169,11 @@ It does not implement grade return or learning completion synchronization.
 
 ## Playback and citations
 
-When the current frame has an authenticated `videoId` grant, the companion and
-question view exchange `videoq:ready`, `videoq:state` and `videoq:seek` messages.
-Both sides verify the exact origin, source window, protocol version and a random
-per-view channel. Video IDs and finite times are checked; seek requests outside
-the actual media duration are rejected. The bridge does not send an LTI token,
-VideoQ token, question, answer or user identity.
+The native learning response supplies the currently authorized materials. The
+Moodle player and learning interface exchange local DOM events for selection,
+playback context and citation seeking. Video IDs and finite times are checked;
+seek requests outside the actual media duration are rejected. No cross-window
+message or browser-side VideoQ credential is required.
 
 The question view automatically attaches available playback context without
 extra position controls or question suggestions. The API
@@ -153,11 +196,14 @@ position as part of the question text in its existing guest question logs.
 
 ## Reproducible verification
 
-See the [Moodle lab](../../../lab/README.md) and
-[verification coverage](../../../docs/verification.md). PHP validates the plugin and packages, and drives native Chrome to test
-streaming, feedback and seeking.
-The default chat test uses a browser-only held response and no paid provider.
-The `--live` test makes one actual model request.
+See the [Moodle lab](https://github.com/videoq-jp/videoq-moodle/blob/main/lab/README.md) and
+[verification coverage](../../../docs/verification.md). PHP validates the plugin
+and packages, and drives native Chrome through the Moodle-rendered learning
+panels and player contracts. These browser contracts use controlled API/model
+substitutes. Actual Moodle-to-VideoQ authentication, File/local-CPU inference and
+approved privacy requests are checked separately by the paired backend's Moodle
+installed acceptance workflow. Historical frame trials do not establish
+acceptance of this native transport.
 
 ## Native Moodle messaging interface
 
@@ -176,24 +222,29 @@ the existing standard messaging UI, not an installation of the legacy activity.
 The AI conversation is not a human direct-message thread: VideoQ still handles
 answer generation, course-wide evidence and question records. No bot user,
 Moodle message record or notification is created. Standalone LTI launches retain
-the VideoQ question interface when the companion is not present. Older backends
-or course-only bindings without a playback grant automatically fall back to
-the visible LTI interface if the native renderer handshake is unavailable.
+the VideoQ question interface. The companion's learning interface requires the
+native learning API protocol. It
+uses Moodle templates, JavaScript and current Moodle capabilities for every
+operation, including empty-course tools. It does not launch a VideoQ presentation
+iframe or an authentication/transport iframe. The existing standalone LTI
+interface remains available as a separate integration.
 
-The companion's LTI iframe now acts as an off-screen authenticated transport.
-Only the allowed Moodle parent, exact source window, protocol version, per-launch
-channel and permitted video can activate the `videoq:ui` renderer protocol. Native
-`videoq:question` commands have bounded text and unique request IDs. Replies carry
-only display status, question text or structured answer data; session tokens,
-ID tokens, browser proof and owner log capabilities never leave the API frame.
-The parent applies the same source/origin/channel checks before rendering. Model
-HTML remains literal text; formatting and citations use safe DOM nodes. Source
-clicks use the existing restricted seek bridge and server-rendered media catalog.
+Normal requests use Moodle's session-authenticated `core/ajax` external function.
+Moodle PHP resolves the actor, course, current source visibility and operation
+capabilities, then sends a short-lived, operation/body-bound signed assertion to
+VideoQ over verified HTTPS. Assertions, access proofs and native server-session
+identifiers remain in PHP. An unexpired refused session is never silently
+replaced. Answers use a same-origin, sesskey-checked Moodle stream endpoint that
+releases the Moodle session lock before relaying events incrementally.
+
+Model HTML remains literal text; formatting and citations use safe DOM nodes.
+Source clicks operate the local Moodle player directly, using the current
+server-authorized material list and the Moodle-rendered media catalog.
 
 Only the message list scrolls. The composer stays below it; Enter sends,
 Shift+Enter adds a line and Japanese IME composition does not send. Failed
 questions keep their input for retry, and connection failures show a message and
-the existing separate-view link. Standard theme changes affect the chat directly,
+the current Moodle status. Standard theme changes affect the chat directly,
 without copying colors or loading a separate imitation of Moodle CSS.
 
 The companion also uses the standard Moodle page header, breadcrumbs, cards and

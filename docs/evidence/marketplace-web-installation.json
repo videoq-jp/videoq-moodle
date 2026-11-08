@@ -1,0 +1,163 @@
+{
+  "passed": true,
+  "method": "Native Chrome via PHP WebDriver; stock Moodle ZIP upload and database installer",
+  "components": {
+    "local_videoq": {
+      "component": "local_videoq",
+      "archiveSha256": "4ca0504a053cda66e64dc7fea885bd26e64be002c7fcf48a86054b130184e7ff",
+      "validationPassed": true,
+      "alphaWarning": true,
+      "manualSetupPrompted": false,
+      "steps": [
+        {
+          "path": "/admin/index.php",
+          "title": "Current release information | VideoQAudit",
+          "headings": [
+            "Current release information",
+            "Moodle 5.1.8+ (Build: 20261030)",
+            "Server checks",
+            "Other checks"
+          ]
+        },
+        {
+          "path": "/admin/index.php",
+          "title": "Plugins check | VideoQAudit",
+          "headings": [
+            "Plugins check",
+            "Plugins requiring attention"
+          ]
+        },
+        {
+          "path": "/admin/index.php",
+          "title": "Upgrading to new version | Moodle 5.1.8+ (Build: 20261030) | VideoQAudit",
+          "headings": [
+            "Upgrading to new version",
+            "local_videoq",
+            "upgrade_noncore()"
+          ]
+        },
+        {
+          "path": "/admin/index.php",
+          "title": "Notifications | Administration | VideoQAudit",
+          "headings": [
+            "Notifications",
+            "Blocks",
+            "Admin bookmarks",
+            "VideoQ marketplace audit",
+            "Notifications",
+            "Messaging",
+            "Contacts",
+            "Non-contacts",
+            "Messages",
+            "Privacy",
+            "Notification preferences",
+            "General"
+          ]
+        }
+      ]
+    },
+    "ltisource_videoq": {
+      "component": "ltisource_videoq",
+      "archiveSha256": "92cbb616311b548d4f67acb5318a219449822babb2af9ff37c7d3762bf6b5815",
+      "validationPassed": true,
+      "alphaWarning": true,
+      "manualSetupPrompted": false,
+      "steps": [
+        {
+          "path": "/admin/index.php",
+          "title": "Current release information | VideoQAudit",
+          "headings": [
+            "Current release information",
+            "Moodle 5.1.8+ (Build: 20261030)",
+            "Server checks",
+            "Other checks"
+          ]
+        },
+        {
+          "path": "/admin/index.php",
+          "title": "Plugins check | VideoQAudit",
+          "headings": [
+            "Plugins check",
+            "Plugins requiring attention"
+          ]
+        },
+        {
+          "path": "/admin/index.php",
+          "title": "Upgrading to new version | Moodle 5.1.8+ (Build: 20261030) | VideoQAudit",
+          "headings": [
+            "Upgrading to new version",
+            "ltisource_videoq",
+            "upgrade_noncore()"
+          ]
+        },
+        {
+          "path": "/admin/index.php",
+          "title": "Notifications | Administration | VideoQAudit",
+          "headings": [
+            "Notifications",
+            "Blocks",
+            "Admin bookmarks",
+            "VideoQ marketplace audit",
+            "Notifications",
+            "Messaging",
+            "Contacts",
+            "Non-contacts",
+            "Messages",
+            "Privacy",
+            "Notification preferences",
+            "General"
+          ]
+        }
+      ]
+    }
+  },
+  "connectPage": {
+    "alerts": [],
+    "headings": [
+      "Notifications",
+      "Blocks",
+      "Admin bookmarks",
+      "VideoQ marketplace audit",
+      "Connect to VideoQ",
+      "Messaging",
+      "Contacts",
+      "Non-contacts",
+      "Messages",
+      "Privacy",
+      "Notification preferences",
+      "General"
+    ],
+    "labels": [
+      "Edit mode",
+      "Search",
+      "VideoQ URL",
+      "Connection code",
+      "Delete for me and for everyone else",
+      "My contacts only",
+      "My contacts and anyone in my courses",
+      "Use enter to send"
+    ],
+    "path": "/local/videoq/connect.php",
+    "title": "Connect to VideoQ | Local plugins | Plugins | Administration | VideoQAudit"
+  },
+  "installedRuntime": {
+    "database": "pgsql",
+    "versions": {
+      "local_videoq": 2026110603,
+      "ltisource_videoq": 2026110601
+    },
+    "manualDefaultsInitialized": true,
+    "accessKeyInitialized": true,
+    "tablesCreated": 3
+  },
+  "candidatePluginCommit": "e9afc8f4002f1449088007900b1378983a5f517b",
+  "moodleSourceCommit": "a682566412e1d429b95ac8ef4351a518f61b94c5",
+  "moodleVersion": "5.1.8+ (Build 20261030)",
+  "browserRunner": "lab/check-marketplace-web-install.php",
+  "limits": [
+    "ZIP upload through stock browser installer, not installation from an official listing.",
+    "Alpha maturity warnings remain; this is not Marketplace approval.",
+    "Loopback HTTP development fixture with developer debugging; core server checks also recommend HTTPS, zend.exception_ignore_args and core Composer autoload setup.",
+    "No live account approval, synchronization, AI answer, AMOS delivery or reviewer access tested."
+  ]
+}

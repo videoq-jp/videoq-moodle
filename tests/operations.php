@@ -4,10 +4,12 @@ require dirname(__DIR__) . '/scripts/runtime-images.php';
 function policy(bool $valid, string $message): void { if (!$valid) throw new RuntimeException($message); }
 $root = dirname(__DIR__);
 $images = runtime_images();
-policy(count($images) === 3, 'Incomplete dependency coverage');
+policy(count($images) === 4, 'Incomplete dependency coverage');
 $original = file_get_contents($root . '/lab/images/compose.yaml');
 $temporary = tempnam(sys_get_temp_dir(), 'videoq-images-');
 try {
+    file_put_contents($temporary, preg_replace('/  mysql:\R    image: [^\r\n]+\R/', '', $original));
+    policy(count(runtime_images($temporary)) === 3, 'Historical release image manifests must remain supported');
     foreach ([preg_replace('/@sha256:[a-f0-9]{64}/', '', $original, 1), str_replace(':8.3@', ':9.0@', $original),
             $original . "  unknown:\n    image: example:1@sha256:" . str_repeat('a',64) . "\n"] as $invalid) {
         file_put_contents($temporary, $invalid);
@@ -21,7 +23,9 @@ foreach (['lab/compose.yaml', 'lab/compose.restore.yaml'] as $file) {
 }
 $workflow = file_get_contents($root . '/.github/workflows/ci.yml');
 policy(!str_contains($workflow, 'PHP_IMAGE:') && str_contains($workflow, 'php scripts/runtime-images.php php'), 'CI bypasses canonical images');
-policy(str_contains($workflow, 'merge_group:') && str_contains($workflow, 'schedule:') && substr_count($workflow, 'timeout-minutes:') === 2, 'Missing maintenance/merge gates');
+policy(str_contains($workflow, 'merge_group:') && str_contains($workflow, 'schedule:') && substr_count($workflow, 'timeout-minutes:') === 4, 'Missing maintenance/merge gates');
+policy(str_contains($workflow, 'needs: [tooling, database]') && str_contains($workflow, 'if: always()')
+    && str_contains($workflow, 'database: [pg, mysql]'), 'Required verification must include both installed database lifecycles');
 policy(str_contains($workflow, 'cancel-in-progress: false') && str_contains($workflow, 'GH_TOKEN: ${{ github.token }}'), 'Release safety contract changed');
 policy(!str_contains($workflow, 'pull_request_target:'), 'Untrusted PR privilege escalation');
 $rules = json_decode(file_get_contents($root . '/.github/main-ruleset.json'), true, 32, JSON_THROW_ON_ERROR);

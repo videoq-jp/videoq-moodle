@@ -1,0 +1,18 @@
+{{!
+    @template local_videoq/tags
+    @copyright 2026 VideoQ contributors
+    @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+    Native Moodle learning panel.
+
+    Example context (json): {}
+}}
+<details class="local-videoq-tool p-3 border-bottom" id="videoq-course-tags" hidden><summary>{{#str}}nativetags_title, local_videoq{{/str}}</summary><p>{{#str}}nativetags_notice, local_videoq{{/str}}</p>
+<div class="qa-row"><button id="videoq-tags-close" type="button" class="btn btn-outline-secondary btn-sm" hidden>{{#str}}nativetags_close, local_videoq{{/str}}</button><button id="videoq-tags-refresh" type="button" class="btn btn-outline-secondary btn-sm">{{#str}}nativetags_refresh, local_videoq{{/str}}</button></div>
+<p id="videoq-tags-status" role="status" aria-live="polite"></p><section id="videoq-tags-catalog">
+<label for="videoq-tags-filter">{{#str}}nativetags_filter, local_videoq{{/str}}</label><select class="form-select" id="videoq-tags-filter"><option value="">{{#str}}nativetags_all, local_videoq{{/str}}</option></select>
+<label for="videoq-tags-search">{{#str}}nativetags_search, local_videoq{{/str}}</label><input class="form-control" id="videoq-tags-search" type="search" maxlength="200">
+<h2>{{#str}}nativetags_materials, local_videoq{{/str}}</h2><ol id="videoq-tags-materials"></ol><section id="videoq-tags-transcript" hidden><h3></h3><ol></ol><button type="button" id="videoq-tags-more" class="btn btn-outline-secondary btn-sm">{{#str}}nativetags_transcript, local_videoq{{/str}}</button></section><h2>{{#str}}nativetags_vocabulary, local_videoq{{/str}}</h2><p>{{#str}}nativetags_readonly, local_videoq{{/str}}</p>
+<button id="videoq-tags-create" class="btn btn-outline-secondary btn-sm" type="button" hidden>{{#str}}nativetags_create, local_videoq{{/str}}</button><ul id="videoq-tags-vocabulary"></ul></section>
+<form id="videoq-tags-editor" hidden><h2 id="videoq-tags-editor-title"></h2><fieldset id="videoq-tags-fields"></fieldset><div class="qa-row">
+<button id="videoq-tags-save" class="btn btn-primary" type="submit">{{#str}}nativetags_save, local_videoq{{/str}}</button><button id="videoq-tags-delete" class="btn btn-outline-secondary btn-sm" type="button" hidden>{{#str}}nativetags_remove, local_videoq{{/str}}</button>
+<button id="videoq-tags-cancel" class="btn btn-outline-secondary btn-sm" type="button">{{#str}}nativetags_cancel, local_videoq{{/str}}</button></div></form></details>

@@ -1,22 +1,24 @@
 # Repository operations
 
-The target home is `videoq-jp/videoq-moodle`. Transfer the existing repository,
-rather than creating a copy, to preserve its history, releases and pull requests.
-Update local remotes after transfer. GitHub redirects existing repository URLs;
-historical evidence links can remain intact.
+The repository is maintained at `videoq-jp/videoq-moodle`. Historical links from
+the previous owner can remain as evidence; use the organization URL for new links.
 
 ## Dependency updates and CI
 
 Dependabot checks `lab/images/compose.yaml` every Monday at 09:00 JST. It opens
 grouped image-update PRs; PHP stays on 8.3 and major image upgrades need a separate
 compatibility change. This single manifest supplies both labs and CI, including
-the restored-site lab. Every image is pinned by digest. No Composer packages or
-third-party GitHub actions are installed, so empty Composer/action update jobs
-are unnecessary. The existing PHP-only tooling requirement is retained.
+the restored-site lab and PostgreSQL/MySQL verification matrix. Every image is
+pinned by digest. The official Moodle coding tools are Composer development
+dependencies in `.github/moodle-codecheck`, with a lockfile and separate Dependabot
+coverage. They are excluded from plugin installers. CI uses PHP and native tools
+without third-party JavaScript actions; no Node.js or Python runtime is required.
 
 CI checks PRs, main, tags, merge groups and a weekly schedule. Installer, syntax,
 PHP contracts, native browser assets and both resolved Compose configurations
-must pass. Verification is cancellable when superseded; publishing is serialized
+must pass. The existing required-check context now aggregates tooling and both
+installed-Moodle database lifecycles; release publishing waits for that gate.
+Verification is cancellable when superseded; publishing is serialized
 and reconciles existing immutable release assets. Older tags without the image
 manifest use the workflow revision's validated image for release recovery.
 
