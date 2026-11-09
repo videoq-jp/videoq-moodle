@@ -44,6 +44,7 @@ namespace {
         public function delete_records(string $table, array $where): void { $this->writes++; unset($this->languages[$where['cmid']]); }
     }
     function get_string(string $key, string $component): string { return $key; }
+    function current_language(): string { return $GLOBALS['moodlelanguage'] ?? 'ja'; }
     function has_capability(string $capability, context_module $context): bool { return $GLOBALS['canedit']; }
     function require_capability(string $capability, context_module $context): void { if (!has_capability($capability, $context)) throw new RuntimeException('Edit capability required'); }
     function get_file_storage(): object {
@@ -63,7 +64,14 @@ namespace {
     $class = \local_videoq\transcription_language::class; $field = $class::FIELD;
     check(array_keys($class::options()) === ['', 'ja', 'en', 'zh', 'ko', 'es', 'fr', 'de', 'pt', 'it', 'ru', 'hi', 'ar'], 'Automatic plus the supported VideoQ language choices required');
     $newform = new mod_resource_mod_form(); $quick = new MoodleQuickForm(); $class::form($newform, $quick);
-    check(isset($quick->elements[$field]) && $quick->defaults[$field] === '', 'New uploads must offer language selection with automatic default');
+    check(isset($quick->elements[$field]) && $quick->defaults[$field] === 'ja', 'New uploads must default to the Moodle language');
+    foreach (['en' => 'en', 'en_us' => 'en', 'zh_cn' => 'zh', 'pt_br' => 'pt', 'es-mx' => 'es', 'fr_ca' => 'fr', 'sv' => ''] as $locale => $expected) {
+        $moodlelanguage = $locale; $class::form($newform, $quick);
+        check($quick->defaults[$field] === $expected, 'Moodle locale default mapping failed: ' . $locale);
+    }
+    $moodlelanguage = 'en';
+    $existingform = new mod_resource_mod_form((object)['id' => 9]); $class::form($existingform, $quick);
+    check($quick->defaults[$field] === '', 'An existing automatic choice must remain automatic');
     check($class::validate($newform, [$field => 'ja']) === [], 'New upload language rejected');
     check(isset($class::validate($newform, [$field => 'en-US'])[$field]), 'Unsupported language accepted');
     $form = new mod_resource_mod_form((object)['id' => 10]); $DB->bound[10] = true;
