@@ -104,6 +104,7 @@ final class transcription_language {
         }
         $cm = $form->get_coursemodule();
         $mform->addElement('header', 'local_videoq_upload', get_string('managesync', 'local_videoq'));
+        $mform->setExpanded('local_videoq_upload', true);
         $mform->addElement('select', self::FIELD, get_string('transcriptionlanguage', 'local_videoq'), self::options());
         $mform->setType(self::FIELD, PARAM_ALPHA);
         $mform->setDefault(self::FIELD, self::get((int)($cm->id ?? 0)));
