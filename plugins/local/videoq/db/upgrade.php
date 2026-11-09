@@ -119,5 +119,9 @@ function xmldb_local_videoq_upgrade($oldversion) {
     if ($oldversion < 2026110802) {
         upgrade_plugin_savepoint(true, 2026110802, 'local', 'videoq');
     }
+    if ($oldversion < 2026110900) {
+        // Rebuild hook registrations for the simplified course navigation.
+        upgrade_plugin_savepoint(true, 2026110900, 'local', 'videoq');
+    }
     return true;
 }
