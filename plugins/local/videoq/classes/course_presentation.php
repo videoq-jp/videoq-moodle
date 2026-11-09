@@ -49,13 +49,14 @@ final class course_presentation {
                 $rows[] = (object)['lticmid' => $entry->lticmid, 'linkcmid' => 0];
             }
         }
+        $info = get_fast_modinfo($courseid);
         $ids = [];
         foreach ($rows as $row) {
             foreach ([(int)$row->lticmid, (int)$row->linkcmid] as $id) {
                 if ($id <= 0) {
                     continue;
                 }
-                $cm = get_coursemodule_from_id('', $id, $courseid, false, IGNORE_MISSING);
+                $cm = $info->cms[$id] ?? null;
                 if ($cm && in_array($cm->modname, ['lti', 'url'], true) && !$cm->visibleoncoursepage) {
                     $ids[$id] = $id;
                 }

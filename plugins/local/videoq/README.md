@@ -13,7 +13,7 @@ including in courses without videos. VideoQ assertions, access proofs and privat
 server-session identifiers stay in PHP. The optional YouTube content player uses
 the provider's iframe; it is separate from learning authentication and screens.
 Deploy the compatible backend with native learning protocol 1 before this
-0.22.1 companion. Standalone browser-LTI remains a separate integration.
+0.22.2 companion. Standalone browser-LTI remains a separate integration.
 
 The companion includes course learning, Q&A, personal conversations, transcripts,
 material management, tags and reports according to current permissions. Course
