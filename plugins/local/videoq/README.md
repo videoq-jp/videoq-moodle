@@ -13,7 +13,7 @@ including in courses without videos. VideoQ assertions, access proofs and privat
 server-session identifiers stay in PHP. The optional YouTube content player uses
 the provider's iframe; it is separate from learning authentication and screens.
 Deploy the compatible backend with native learning protocol 1 before this
-0.22.2 companion. Standalone browser-LTI remains a separate integration.
+0.23.0 companion. Standalone browser-LTI remains a separate integration.
 
 The companion includes course learning, Q&A, personal conversations, transcripts,
 material management, tags and reports according to current permissions. Course
@@ -254,3 +254,13 @@ changed to the course for rendering. The demo can be localized with
 
 Current commands and coverage are documented in the lab guide. Earlier browser
 acceptance evidence is retained in `docs/evidence/` and Git history.
+
+## Transcription language
+
+The File upload form includes **VideoQ → Transcription language**, with automatic
+detection and the same twelve language choices as VideoQ. Choose it before the
+first synchronization, or when uploading a different source video. Existing
+processed media is not retranscribed by changing a setting alone. The setting is
+preserved in Moodle backup/restore, even before VideoQ has been enabled.
+Deploy a VideoQ backend supporting `transcriptionLanguage` in LMS File manifests
+before using a specific language. Automatic detection keeps legacy manifests unchanged.

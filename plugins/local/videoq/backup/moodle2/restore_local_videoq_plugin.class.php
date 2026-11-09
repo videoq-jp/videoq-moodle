@@ -45,11 +45,14 @@ class restore_local_videoq_plugin extends restore_local_plugin {
     public function process_videoq_binding($data) {
         $data = (object)$data;
         $sourcekind = ($data->sourcekind ?? '') === '' ? 'file' : $data->sourcekind;
+        $language = (string)($data->transcriptionlanguage ?? '');
         if (
             (int)$data->id !== (int)$this->task->get_old_moduleid() ||
                 !in_array($data->role ?? '', ['source', 'transport', 'shortcut', 'entry'], true) ||
                 !in_array((string)($data->enabled ?? ''), ['0', '1'], true) ||
-                !in_array($sourcekind, ['file', 'youtube'], true)
+                !in_array($sourcekind, ['file', 'youtube'], true) ||
+                !\local_videoq\transcription_language::valid($language) ||
+                ($language !== '' && (($data->role ?? '') !== 'source' || $sourcekind !== 'file'))
         ) {
             throw new restore_step_exception('invalid_videoq_backup_metadata');
         }
@@ -59,7 +62,8 @@ class restore_local_videoq_plugin extends restore_local_plugin {
             (int)$data->id,
             (int)$this->task->get_moduleid(),
             (int)$this->task->get_courseid(),
-            ['role' => $data->role, 'enabled' => (int)$data->enabled, 'sourcekind' => $sourcekind]
+            ['role' => $data->role, 'enabled' => (int)$data->enabled, 'sourcekind' => $sourcekind,
+                'transcriptionlanguage' => $language]
         );
     }
     /**

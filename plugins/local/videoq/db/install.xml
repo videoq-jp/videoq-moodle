@@ -1,6 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB PATH="local/videoq/db" VERSION="2026110704" COMMENT="VideoQ synchronization state">
+<XMLDB PATH="local/videoq/db" VERSION="2026110901" COMMENT="VideoQ synchronization state">
   <TABLES>
+    <TABLE NAME="local_videoq_languages" COMMENT="Upload-time language settings for File activities">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" />
+        <FIELD NAME="language" TYPE="char" LENGTH="12" NOTNULL="true" />
+      </FIELDS>
+      <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id" /></KEYS>
+      <INDEXES><INDEX NAME="cmid_unique" UNIQUE="true" FIELDS="cmid" /></INDEXES>
+    </TABLE>
     <TABLE NAME="local_videoq_courses" COMMENT="Course LTI entries and synchronization state, with no learner data">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />

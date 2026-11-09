@@ -64,6 +64,14 @@ try {
             'module' => $DB->get_field('modules', 'id', ['name' => 'url']), 'name' => $name,
             'externalurl' => $target, 'display' => 0, 'printintro' => 0, 'parameters' => []]), $source);
     };
+    $upload = add_moduleinfo((object)array_merge($common, ['modulename' => 'resource',
+        'module' => $DB->get_field('modules', 'id', ['name' => 'resource']), 'name' => 'Owned language upload',
+        'files' => 0, 'display' => 0, 'printintro' => 0, 'showsize' => 0, 'showtype' => 0, 'showdate' => 0,
+        'local_videoq_transcriptionlanguage' => 'ja']), $source);
+    get_file_storage()->create_file_from_string(['contextid' => context_module::instance($upload->coursemodule)->id,
+        'component' => 'mod_resource', 'filearea' => 'content', 'itemid' => 0, 'filepath' => '/',
+        'filename' => 'language.mp4', 'mimetype' => 'video/mp4'], 'Synthetic upload language bytes');
+    $check(\local_videoq\transcription_language::get((int)$upload->coursemodule) === 'ja', 'Module save persists upload language before opt-in');
     $enabled = $url('Owned enabled provider', 'https://youtu.be/abcDEF123_-');
     $disabled = $url('Owned disabled provider', 'https://youtu.be/xyzUVW987_-');
     $unrelated = $url('Owned ordinary reference', 'https://example.invalid/ordinary');
@@ -149,6 +157,13 @@ try {
         $check(!$usersetting->get_value(), $mode . ': restore excludes user data without widening teacher authority');
         if (!$rc->execute_precheck() && !empty($rc->get_precheck_results()['errors'])) throw new RuntimeException('Owned archive restore precheck failed');
         $rc->execute_plan(); $rc->destroy();
+        if ($full) {
+            $copy = $DB->get_record('resource', ['course' => $destination, 'name' => 'Owned language upload'], '*', MUST_EXIST);
+            $copycm = get_coursemodule_from_instance('resource', $copy->id, $destination, false, MUST_EXIST);
+            $check(\local_videoq\transcription_language::get((int)$copycm->id) === 'ja'
+                && !$DB->record_exists('local_videoq_sync', ['cmid' => $copycm->id]),
+                'Course archive restores upload language without enabling VideoQ or copying a remote binding');
+        }
         $rows = $DB->get_records('local_videoq_sync', ['courseid' => $destination]);
         $check(count($rows) === ($deniedcapability ? 0 : 1), $mode . ': only authorized opted-in sources acquire destination bindings');
         $restored = $DB->get_record('url', ['course' => $destination, 'name' => 'Owned enabled provider'], '*', MUST_EXIST);

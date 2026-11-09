@@ -42,7 +42,11 @@ class backup_local_videoq_plugin extends backup_local_plugin {
         $plugin = $this->get_plugin_element();
         $wrapper = new backup_nested_element($this->get_recommended_name());
         $plugin->add_child($wrapper);
-        $binding = new backup_nested_element('binding', ['id'], ['role', 'enabled', 'sourcekind']);
+        $fields = ['role', 'enabled', 'sourcekind'];
+        if (isset($metadata['transcriptionlanguage'])) {
+            $fields[] = 'transcriptionlanguage';
+        }
+        $binding = new backup_nested_element('binding', ['id'], $fields);
         $wrapper->add_child($binding);
         $binding->set_source_array([(object)(['id' => $cmid] + $metadata)]);
         return $plugin;

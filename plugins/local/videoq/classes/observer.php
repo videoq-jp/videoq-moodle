@@ -39,6 +39,9 @@ final class observer {
         $data = $event->get_data();
         if (str_starts_with($data['eventname'], '\core\event\course_module_')) {
             $cmid = (int)$data['objectid'];
+            if ($data['eventname'] === '\\core\\event\\course_module_deleted') {
+                $DB->delete_records('local_videoq_languages', ['cmid' => $cmid]);
+            }
             $rows = $DB->get_records_select('local_videoq_sync', 'cmid = ? OR lticmid = ? OR linkcmid = ?', [$cmid, $cmid, $cmid]);
         } else {
             $rows = $DB->get_records('local_videoq_sync', ['courseid' => (int)$data['objectid']]);

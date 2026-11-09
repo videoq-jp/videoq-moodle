@@ -448,6 +448,10 @@ final class synchronizer {
                 }
             }
             if ($file) {
+                $language = transcription_language::get((int)$row->cmid);
+                if ($language !== '') {
+                    $manifest['transcriptionLanguage'] = $language;
+                }
                 $manifest['file'] = ['filename' => $file->get_filename(), 'contentType' => $file->get_mimetype(),
                 'size' => (int)$file->get_filesize(), 'contentHash' => $file->get_contenthash()];
             }

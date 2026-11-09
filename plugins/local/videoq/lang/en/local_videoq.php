@@ -379,3 +379,8 @@ $string['nativeaccessdenied'] = 'Your current Moodle permissions do not allow th
 $string['syncpreparing'] = 'Questions will be available when preparation finishes.';
 
 $string['askvideo'] = 'Ask a question';
+
+$string['transcriptionlanguage'] = 'Transcription language';
+$string['transcriptionlanguageauto'] = 'Detect automatically';
+$string['invalidtranscriptionlanguage'] = 'Select a supported transcription language.';
+$string['transcriptionlanguageuploadonly'] = 'Choose the language when uploading a new video.';
