@@ -306,6 +306,27 @@ try {
         && (int)$preserved->typeid === $sourcetype && (int)$preserved->lticmid === (int)$transport->coursemodule
         && (int)$preserved->ltiinstance === (int)$transport->instance && (int)$preserved->linkcmid === (int)$shortcut->coursemodule,
         'duplicate and recycle operations preserve the original source opt-in and transport');
+    \core\session\manager::set_user(get_admin());
+    reload_all_capabilities();
+    $languagecourse = create_course((object)['fullname' => 'Owned language deletion ' . $suffix,
+        'shortname' => 'VIDEOQ-LANGUAGE-DELETE-' . $suffix, 'category' => 1, 'visible' => 0, 'newsitems' => 0]);
+    $deletionmodules = [];
+    foreach (['individual', 'bulk'] as $case) {
+        $activity = add_moduleinfo((object)['modulename' => 'resource',
+            'module' => $DB->get_field('modules', 'id', ['name' => 'resource']), 'course' => $languagecourse->id,
+            'section' => 0, 'visible' => 1, 'intro' => '', 'introformat' => FORMAT_HTML, 'name' => 'Owned language ' . $case,
+            'files' => 0, 'display' => 0, 'printintro' => 0, 'showsize' => 0, 'showtype' => 0, 'showdate' => 0,
+            'local_videoq_transcriptionlanguage' => 'ja'], $languagecourse);
+        $deletionmodules[$case] = (int)$activity->coursemodule;
+    }
+    course_delete_module($deletionmodules['individual']);
+    $check(\local_videoq\transcription_language::get($deletionmodules['individual']) === ''
+        && \local_videoq\transcription_language::get($deletionmodules['bulk']) === 'ja',
+        'Individual activity deletion removes only its upload language');
+    delete_course($languagecourse, false);
+    $check(\local_videoq\transcription_language::get($deletionmodules['bulk']) === ''
+        && \local_videoq\transcription_language::get((int)$upload->coursemodule) === 'ja',
+        'Bulk course deletion removes orphan upload language while preserving live activities');
     echo json_encode(['passed' => true, 'database' => $CFG->dbtype, 'checks' => $checks,
         'limits' => ['Real Moodle mbz course/activity restore and core roles; original source binding/readiness is synthetic.',
             'No backend discovery/provider/AI processing, cross-site restore or completed destination initialization.']],
