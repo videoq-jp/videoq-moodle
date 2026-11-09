@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<XMLDB PATH="local/videoq/db" VERSION="2026110704" COMMENT="VideoQ synchronization state">
+<XMLDB PATH="local/videoq/db" VERSION="2026110901" COMMENT="VideoQ synchronization state">
   <TABLES>
     <TABLE NAME="local_videoq_languages" COMMENT="Upload-time language settings for File activities">
       <FIELDS>
