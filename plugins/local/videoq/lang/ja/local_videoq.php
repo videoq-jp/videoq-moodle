@@ -103,7 +103,7 @@ $string['chatseek'] = 'へ移動';
 $string['privacy:metadata:conversation'] = 'Moodleの質問画面と登録済みVideoQツールの間で受け渡す質問文とAI回答です。質問の記録はVideoQで管理します。';
 
 $string['assistant'] = 'AIアシスタント';
-$string['courseassistant'] = 'AIアシスタント（講座全体に質問）';
+$string['courseassistant'] = 'VideoQ';
 $string['nocoursevideos'] = '現在、質問できる動画教材はありません。教材の処理が完了すると利用できます。';
 
 $string['connecttitle'] = 'VideoQと接続';

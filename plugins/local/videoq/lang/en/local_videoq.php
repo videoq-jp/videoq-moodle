@@ -103,7 +103,7 @@ $string['chatseek'] = '— jump to this point';
 $string['privacy:metadata:conversation'] = 'Question text and the displayed AI answer exchanged between the native Moodle interface and the registered VideoQ tool. Question records remain in VideoQ.';
 
 $string['assistant'] = 'AI Assistant';
-$string['courseassistant'] = 'AI Assistant — ask about this course';
+$string['courseassistant'] = 'VideoQ';
 $string['nocoursevideos'] = 'No video lessons are currently available for questions. You can use the assistant once processing is complete.';
 
 $string['connecttitle'] = 'Connect to VideoQ';
