@@ -46,7 +46,9 @@ final class restoration {
         foreach ($rows as $row) {
             $sourcekind = $row->sourcekind ?? 'file';
             if ((int)$row->cmid === $cmid && $cm->modname === ($sourcekind === 'youtube' ? 'url' : 'resource')) {
-                return ['role' => 'source', 'enabled' => (int)(bool)$row->enabled, 'sourcekind' => $sourcekind];
+                return ['role' => 'source', 'enabled' => (int)(bool)$row->enabled, 'sourcekind' => $sourcekind]
+                    + ($sourcekind === 'file' && transcription_language::get($cmid) !== ''
+                        ? ['transcriptionlanguage' => transcription_language::get($cmid)] : []);
             }
             if ((int)$row->lticmid === $cmid && $cm->modname === 'lti') {
                 return ['role' => 'transport', 'enabled' => 0];
@@ -54,6 +56,10 @@ final class restoration {
             if ((int)$row->linkcmid === $cmid && $cm->modname === 'url') {
                 return ['role' => 'shortcut', 'enabled' => 0];
             }
+        }
+        if ($cm->modname === 'resource' && transcription_language::get($cmid) !== '') {
+            return ['role' => 'source', 'enabled' => 0, 'sourcekind' => 'file',
+                'transcriptionlanguage' => transcription_language::get($cmid)];
         }
         if (
             $cm->modname === 'url' && $DB->get_field('url', 'externalurl', ['id' => $cm->instance]) ===
@@ -106,6 +112,9 @@ final class restoration {
                     $sourcekind = $metadata['sourcekind'] ?? 'file';
                     if ($cm->modname !== ($sourcekind === 'youtube' ? 'url' : 'resource')) {
                         throw new \RuntimeException('Restored source kind does not match');
+                    }
+                    if ($sourcekind === 'file') {
+                        transcription_language::save((int)$cm->id, (string)($metadata['transcriptionlanguage'] ?? ''));
                     }
                     if (
                         $metadata['enabled']

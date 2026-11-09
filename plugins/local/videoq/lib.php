@@ -77,3 +77,37 @@ function local_videoq_extend_navigation_course(navigation_node $navigation, stdC
         );
     }
 }
+
+/**
+ * Adds VideoQ language selection to the standard File upload form.
+ *
+ * @param moodleform_mod $form Activity form.
+ * @param MoodleQuickForm $mform Form fields.
+ * @return void
+ */
+function local_videoq_coursemodule_standard_elements(moodleform_mod $form, MoodleQuickForm $mform): void {
+    \local_videoq\transcription_language::form($form, $mform);
+}
+
+/**
+ * Validates upload-time language selection.
+ *
+ * @param moodleform_mod $form Activity form.
+ * @param array $data Submitted fields.
+ * @return array
+ */
+function local_videoq_coursemodule_validation(moodleform_mod $form, array $data): array {
+    return \local_videoq\transcription_language::validate($form, $data);
+}
+
+/**
+ * Persists the selected language after Moodle saves the File activity.
+ *
+ * @param stdClass $moduleinfo Module fields.
+ * @param stdClass $course Course fields.
+ * @return stdClass
+ */
+function local_videoq_coursemodule_edit_post_actions(stdClass $moduleinfo, stdClass $course): stdClass {
+    \local_videoq\transcription_language::saved($moduleinfo);
+    return $moduleinfo;
+}

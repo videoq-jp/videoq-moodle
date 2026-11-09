@@ -123,5 +123,17 @@ function xmldb_local_videoq_upgrade($oldversion) {
         // Rebuild hook registrations for the simplified course navigation.
         upgrade_plugin_savepoint(true, 2026110900, 'local', 'videoq');
     }
+    if ($oldversion < 2026110901) {
+        $manager = $DB->get_manager();
+        $schema = new xmldb_file(__DIR__ . '/install.xml');
+        if (!$schema->loadXMLStructure()) {
+            throw new \RuntimeException('Invalid install schema');
+        }
+        $table = $schema->getStructure()->getTable('local_videoq_languages');
+        if (!$manager->table_exists($table)) {
+            $manager->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026110901, 'local', 'videoq');
+    }
     return true;
 }

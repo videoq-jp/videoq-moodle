@@ -379,3 +379,8 @@ $string['nativeaccessdenied'] = '現在のMoodleの権限では、この操作�
 $string['syncpreparing'] = '準備が終わると質問できます。';
 
 $string['askvideo'] = '質問する';
+
+$string['transcriptionlanguage'] = '文字起こし言語';
+$string['transcriptionlanguageauto'] = '自動判定';
+$string['invalidtranscriptionlanguage'] = '対応している言語を選択してください。';
+$string['transcriptionlanguageuploadonly'] = '言語は新しい動画のアップロード時に指定してください。';
