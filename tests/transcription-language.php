@@ -26,6 +26,7 @@ namespace {
         public array $elements = []; public array $defaults = [];
         public function addElement(string $type, string $name, mixed ...$args): void { $this->elements[$name] = [$type, ...$args]; }
         public function setType(string $name, int $type): void {}
+        public function setExpanded(string $name, bool $expanded): void {}
         public function setDefault(string $name, string $value): void { $this->defaults[$name] = $value; }
     }
     final class FixtureFile {
