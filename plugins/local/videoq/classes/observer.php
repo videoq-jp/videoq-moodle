@@ -44,6 +44,10 @@ final class observer {
             }
             $rows = $DB->get_records_select('local_videoq_sync', 'cmid = ? OR lticmid = ? OR linkcmid = ?', [$cmid, $cmid, $cmid]);
         } else {
+            if ($data['eventname'] === '\\core\\event\\course_deleted') {
+                // Bulk course deletion does not emit individual module-deleted events.
+                $DB->delete_records_select('local_videoq_languages', 'cmid NOT IN (SELECT id FROM {course_modules})');
+            }
             $rows = $DB->get_records('local_videoq_sync', ['courseid' => (int)$data['objectid']]);
         }
         foreach ($rows as $row) {
