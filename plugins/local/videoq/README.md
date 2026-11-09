@@ -264,3 +264,9 @@ processed media is not retranscribed by changing a setting alone. The setting is
 preserved in Moodle backup/restore, even before VideoQ has been enabled.
 Deploy a VideoQ backend supporting `transcriptionLanguage` in LMS File manifests
 before using a specific language. Automatic detection keeps legacy manifests unchanged.
+
+New File activities default to Moodle's effective page language (including
+course-forced language and user/site preferences). Regional locales such as
+`en_us` and `pt_br` use their supported base language. Unsupported languages fall
+back to automatic detection. Existing saved selections, including automatic
+detection, are preserved.

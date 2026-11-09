@@ -57,6 +57,16 @@ final class transcription_language {
     }
 
     /**
+     * Maps Moodle's effective page language to a supported transcription language.
+     *
+     * @return string Language code, or automatic detection for unsupported locales.
+     */
+    public static function default_language(): string {
+        $language = strtolower((string)preg_split('/[_-]/', current_language())[0]);
+        return isset(self::LANGUAGES[$language]) ? $language : '';
+    }
+
+    /**
      * Reads the activity's upload language without requiring a remote binding.
      *
      * @param int $cmid Course-module identifier, or zero for a new activity.
@@ -107,7 +117,7 @@ final class transcription_language {
         $mform->setExpanded('local_videoq_upload', true);
         $mform->addElement('select', self::FIELD, get_string('transcriptionlanguage', 'local_videoq'), self::options());
         $mform->setType(self::FIELD, PARAM_ALPHA);
-        $mform->setDefault(self::FIELD, self::get((int)($cm->id ?? 0)));
+        $mform->setDefault(self::FIELD, $cm ? self::get((int)$cm->id) : self::default_language());
     }
 
     /**
