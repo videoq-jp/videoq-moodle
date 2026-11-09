@@ -57,7 +57,6 @@ $status = $row->status ?? 'off';
 $ready = $enabled && $status === 'completed';
 $failed = $enabled && in_array($status, ['error', 'blocked'], true);
 if (!$enabled) {
-    echo html_writer::tag('p', get_string('syncdescription', 'local_videoq'));
     echo $OUTPUT->single_button(
         new moodle_url($url, ['action' => 'enable']),
         get_string('sync_enable', 'local_videoq'),
@@ -90,7 +89,6 @@ if (!$enabled) {
             ['type' => 'primary']
         );
     } else if (!$ready) {
-        echo html_writer::tag('p', get_string('syncpreparing', 'local_videoq'));
         echo html_writer::link($url, get_string('refreshstatus', 'local_videoq'), ['class' => 'btn btn-secondary']);
     }
     echo html_writer::start_div('mt-4');
