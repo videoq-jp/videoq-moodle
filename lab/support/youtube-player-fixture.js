@@ -2,7 +2,8 @@
 window.playerFixture = {calls: [], pending: [], delayed: false, errors: []};
 const fixture = window.playerFixture;
 window.addEventListener('error', event => fixture.errors.push(event.message));
-const sources = [{videoId: 1, lesson: '1', title: 'Owned VideoQ file'}, {videoId: 2, lesson: '2', title: 'Owned YouTube'}];
+const sources = [{videoId: 1, lesson: '1', title: 'Owned VideoQ file'}, {videoId: 2, lesson: '2', title: 'Owned YouTube'},
+    {videoId: 3, lesson: '3', title: 'Another VideoQ file'}];
 document.body.innerHTML = '<div class="local-videoq-workspace" data-videoq-native="1"><section class="local-videoq-main">'
     + '<div data-videoq-file><video id="videoq-player"></video></div><div class="local-videoq-youtube" data-videoq-youtube hidden></div>'
     + '<p data-videoq-player-status role="status"></p><h3 data-videoq-video-title></h3><p data-videoq-description></p></section>'

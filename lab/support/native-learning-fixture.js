@@ -43,7 +43,11 @@
         if (operation === 'playback') return {kind: 'file', url: 'https://media.example/fixture.mp4', title: 'Owned VideoQ video', description: 'Linked course description'};
         if (operation === 'materials') return metadata();
         if (operation === 'course-history') return {count: 1, results: [{id:1, created_at:new Date().toISOString(), question:'Owned course question',
-            asked_by:{username:'Learner',email:'learner@example.com'}, answer, feedback:'good'}]};
+            asked_by:{username:'Learner',email:'learner@example.com'}, answer: {
+                segments: [{text: 'History answer', sourceIds: [1, 1]}],
+                sources: [{id: 1, video_id: 1, title: 'Owned Moodle File', start_time: '00:00:12,345'},
+                    {id: 2, video_id: 1, title: 'Unreferenced source', start_time: '01:02:03,450'}]
+            }, feedback:'good'}]};
         if (operation === 'history') return {turns: []};
         if (operation === 'transcript') return {videoId: 1, cues: [{startTime: '00:00:12', text: 'Owned transcript'}], nextCursor: null};
         if (operation === 'feedback') return {feedback: input.feedback};
