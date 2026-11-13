@@ -10,7 +10,7 @@ $root = dirname(__DIR__);
 $destination = $argv[1];
 if (!is_dir($destination) && !mkdir($destination, 0755, true)) throw new RuntimeException('Cannot create output directory');
 $destination = realpath($destination);
-foreach (['local', 'ltisource'] as $type) {
+foreach (['local'] as $type) {
     $source = realpath($root . '/plugins/' . $type . '/videoq');
     if (str_starts_with($destination . '/', $source . '/')) throw new RuntimeException('Output must be outside plugin source');
 }
@@ -46,7 +46,6 @@ function videoq_translation_placeholders(string $text): array {
 }
 $sources = [
     'local_videoq' => ['plugins/local/videoq/lang/en/local_videoq.php', 'plugins/local/videoq/lang/ja/local_videoq.php'],
-    'ltisource_videoq' => ['plugins/ltisource/videoq/lang/en/ltisource_videoq.php', 'translations/ja/ltisource_videoq.php'],
 ];
 $report = ['status' => 'prepared-not-submitted', 'language' => 'ja', 'moodleBranch' => '5.1', 'components' => []];
 foreach ($sources as $component => [$english, $japanese]) {

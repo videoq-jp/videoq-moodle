@@ -13,7 +13,13 @@ $root = dirname(__DIR__);
 $destination = $argv[1];
 if (!is_dir($destination) && !mkdir($destination, 0755, true)) throw new RuntimeException('Cannot create output directory');
 $destination = realpath($destination);
-$plugins = ['local_videoq' => 'plugins/local/videoq', 'ltisource_videoq' => 'plugins/ltisource/videoq'];
+$plugins = ['local_videoq' => 'plugins/local/videoq'];
+// Retire an obsolete installer left by an earlier build in this output directory.
+$retired = $destination . '/ltisource_videoq.zip';
+if (is_link($retired) || (file_exists($retired) && !is_file($retired))) {
+    throw new RuntimeException('Unsafe retired installer output');
+}
+if (is_file($retired) && !unlink($retired)) throw new RuntimeException('Cannot remove retired installer');
 $checksums = [];
 foreach ($plugins as $component => $relative) {
     $base = $root . '/' . $relative;

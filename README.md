@@ -1,38 +1,22 @@
 # VideoQ for Moodle
 
-Watch linked VideoQ course videos and ask VideoQ questions across the course.
+Connect each Moodle course to a teacher-owned VideoQ course. Install **one plugin: `local_videoq.zip`**.
 
-Requires Moodle 5.1 and a compatible VideoQ deployment. Development preview,
-tested with the Boost theme.
+Requires Moodle 5.1 and a compatible VideoQ service. Development preview, tested with Boost. Marketplace approval is pending.
 
-Learning and teacher screens use Moodle templates, login and course permissions.
-The browser talks to Moodle; PHP calls VideoQ's shared AI/search/storage services
-over verified HTTPS. No VideoQ presentation or authentication iframe is used.
-This preview requires the paired backend with native learning protocol 1.
-Public sharing, billing and global VideoQ administration remain outside the
-Moodle interface. See [current verification](docs/verification.md).
+## Install and connect
 
-## Installation
+1. Download `local_videoq.zip` and `SHA256SUMS` from the [current release](https://github.com/videoq-jp/videoq-moodle/releases). Verify the checksum and upload the ZIP through **Site administration → Plugins → Install plugins**.
+2. As an administrator, open **Connect to VideoQ**, select the VideoQ HTTPS service, sign in, and approve communication with the school.
+3. As a teacher, open **Connect my VideoQ account** from the Moodle course. Sign in to your own VideoQ account and choose an existing course you own.
+4. Learners open the course assistant in Moodle. They do not need VideoQ accounts.
 
-Marketplace submission is being prepared. These plugins are not yet listed or
-approved. The manual steps below are for development and evaluation; the target
-is installation from the official listing once review and publication complete.
+Upload and edit videos in VideoQ. Moodle provides its native learning screen with video selection, overview, course Q&A, AI questions, citations and feedback. Chats resume automatically. Only the connected owner teacher can view course question history and export learner names/emails, questions, answers and feedback as CSV.
 
-1. Install both VideoQ components through Moodle's **Install plugins** screen.
-   The target is the official directory after approval. During evaluation, upload
-   the matching component ZIPs provided for that build (local plugin first).
-   See the [installation guide](docs/setup.md); Git is an optional operator method.
-2. In Moodle, open **Site administration → Plugins → Local plugins → Connect to
-   VideoQ** and enter your cloud or on-premises VideoQ HTTPS URL.
-3. Sign in to VideoQ and allow the connection to return to Moodle automatically
-   (the current `https://videoq.jp` service supports this flow).
-4. As a course teacher, choose **Connect my VideoQ account**, sign in to VideoQ and select an existing course.
-5. Add/edit videos in VideoQ. Learners open the course assistant in Moodle; no VideoQ student account is needed.
+## Upgrade from 0.25.3 or earlier
 
-Version 0.25.1 removes Moodle upload/import controls. The workspace follows the VideoQ/Classroom arrangement with Moodle theme styles: video and Overview/Q&A at left, Videos/AI tabs at right.
-Apply the matching VideoQ API/web changes and migrations 0063/0064 before upgrading.
+Upgrade `local_videoq` in place; do not uninstall it. Version 0.25.4 removes the setup dependency on the retired `ltisource_videoq` helper and ships only the local plugin. An already installed helper does not block this update. After checking the new course connection, uninstall **only `ltisource_videoq`** from Moodle's plugin overview, then remove its code if Moodle cannot do that automatically. Do not delete Moodle courses, videos, or the local plugin.
 
-See the [setup guide](docs/setup.md) for details and the
-[development guide](lab/README.md) for building and testing.
+The service must include the teacher-owned connection API and DB migrations 0062–0064. Legacy installation-wide ownership/import is retired; teachers reconnect their accounts and select existing VideoQ courses. Moodle source files are not imported or moved by this update.
 
-The viewer matches VideoQ: learner chats continue automatically, without new-conversation or private-history controls. The connected owner teacher has course question/answer history and CSV; other teachers and learners cannot read the owner logs.
+See the [setup guide](docs/setup.md), [日本語の導入手順](docs/setup.ja.md), and [verification](docs/verification.md). The [lab](lab/README.md) contains developer tooling; learners and site administrators do not install it.

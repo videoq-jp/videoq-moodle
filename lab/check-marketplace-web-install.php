@@ -1,5 +1,5 @@
 <?php
-/** Browser-install both submission ZIPs in the explicitly owned, empty Marketplace web fixture. */
+/** Browser-install the single submission ZIP in the explicitly owned, empty Marketplace web fixture. */
 declare(strict_types=1);
 require __DIR__.'/support/browser.php';
 use function VideoQLab\ensure;
@@ -14,7 +14,7 @@ $lock=fopen($base.'/.marketplace-web-install.lock','c');
 ensure($lock!==false && flock($lock,LOCK_EX|LOCK_NB),'Another web installer check is running');
 chmod($base.'/.marketplace-web-install.lock',0600);
 register_shutdown_function(static function()use($lock):void{flock($lock,LOCK_UN);fclose($lock);});
-foreach(['local_videoq','ltisource_videoq'] as $component) ensure(is_file($archives.'/'.$component.'.zip'),'Missing component ZIP');
+foreach(['local_videoq'] as $component) ensure(is_file($archives.'/'.$component.'.zip'),'Missing component ZIP');
 $container='videoq-marketplace-web-20261106';
 $identity=json_decode(VideoQLab\docker(['inspect','--format','{{json .}}',$container]),true,512,JSON_THROW_ON_ERROR);
 ensure(($identity['Config']['Labels']['videoq.marketplace.audit']??'')==='web-20261106','Unrelated web container');
@@ -24,8 +24,8 @@ $preflight= <<<'PHP'
 define('CLI_SCRIPT',true);
 require '/site/config.php';
 if($CFG->dbname!=='moodleaudit_web'||$CFG->wwwroot!=='http://127.0.0.1:18881'||$CFG->dbhost!=='audit-db')throw new RuntimeException('Unrelated fixture');
-foreach(['local_videoq','ltisource_videoq'] as $component)if(get_config($component,'version'))throw new RuntimeException('Expected uninstalled plugins');
-foreach(['/local/videoq','/mod/lti/source/videoq'] as $path)if(is_dir($CFG->dirroot.$path))throw new RuntimeException('Expected no staged plugin code');
+foreach(['local_videoq'] as $component)if(get_config($component,'version'))throw new RuntimeException('Expected uninstalled plugins');
+foreach(['/local/videoq'] as $path)if(is_dir($CFG->dirroot.$path))throw new RuntimeException('Expected no staged plugin code');
 echo 'owned-clean-fixture';
 PHP;
 ensure(VideoQLab\docker(['exec',$container,'php','-r',$preflight])==='owned-clean-fixture','Fixture preflight failed');
@@ -68,7 +68,7 @@ $b=new VideoQLab\Browser();
 try {
  $b->login('auditadmin');
  $report=['passed'=>false,'method'=>'Native Chrome via PHP WebDriver; stock Moodle ZIP upload and database installer','components'=>[]];
- foreach(['local_videoq','ltisource_videoq'] as $component) {
+ foreach(['local_videoq'] as $component) {
   $report['components'][$component]=installComponent($b,$component,$base,$archives);
   file_put_contents($base.'/web-full-install-progress.json',json_encode($report,JSON_PRETTY_PRINT));
  }
@@ -82,7 +82,7 @@ define('CLI_SCRIPT',true);
 require '/site/config.php';
 if($CFG->dbname!=='moodleaudit_web'||$CFG->wwwroot!=='http://127.0.0.1:18881'||$CFG->dbhost!=='audit-db')throw new RuntimeException('Unrelated fixture');
 $versions=[];
-foreach(['local_videoq'=>'/local/videoq','ltisource_videoq'=>'/mod/lti/source/videoq'] as $component=>$path){
+foreach(['local_videoq'=>'/local/videoq'] as $component=>$path){
  $plugin=new stdClass();require $CFG->dirroot.$path.'/version.php';
  $versions[$component]=(int)get_config($component,'version');
  if($versions[$component]!==$plugin->version)throw new RuntimeException('Version mismatch');

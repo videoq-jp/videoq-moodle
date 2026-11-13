@@ -15,7 +15,7 @@ try {
         [$code, $output] = videoq_translation_test_run([$root . '/scripts/package-plugins.php', $base . '/' . $profile, ...$flags]);
         if ($code !== 0) throw new RuntimeException('Installer profile failed');
     }
-    foreach (['local_videoq', 'ltisource_videoq'] as $component) {
+    foreach (['local_videoq'] as $component) {
         $dev = new ZipArchive(); $official = new ZipArchive();
         $dev->open($base . '/development/' . $component . '.zip');
         $official->open($base . '/marketplace/' . $component . '.zip');
@@ -37,16 +37,15 @@ try {
     [$code, $output] = videoq_translation_test_run([$root . '/scripts/package-translations.php', $base . '/amos']);
     if ($code !== 0) throw new RuntimeException('AMOS export failed');
     $report = json_decode(file_get_contents($base . '/amos/amos-ja.json'), true, 16, JSON_THROW_ON_ERROR);
-    if ($report['status'] !== 'prepared-not-submitted' || count($report['components']) !== 2) {
+    if ($report['status'] !== 'prepared-not-submitted' || count($report['components']) !== 1) {
         throw new RuntimeException('AMOS status/components incorrect');
     }
     if ($report['archiveSha256'] !== hash_file('sha256', $base . '/amos/amos-ja.zip')) throw new RuntimeException('AMOS checksum mismatch');
     $zip = new ZipArchive(); $zip->open($base . '/amos/amos-ja.zip');
-    if ($zip->numFiles !== 2 || $zip->locateName('local_videoq.php') === false || $zip->locateName('ltisource_videoq.php') === false) {
+    if ($zip->numFiles !== 1 || $zip->locateName('local_videoq.php') === false) {
         throw new RuntimeException('AMOS requires a flat component-named import');
     }
-    if ($zip->getFromName('local_videoq.php') !== file_get_contents($root . '/plugins/local/videoq/lang/ja/local_videoq.php')
-            || $zip->getFromName('ltisource_videoq.php') !== file_get_contents($root . '/translations/ja/ltisource_videoq.php')) {
+    if ($zip->getFromName('local_videoq.php') !== file_get_contents($root . '/plugins/local/videoq/lang/ja/local_videoq.php')) {
         throw new RuntimeException('AMOS import must preserve reviewed Japanese source values');
     }
     $zip->close();
@@ -57,9 +56,8 @@ try {
     $fixture = $base . '/fixture';
     foreach (['scripts/package-translations.php', 'scripts/package-plugins.php',
             'plugins/local/videoq/version.php', 'plugins/local/videoq/LICENSE',
-            'plugins/ltisource/videoq/version.php', 'plugins/ltisource/videoq/LICENSE', 'plugins/local/videoq/lang/en/local_videoq.php',
-            'plugins/local/videoq/lang/ja/local_videoq.php', 'plugins/ltisource/videoq/lang/en/ltisource_videoq.php',
-            'translations/ja/ltisource_videoq.php'] as $name) {
+            'plugins/local/videoq/lang/en/local_videoq.php',
+            'plugins/local/videoq/lang/ja/local_videoq.php'] as $name) {
         $target = $fixture . '/' . $name;
         if (!is_dir(dirname($target))) mkdir(dirname($target), 0700, true);
         copy($root . '/' . $name, $target);
@@ -74,7 +72,7 @@ try {
         [$code] = videoq_translation_test_run([$fixture . '/scripts/package-translations.php', $directory . '/amos'], ['TZ' => $timezone]);
         if ($code !== 0) throw new RuntimeException('Portable AMOS build failed');
         $hashes = array_map(static fn($name) => hash_file('sha256', $directory . '/' . $name),
-            ['local_videoq.zip', 'ltisource_videoq.zip', 'amos/amos-ja.zip']);
+            ['local_videoq.zip', 'amos/amos-ja.zip']);
         if ($reference !== null && $reference !== $hashes) throw new RuntimeException('Archives vary with source permissions or process timezone');
         $reference = $hashes;
     }

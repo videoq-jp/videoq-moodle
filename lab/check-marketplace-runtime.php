@@ -38,6 +38,13 @@ if ($phase === 'uninstalled') {
         'tablesRemoved' => true, 'settingsRemoved' => true, 'coreSitePreserved' => true], JSON_PRETTY_PRINT) . "\n";
     exit;
 }
+if ($phase === 'single') {
+    if ($DB->record_exists('config_plugins', ['plugin' => 'ltisource_videoq'])
+            || is_dir($CFG->dirroot . '/mod/lti/source/videoq')) {
+        throw new RuntimeException('Single-plugin install contains the retired helper');
+    }
+    $phase = 'installed';
+}
 if ($phase !== 'installed') {
     throw new RuntimeException('Unknown runtime inspection phase');
 }
@@ -58,7 +65,6 @@ foreach ($tables as $table) {
 }
 $components = [
     'local_videoq' => ['conversation', 'feedback', 'transcript', 'courseqa', 'materialmanagement', 'access', 'video', 'position', 'videofile', 'title'],
-    'ltisource_videoq' => ['userid', 'courseid', 'resourceid'],
 ];
 $versions = [];
 foreach ($components as $component => $expected) {

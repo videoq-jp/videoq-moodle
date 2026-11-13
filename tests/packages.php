@@ -8,13 +8,14 @@ mkdir($output, 0700);
 function verify(bool $condition, string $message): void { if (!$condition) throw new RuntimeException($message); }
 try {
     file_put_contents($output . '/SHA256SUMS', 'stale checksums');
+    file_put_contents($output . '/ltisource_videoq.zip', 'retired installer');
     chmod($output . '/SHA256SUMS', 0444); // Rebuilds must replace an old read-only manifest atomically.
     // Run outside the checkout; the child receives no Node executable or package path.
     $process = proc_open([PHP_BINARY, $root . '/scripts/package-plugins.php', $output], [0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']], $pipes, sys_get_temp_dir(), ['PATH'=>'/no-node-required']);
     verify(is_resource($process), 'Cannot start PHP builder'); fclose($pipes[0]);
     $stdout = stream_get_contents($pipes[1]); $stderr = stream_get_contents($pipes[2]); fclose($pipes[1]); fclose($pipes[2]);
     verify(proc_close($process) === 0, 'Builder failed: ' . $stderr);
-    foreach (['local_videoq','ltisource_videoq'] as $component) {
+    foreach (['local_videoq'] as $component) {
         $zip = new ZipArchive(); verify($zip->open($output . '/' . $component . '.zip') === true, 'Cannot read installer');
         verify(str_contains($zip->getFromName('videoq/version.php'), '$plugin->component = \'' . $component . '\''), 'Wrong installer root/component');
         verify($zip->locateName('videoq/lang/en/' . $component . '.php') !== false, 'Missing language file');
@@ -41,8 +42,9 @@ try {
         }
         $zip->close();
     }
+    verify(!file_exists($output . '/ltisource_videoq.zip'), 'Retired installer must not remain in output');
     $lines = file($output . '/SHA256SUMS', FILE_IGNORE_NEW_LINES);
-    verify(count($lines) === 2, 'Missing installer checksums');
+    verify(count($lines) === 1, 'Missing installer checksums');
     foreach ($lines as $line) { [$hash,$name] = explode('  ', $line); verify(hash_equals($hash, hash_file('sha256', $output . '/' . $name)), 'Wrong installer checksum'); }
     $blocked = $output . '/blocked'; mkdir($blocked); mkdir($blocked . '/SHA256SUMS');
     try {
@@ -53,7 +55,7 @@ try {
         foreach (scandir($blocked) as $name) if (is_file($blocked . '/' . $name)) unlink($blocked . '/' . $name);
         rmdir($blocked . '/SHA256SUMS'); rmdir($blocked);
     }
-    echo "PHP-only installer contract passed for both plugins.\n";
+    echo "PHP-only installer contract passed for the single local plugin.\n";
 } finally {
     foreach (scandir($output) as $name) if ($name !== '.' && $name !== '..') unlink($output . '/' . $name);
     rmdir($output);

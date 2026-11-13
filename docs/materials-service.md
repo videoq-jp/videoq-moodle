@@ -1,3 +1,5 @@
+> Historical implementation notes. For the supported single-plugin installation and teacher-owned connection flow, use [setup](setup.md). The old import/LTI-helper workflow below is retired.
+
 # LTI materials service: setup and migration
 
 The new integration uses one LTI registration for learner launch and platform
@@ -44,7 +46,7 @@ the deployment overlap. The key ring accepts at most three retired public keys.
 
 ## Connect or migrate
 
-1. Install/update `local_videoq` 0.9.1 and `ltisource_videoq`. Finish Moodle's
+1. Historical prerequisite (retired): finish Moodle's
    plugin upgrade and keep normal Moodle cron/ad-hoc task execution enabled.
 2. Open Moodle's `/local/videoq/connect.php` as its administrator and enter the
    cloud or on-premises VideoQ HTTPS URL. Continue to VideoQ, sign in and allow

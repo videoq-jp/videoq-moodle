@@ -10,7 +10,6 @@ services:
       - ./apache.conf:/etc/apache2/sites-enabled/000-default.conf:ro
       - .:/lab:ro
       - ${MOODLE_INTEGRATION_ROOT:-..}/plugins/local/videoq:/var/www/html/public/local/videoq:ro
-      - ${MOODLE_INTEGRATION_ROOT:-..}/plugins/ltisource/videoq:/var/www/html/public/mod/lti/source/videoq:ro
       - moodledata:/var/www/moodledata
       - certificates:/certificates:ro
     networks: [trial]

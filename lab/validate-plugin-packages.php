@@ -11,7 +11,7 @@ class videoq_archive_validator extends \core\update\validator {
     }
 }
 $results = [];
-foreach (['local_videoq' => 'local', 'ltisource_videoq' => 'ltisource'] as $component => $type) {
+foreach (['local_videoq' => 'local'] as $component => $type) {
     $temp = make_request_directory();
     $files = core_plugin_manager::instance()->unzip_plugin_file('/tmp/videoq-plugin-packages/' . $component . '.zip', $temp, 'videoq');
     if (!$files) throw new Exception('Cannot extract plugin package');

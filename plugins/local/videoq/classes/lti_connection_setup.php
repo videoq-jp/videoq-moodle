@@ -41,9 +41,6 @@ final class lti_connection_setup {
         require_capability('moodle/site:config', \context_system::instance());
         require_once($CFG->dirroot . '/mod/lti/locallib.php');
         require_once($CFG->libdir . '/filelib.php');
-        if (!$DB->record_exists('config_plugins', ['plugin' => 'ltisource_videoq', 'name' => 'version'])) {
-            throw new \RuntimeException('Install both VideoQ plugins first');
-        }
         $value = connection_setup::decode($code);
         if (($value['mode'] ?? '') !== 'materials') {
             throw new \RuntimeException('Invalid connection mode');

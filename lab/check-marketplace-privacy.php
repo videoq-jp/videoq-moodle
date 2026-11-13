@@ -28,7 +28,7 @@ $snapshot = static function() use ($DB, $tables): array {
 };
 $before = $snapshot();
 $report = ['passed' => false, 'database' => $CFG->dbtype, 'components' => []];
-foreach (['local_videoq', 'ltisource_videoq'] as $component) {
+foreach (['local_videoq'] as $component) {
     $class = '\\' . $component . '\\privacy\\provider';
     foreach ([\core_privacy\local\request\plugin\provider::class,
             \core_privacy\local\request\core_userlist_provider::class] as $interface) {

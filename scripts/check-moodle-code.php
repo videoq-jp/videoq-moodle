@@ -74,7 +74,7 @@ if (!is_file($scanner)) throw new RuntimeException('Run prepare before the offli
 $code = videoq_codecheck_run([PHP_BINARY, $scanner, '--runtime-set', 'installed_paths',
     $work . '/vendor/phpcsstandards/phpcsextra,' . $work . '/vendor/moodlehq/moodle-cs',
     '--standard=' . $work . '/vendor/moodlehq/moodle-cs/moodle', '--report=json',
-    '--report-file=' . $work . '/phpcs.json', $root . '/plugins/local/videoq', $root . '/plugins/ltisource/videoq'], $work);
+    '--report-file=' . $work . '/phpcs.json', $root . '/plugins/local/videoq'], $work);
 if (!is_file($work . '/phpcs.json')) throw new RuntimeException('Scanner did not produce a report');
 $report = json_decode(file_get_contents($work . '/phpcs.json'), true, 512, JSON_THROW_ON_ERROR);
 echo json_encode(['moodleCodingStandard' => $report['totals']], JSON_THROW_ON_ERROR) . "\n";

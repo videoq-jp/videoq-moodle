@@ -1,3 +1,5 @@
+> Historical implementation notes. For the supported single-plugin installation and teacher-owned connection flow, use [setup](setup.md). The old import/LTI-helper workflow below is retired.
+
 # Moodle integration review — 2026-11-05
 
 Scope: `videoq-moodle`, its HTTPS contract with the deployed VideoQ trial,

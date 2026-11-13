@@ -29,7 +29,6 @@ $root = dirname(__DIR__);
 require_once $root . '/plugins/local/videoq/classes/privacy_api.php';
 $components = [
     'local_videoq' => ['local', ['conversation', 'feedback', 'access', 'video', 'position', 'videofile', 'title']],
-    'ltisource_videoq' => ['ltisource', ['userid', 'courseid', 'resourceid']],
 ];
 foreach ($components as $component => [$type, $required]) {
     $directory = $root . '/plugins/' . $type . '/videoq';
