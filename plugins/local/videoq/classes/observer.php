@@ -29,6 +29,22 @@ namespace local_videoq;
  */
 final class observer {
     /**
+     * Removes historical language metadata without queuing imports or changing connections.
+     *
+     * @param \core\event\base $event Moodle deletion event.
+     * @return void
+     */
+    public static function cleanup(\core\event\base $event): void {
+        global $DB;
+        $data = $event->get_data();
+        if ($data['eventname'] === '\\core\\event\\course_module_deleted') {
+            $DB->delete_records('local_videoq_languages', ['cmid' => (int)$data['objectid']]);
+        } else if ($data['eventname'] === '\\core\\event\\course_deleted') {
+            $DB->delete_records_select('local_videoq_languages', 'cmid NOT IN (SELECT id FROM {course_modules})');
+        }
+    }
+
+    /**
      * Queues reconciliation after a source activity is changed or removed.
      *
      * @param \core\event\base $event Moodle activity event.
