@@ -20,3 +20,5 @@ Upgrade `local_videoq` in place; do not uninstall it. Version 0.25.4 removes the
 The service must include the teacher-owned connection API and DB migrations 0062–0064. Legacy installation-wide ownership/import is retired; teachers reconnect their accounts and select existing VideoQ courses. Moodle source files are not imported or moved by this update.
 
 See the [setup guide](docs/setup.md), [日本語の導入手順](docs/setup.ja.md), and [verification](docs/verification.md). The [lab](lab/README.md) contains developer tooling; learners and site administrators do not install it.
+
+授業での操作は[先生向けガイド](docs/teacher.ja.md)・[生徒向けガイド](docs/learner.ja.md)を参照してください。
