@@ -1,10 +1,9 @@
 <?php
-// Read-only verification of both plugins against Moodle's actual privacy API.
+// Read-only verification of the local plugin against Moodle's actual privacy API.
 define('CLI_SCRIPT', true);
 require '/var/www/html/config.php';
 if ($CFG->wwwroot !== 'https://moodle.localhost:18443' || $CFG->dbhost !== 'db') throw new RuntimeException('Lab only');
-$expected = ['local_videoq'=>['conversation','feedback','access','video','position','videofile','title'],
-    'ltisource_videoq'=>['userid','courseid','resourceid']];
+$expected = ['local_videoq'=>['conversation','feedback','access','video','position','videofile','title']];
 $fields = [];
 foreach ($expected as $component=>$required) {
     $class = '\\' . $component . '\\privacy\\provider';

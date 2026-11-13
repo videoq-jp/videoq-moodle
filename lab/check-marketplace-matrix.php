@@ -62,6 +62,11 @@ function matrix_source(string $repo, string $revision, string $target, ?string $
 }
 function matrix_stage(string $source, string $site, ?string $retire): void {
     foreach (['local' => 'local', 'ltisource' => 'mod/lti/source'] as $type => $relative) {
+        // The historical baseline has two plugins; candidates ship only local_videoq.
+        if (!is_file($source . '/' . $type . '_videoq.zip')) {
+            if ($type === 'ltisource') continue;
+            throw new RuntimeException('Missing local plugin archive');
+        }
         $target = $site . '/public/' . $relative . '/videoq';
         if (is_link($target)) throw new RuntimeException('Unexpected plugin symlink');
         if (is_dir($target)) {
@@ -195,7 +200,8 @@ CONFIG;
     matrix_stage($work . '/archives', $work . '/site', null);
     matrix_run([...$php, '/site/admin/cli/upgrade.php', '--non-interactive'], $work . '/candidate-reinstall.log');
     matrix_diagnostics($work . '/candidate-reinstall.log');
-    $check('reinstalled-runtime', ['/src/lab/check-marketplace-runtime.php', '/site']);
+    $check('reinstalled-runtime', ['/src/lab/check-marketplace-runtime.php', '/site', 'single']);
+    $check('single-plugin-setup', ['/src/lab/check-single-plugin-setup.php', '/site']);
     foreach (['defaults', 'revoked', 'restored'] as $phase) {
         $check('reinstalled-capabilities-' . $phase, ['/src/lab/check-marketplace-capabilities.php', '/site', $phase]);
         if ($phase === 'revoked') $check('reinstalled-native-page', ['/src/lab/check-marketplace-native-page.php', '/site']);
@@ -206,7 +212,7 @@ CONFIG;
     $check('reinstalled-youtube-sources', ['/src/lab/check-youtube-source.php', '/site']);
     $check('reinstalled-youtube-restore', ['/src/lab/check-youtube-restore.php', '/site']);
     $hashes = [];
-    foreach (['local_videoq.zip', 'ltisource_videoq.zip'] as $file) $hashes[$file] = hash_file('sha256', $work . '/archives/' . $file);
+    foreach (['local_videoq.zip'] as $file) $hashes[$file] = hash_file('sha256', $work . '/archives/' . $file);
     $summary = ['passed' => true, 'database' => $mode, 'moodleRevision' => $pins['moodleRevision'],
         'baselineRevision' => $pins['baselineRevision'], 'phpImage' => $images['php'],
         'databaseImage' => $images[$mode === 'pg' ? 'db' : 'mysql'], 'archiveSha256' => $hashes,

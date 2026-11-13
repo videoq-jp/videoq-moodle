@@ -7,9 +7,15 @@ package installation in this repository. PHP communicates with ChromeDriver or
 GeckoDriver and uses cURL, OpenSSL, database extensions and ZipArchive directly.
 VideoQ remains an independently deployed application with its own runtime.
 
+## Single-plugin 0.25.4
+
+The supported distribution is `local_videoq.zip` only. The old LTI helper is absent from fresh installs. The DB matrix upgrades the published 0.25.3 two-plugin version, preserves its records, removes the helper through Moodle, and reinstalls only the local plugin. It also verifies that setup reaches connection-code validation with no helper installed.
+
+The separately installed Moodle test completed real school authorization, a fresh teacher-owned course connection, learner video playback and local AI answers, feedback restoration, and owner-only CSV access after removing the helper's code and database registration. Generated LTI activity links open the native viewer and are hidden from course navigation; unrelated activities and Moodle permissions are preserved. See [the evidence](evidence/single-plugin-20261113/README.md).
+
 ## Current native learning interface
 
-The 0.22.1 companion renders learning and teacher panels with Moodle templates.
+The 0.25.4 plugin renders learning and teacher panels with Moodle templates.
 Ordinary requests use core/ajax; streaming uses a same-origin Moodle endpoint.
 PHP signs the private VideoQ API requests. No presentation/authentication frame or
 cross-window learning bridge is part of this transport.

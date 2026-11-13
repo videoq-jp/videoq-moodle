@@ -2,5 +2,5 @@
   "moodleRepository": "https://github.com/moodle/moodle.git",
   "moodleRevision": "a682566412e1d429b95ac8ef4351a518f61b94c5",
   "baselineRepository": "https://github.com/videoq-jp/videoq-moodle.git",
-  "baselineRevision": "2d195b22a14a11365f256b3c5f0c9ca242b93827"
+  "baselineRevision": "371859fc1845764a5d1e2d34417408d282a0c728"
 }

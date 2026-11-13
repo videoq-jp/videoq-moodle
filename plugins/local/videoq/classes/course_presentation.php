@@ -29,7 +29,7 @@ namespace local_videoq;
  */
 final class course_presentation {
     /**
-     * Hides mapped stealth companions without changing launch permissions.
+     * Hides owned transport entries without changing native access permissions.
      *
      * @param \core\hook\output\before_standard_head_html_generation $hook Output hook.
      * @return void
@@ -40,17 +40,17 @@ final class course_presentation {
         if ($courseid <= SITEID) {
             return;
         }
-        // Only VideoQ-owned companions already configured as stealth are eligible.
-        // A teacher-made activity or a deliberately visible companion is untouched.
+        // Historical source companions retain their existing visibility policy.
+        // The current generated course transport always uses the native viewer link.
         $rows = $DB->get_records('local_videoq_sync', ['courseid' => $courseid], '', 'id, lticmid, linkcmid');
+        $ids = [];
         if (class_exists(course_entry::class)) {
             $entry = course_entry::find($courseid);
-            if ($entry) {
-                $rows[] = (object)['lticmid' => $entry->lticmid, 'linkcmid' => 0];
+            if ($entry && course_entry::valid($entry)) {
+                $ids[(int)$entry->lticmid] = (int)$entry->lticmid;
             }
         }
         $info = get_fast_modinfo($courseid);
-        $ids = [];
         foreach ($rows as $row) {
             foreach ([(int)$row->lticmid, (int)$row->linkcmid] as $id) {
                 if ($id <= 0) {

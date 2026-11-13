@@ -119,7 +119,7 @@ $string['cancelconnection'] = '未完了の設定を中止してやり直す';
 $string['cancelconnectionhint'] = '未使用のローカル設定を取り消します。VideoQ側に接続が表示されている場合は、そちらでも接続を解除してください。';
 $string['advancedsettings'] = 'VideoQ 詳細設定（手動接続）';
 
-$string['connectionconfigured'] = 'LTI接続が設定されています。接続状態はVideoQの設定画面で確認できます。';
+$string['connectionconfigured'] = '学校とVideoQの通信が設定されています。先生ごとに自分の講座を接続してください。';
 
 $string['updateconnection'] = 'VideoQの接続を更新・再接続する';
 $string['videoqurl'] = '接続先のVideoQ URL';
@@ -145,8 +145,8 @@ $string['materialmanagementunavailable'] = '教材管理を利用できません
 $string['personalconversations'] = '自分のAI会話';
 $string['personalconversationsunavailable'] = '保存済み会話を利用できません。コースから開き直すか管理者にお問い合わせください。';
 
-$string['accountmanagement'] = '接続先のVideoQアカウントを管理';
-$string['accountmanagementhelp'] = 'VideoQのアカウント設定・課金・システム管理には、VideoQへの別途ログインと、対応するアカウントの権限が必要です。';
+$string['accountmanagement'] = '学校の接続を管理';
+$string['accountmanagementhelp'] = 'ここでは学校との通信を管理します。先生のVideoQアカウントは、各Moodle講座から個別に接続します。';
 $string['accountunavailable'] = 'VideoQのアカウント管理画面を開けません。接続を確認し、必要に応じてVideoQサーバーを更新してください。';
 
 $string['coursetags'] = 'コースのタグと教材';

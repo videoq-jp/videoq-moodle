@@ -1,3 +1,5 @@
+> Historical implementation notes. For the supported single-plugin installation and teacher-owned connection flow, use [setup](setup.md). The old import/LTI-helper workflow below is retired.
+
 # Repository extraction
 
 Source: https://github.com/yukiharada1228/videoq

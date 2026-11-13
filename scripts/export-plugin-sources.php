@@ -39,7 +39,7 @@ mkdir($snapshot . '/scripts', 0700, true);
 $builderrevision = trim(source_command(['git', '-C', $root, 'rev-parse', 'HEAD']));
 $builder = source_command(['git', '-C', $root, 'show', $builderrevision . ':scripts/package-plugins.php']);
 if (file_put_contents($snapshot . '/scripts/package-plugins.php', $builder) !== strlen($builder)) throw new RuntimeException('Cannot write committed builder');
-$components = ['local_videoq' => 'plugins/local/videoq', 'ltisource_videoq' => 'plugins/ltisource/videoq'];
+$components = ['local_videoq' => 'plugins/local/videoq'];
 foreach ($components as $component => $prefix) {
     $entries = source_command(['git', '-C', $root, 'ls-tree', '-r', '-z', $revision . ':' . $prefix]);
     if ($entries === '') throw new RuntimeException('Missing committed plugin tree');

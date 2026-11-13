@@ -15,7 +15,7 @@ class videoq_marketplace_zip_validator extends \core\update\validator {
 }
 $directory = $argv[2] ?? '/audit/marketplace-archives';
 $report = ['validation' => 'Moodle web-installer ZIP validator; scratch destination only', 'components' => []];
-foreach (['local_videoq' => 'local', 'ltisource_videoq' => 'ltisource'] as $component => $type) {
+foreach (['local_videoq' => 'local'] as $component => $type) {
     $archive = $directory . '/' . $component . '.zip';
     $scratch = make_request_directory();
     $files = core_plugin_manager::instance()->unzip_plugin_file($archive, $scratch, 'videoq');

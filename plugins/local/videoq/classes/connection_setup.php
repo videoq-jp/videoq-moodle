@@ -78,9 +78,6 @@ final class connection_setup {
             if (get_config('local_videoq', 'synctoken') || get_config('local_videoq', 'servicemode') === 'lti') {
                 throw new \RuntimeException('Already configured');
             }
-            if (!$DB->record_exists('config_plugins', ['plugin' => 'ltisource_videoq', 'name' => 'version'])) {
-                throw new \RuntimeException('Install both VideoQ plugins first');
-            }
             $value = self::decode($code);
             $pending = json_decode((string)get_config('local_videoq', 'pendingconnection'), true);
             $codehash = hash('sha256', trim($code));

@@ -1,6 +1,32 @@
-# Setup guide
+# Moodleへの導入・更新（0.25.4）
 
-Documentation is maintained in English. See the [complete setup guide](setup.md)
-for installation, connection codes, synchronization, access controls, and disconnection.
+インストールするプラグインは **local_videoq.zipの1つだけ**です。0.25.3まで配布していた `ltisource_videoq` は廃止しました。
 
-This page preserves the previously published documentation link.
+Moodle 5.1に対応し、5.1.8+／Boostで検証しています。公式ディレクトリの審査は未完了です。GitHubでは引き続きプレリリースとして配布します。
+
+## 新規インストール
+
+1. [リリース](https://github.com/videoq-jp/videoq-moodle/releases)から **local_videoq.zip** と **SHA256SUMS** をダウンロードし、SHA-256を確認します。SHA256SUMSは確認用ファイルで、プラグインではありません。
+2. Moodleの「サイト管理 → プラグイン → プラグインをインストール」で **local_videoq.zipだけ**をアップロードし、検証・DBインストールを完了します。
+3. 管理者が「サイト管理 → プラグイン → ローカルプラグイン → VideoQに接続」を開き、`https://videoq.jp` または対応する自前サービスのHTTPS URLを選びます。
+4. VideoQにログインして学校との通信を許可し、Moodleに戻ります。管理者が全講座を所有したり、管理者の利用枠を共有したりする設定ではありません。
+5. 各講座の編集権限を持つ先生が「自分のVideoQアカウントを接続」を選び、自分のアカウントでログインして、自分が所有する既存のVideoQ講座を選択します。
+6. 生徒はMoodleの講座アシスタントを開きます。生徒のVideoQアカウント登録は不要です。
+
+別のLTI補助プラグインや手動のLTI起動アクティビティは不要です。動画の登録・編集はVideoQ側で行います。
+
+## 既存環境の更新
+
+1. 自前VideoQの場合は先に本体を更新し、DBマイグレーション0062〜0064を適用します。クラウド版は本体側で反映します。
+2. 通常のMoodleバックアップを取得し、**local_videoq.zipを更新インストール**します。**local_videoqをアンインストールしないでください。** 更新で設定・過去の記録を保持します。
+3. 学校の通信許可が設定済みなら保持し、未設定なら管理者が接続します。先生ごとに自分のアカウントと既存講座を接続します。旧一括所有方式の所有者は自動継承しません。
+4. 講座アシスタントで学習できることを確認します。
+5. 旧 `ltisource_videoq` が入っている場合は「プラグイン概要」から **その補助プラグインだけ**をアンインストールします。Moodleがコードを削除できない場合は、管理者が `public/mod/lti/source/videoq`（構成によっては `mod/lti/source/videoq`）を削除して通知画面を確認します。
+
+旧補助プラグインが一時的に残っていても、新しい本体への更新と接続はできます。自動生成済みのVideoQ活動リンクも、Moodle内の講座アシスタントへ自動で移動します。Moodleの講座・動画や、VideoQ講座を削除する必要はありません。
+
+## 学習画面と権限
+
+本体と同じ動画一覧・概要・講座Q&A・AI質問・引用・評価を、Moodleのテンプレートとテーマで表示します。会話は自動継続します。接続した講座所有者の先生だけが最新100件の質問履歴と全件CSVを利用でき、生徒や別の共同教師には公開しません。現在のMoodle権限も毎回確認します。
+
+詳しい設定・切断・完全削除は[英語の設定ガイド](setup.md)、検証範囲は[verification](verification.md)を参照してください。

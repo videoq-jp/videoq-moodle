@@ -19,7 +19,7 @@ try {
         if (!is_dir(dirname($fixture . '/' . $file))) mkdir(dirname($fixture . '/' . $file), 0700, true);
         copy($root . '/' . $file, $fixture . '/' . $file);
     }
-    foreach (['local_videoq' => 'local', 'ltisource_videoq' => 'ltisource'] as $component => $type) {
+    foreach (['local_videoq' => 'local'] as $component => $type) {
         foreach (['version.php', 'LICENSE', 'lang/en/' . $component . '.php'] as $file) {
             $target = $fixture . '/plugins/' . $type . '/videoq/' . $file;
             if (!is_dir(dirname($target))) mkdir(dirname($target), 0700, true);
