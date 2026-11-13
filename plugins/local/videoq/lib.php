@@ -31,25 +31,6 @@
  * @return void
  */
 function local_videoq_extend_settings_navigation(settings_navigation $nav, context $context) {
-    global $PAGE;
-    if (
-        $context->contextlevel !== CONTEXT_MODULE || !$PAGE->cm
-            || !\local_videoq\source_management::can_manage((int)$PAGE->cm->id)
-    ) {
-        return;
-    }
-    $node = $nav->find('modulesettings', navigation_node::TYPE_SETTING) ?: $nav;
-    $node->add(
-        get_string(
-            'managesync',
-            'local_videoq'
-        ),
-        new moodle_url(
-            '/local/videoq/manage.php',
-            ['cmid' => $PAGE->cm->id]
-        ),
-        navigation_node::TYPE_SETTING
-    );
 }
 
 /**
@@ -66,13 +47,8 @@ function local_videoq_extend_navigation_course(navigation_node $navigation, stdC
     }
     if (has_capability('local/videoq:managecontent', $context) && has_capability('moodle/course:manageactivities', $context)) {
         $navigation->add(
-            get_string('coursecatalog', 'local_videoq'),
-            new moodle_url('/local/videoq/catalog.php', ['course' => $course->id]),
-            navigation_node::TYPE_SETTING
-        );
-        $navigation->add(
-            get_string('managecourseentry', 'local_videoq'),
-            new moodle_url('/local/videoq/course.php', ['course' => $course->id]),
+            get_string('teacherconnect', 'local_videoq'),
+            new moodle_url('/local/videoq/teacherconnect.php', ['course' => $course->id]),
             navigation_node::TYPE_SETTING
         );
     }
@@ -86,7 +62,6 @@ function local_videoq_extend_navigation_course(navigation_node $navigation, stdC
  * @return void
  */
 function local_videoq_coursemodule_standard_elements(moodleform_mod $form, MoodleQuickForm $mform): void {
-    \local_videoq\transcription_language::form($form, $mform);
 }
 
 /**
@@ -97,7 +72,7 @@ function local_videoq_coursemodule_standard_elements(moodleform_mod $form, Moodl
  * @return array
  */
 function local_videoq_coursemodule_validation(moodleform_mod $form, array $data): array {
-    return \local_videoq\transcription_language::validate($form, $data);
+    return [];
 }
 
 /**
@@ -108,6 +83,6 @@ function local_videoq_coursemodule_validation(moodleform_mod $form, array $data)
  * @return stdClass
  */
 function local_videoq_coursemodule_edit_post_actions(stdClass $moduleinfo, stdClass $course): stdClass {
-    \local_videoq\transcription_language::saved($moduleinfo);
+
     return $moduleinfo;
 }

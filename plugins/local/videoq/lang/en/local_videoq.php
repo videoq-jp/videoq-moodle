@@ -112,7 +112,7 @@ $string['connectbutton'] = 'Connect';
 $string['connectionsuccess'] = 'Connected to VideoQ.';
 $string['connectionready'] = 'VideoQ is connected.';
 $string['connectionunavailable'] = 'Could not verify the connection. Check VideoQ availability and connection settings. Existing settings were preserved.';
-$string['connectionnext'] = 'Add a video File activity to a course and enable VideoQ questions in its settings.';
+$string['connectionnext'] = 'Each teacher connects their own VideoQ account from the Moodle course and selects an existing VideoQ course. Add and edit videos in VideoQ.';
 $string['connectioninstructions'] = 'In VideoQ Settings → Connect Moodle, generate a code for this Moodle URL and paste it here. LTI and synchronization are configured automatically.';
 $string['connectionfailed'] = 'Could not connect. Check both VideoQ plugins, the selected URL and server availability. Use Retry if available, or start again from Moodle. Existing materials were preserved.';
 $string['cancelconnection'] = 'Cancel incomplete setup and start again';
@@ -384,3 +384,27 @@ $string['transcriptionlanguage'] = 'Transcription language';
 $string['transcriptionlanguageauto'] = 'Detect automatically';
 $string['invalidtranscriptionlanguage'] = 'Select a supported transcription language.';
 $string['transcriptionlanguageuploadonly'] = 'Choose the language when uploading a new video.';
+
+$string['teacherconnect'] = 'Connect my VideoQ account';
+
+$string['workspacevideos'] = 'Videos';
+$string['workspaceai'] = 'AI assistant';
+$string['workspaceoverview'] = 'Overview';
+$string['workspaceqa'] = 'Questions & answers';
+$string['workspacehistory'] = 'Question history';
+$string['workspacenew'] = 'New conversation';
+$string['workspaceempty'] = 'Choose a video to start learning.';
+
+$string['workspacechat'] = 'Chat';
+$string['workspacecoursehistory'] = 'Course question history';
+$string['workspacehistoryerror'] = 'Unable to load question history. Please try again.';
+
+$string['workspacehistoryempty'] = 'No history yet';
+$string['workspacehistoryshared'] = 'Shared link user';
+
+$string['workspaceback'] = 'Back to course';
+$string['workspacehide'] = 'Hide video';
+$string['workspaceshow'] = 'Show video';
+$string['workspacedetails'] = 'Details';
+
+$string['privacy:metadata:questionauthor'] = 'The Moodle-verified learner identifier, name and email stored with AI answers and included in the connected course owner’s history and CSV.';

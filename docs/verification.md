@@ -80,3 +80,63 @@ The [integration review](integration-review.md) records current findings, correc
 and deployment limits, including the distinction between whole-lab recovery and
 Moodle course backup/restore. Live integration checks are serialized by a PHP lock;
 `php tests/live-lock.php` verifies concurrent checks are rejected and locks released.
+
+## 0.25 linked native course update (2026-11-13)
+
+The teacher selects an existing owned VideoQ course for Moodle, matching Classroom.
+Moodle source-upload controls and activity import observers are retired; old queued
+export tasks cancel their destinations. Scheduled maintenance retains assertion and
+transfer-record cleanup only. Deploy matching API/web and migrations 0063/0064.
+
+Verified during development:
+- Offline PHP contracts, plugin packaging, translations and PHP/JavaScript syntax.
+- PostgreSQL connection ownership, fresh anchor checks, disconnect/revocation,
+  current native playlist membership and signed Moodle playback requests.
+- Production player tests with controlled Moodle AJAX: file/provider switching,
+  citations, unknown-video refusal and late-response revocation.
+- Native learning handlers rendered with pinned Moodle core message templates:
+  streamed questions, safe answer text, feedback, Q&A, personal NDJSON history and
+  failed-question draft preservation. Run in a DOM harness with API/media substitutes.
+- ego-browser desktop/mobile layout checks using the production plugin template,
+  styles and scripts; Moodle theme/message fragments and upstream data substituted.
+
+These are development checks. The new plugin has not been installed on a real
+Moodle instance for end-to-end acceptance, and no production deployment was made.
+
+## 0.25.1 native feature parity
+
+Removed learner new-conversation/private-history buttons from both integrations.
+Internal conversation restoration remains automatic, matching native VideoQ.
+Connected owner teachers use the native latest-100 history and full CSV path;
+learner/co-teacher requests are refused by fresh server authorization. No extra
+aggregate-report or transcript/tag/authoring panels are surfaced in the viewer.
+
+Checks include the actual Moodle core message templates and plugin browser assets
+through ego-browser, owner history/CSV and preserved chat/drafts, plus PostgreSQL
+signed native requests, Google-context revocation and attribution/CSV tests.
+Moodle sessions, upstream APIs/media and model responses in browser fixtures are
+substitutes. Production deployment and installed Moodle/Classroom acceptance have
+not been performed.
+
+## 0.25.3 installed linked-course verification
+
+An isolated installed Moodle 5.1.8+ / Boost environment was paired with the current
+VideoQ working tree on 2026-11-13. ego-browser exercised administrator approval,
+teacher-owned native course selection, learner playback of two actual files,
+real local-model answers citing both videos, citation switching, feedback and
+restoration. The owner downloaded real CSV including the Moodle-verified learner
+name/email, question, answer and feedback; student and co-teacher history/CSV
+requests were refused. The 390px check retained the media element when collapsing
+it for input. Standard Moodle avatar rendering was retained.
+
+The 0.25.3 update signs the server-derived learner profile, reuses the existing
+answer-author snapshot, declares that transfer in Moodle privacy metadata, and
+uses the regular SRT parser for owner-history citations. The connection-complete
+instructions now describe teacher-owned existing-course linking.
+
+Both plugins were CLI-upgraded to 2026111304, with PHP signature/package contracts
+and generated ZIPs checked. This used previously processed public test materials;
+new ASR/indexing, iPhone hardware, Google Classroom installation and production
+load/deployment were not tested. A transient playback authorization failure under
+parallel load required a retry. Detailed sanitized evidence is in the paired
+VideoQ repository at `docs/evidence/moodle-linked-20261113/`.

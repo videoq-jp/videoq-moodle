@@ -83,7 +83,7 @@ namespace {
     Source::require_manager(10);
     $nav = new settings_navigation();
     local_videoq_extend_settings_navigation($nav, context_module::instance(10));
-    check($nav->links === 1, 'Authorized source navigation missing');
+    check($nav->links === 0, 'Legacy source registration navigation must be absent');
     foreach (['course:42:local/videoq:managecontent', 'module:10:moodle/course:manageactivities'] as $key) {
         $grants[$key] = false;
         check(!Source::can_manage(10), 'Denied source navigation remains visible');
@@ -93,7 +93,7 @@ namespace {
         foreach ([fn() => Source::require_manager(10), fn() => Sync::enable(10),
                 fn() => Sync::disable(10), fn() => Sync::retry(10)] as $operation) rejects($operation);
         local_videoq_extend_settings_navigation($nav, context_module::instance(10));
-        check($nav->links === 1 && $DB->writes === 0 && $DB->generation === 5 && $DB->enabled,
+        check($nav->links === 0 && $DB->writes === 0 && $DB->generation === 5 && $DB->enabled,
             'Revoked direct action changed a binding or navigation');
         $grants[$key] = true;
     }

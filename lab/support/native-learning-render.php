@@ -36,7 +36,7 @@ final class NativeFixtureLoader implements Mustache_Loader {
         return file_get_contents($base . '/' . $match[2] . '.mustache');
     }
 }
-$catalog = !empty($_GET['empty']) ? [] : [['lesson' => 'sync_11', 'title' => 'Owned Moodle File', 'kind' => 'file',
+$catalog = !empty($_GET['empty']) ? [] : [['videoId' => 1, 'lesson' => '1', 'title' => 'Owned Moodle File', 'kind' => 'file',
     'mime' => 'video/mp4', 'url' => '/fixture.mp4', 'activityUrl' => '/mod/resource/view.php?id=11', 'sourceGeneration' => 1]];
 $page = new \local_videoq\output\workspace(42, $catalog, $catalog[0]['lesson'] ?? '', [], true);
 $data = $page->export_for_template(new renderer_base());
@@ -50,4 +50,4 @@ echo '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport"
 echo '<style>body{font:16px system-ui;margin:16px}.hidden{display:none}.d-flex{display:flex}.flex-column{flex-direction:column}.p-3{padding:1rem}.card{border:1px solid #ccc}.btn{padding:.4rem .7rem;margin:.2rem}textarea{width:90%}video{width:100%}.message{margin:1rem;background:#eee;padding:.5rem}.send{background:#def}</style>';
 echo $engine->render('local_videoq/workspace', $data);
 echo '<script>window.nativeFixtureConfig=' . json_encode(['copy' => \local_videoq\ui_strings::data(), 'empty' => !$catalog], JSON_HEX_TAG | JSON_THROW_ON_ERROR) . ';</script>';
-echo '<script src="/fixture.js"></script><script src="/player.js"></script><script src="/learning.js"></script><script defer src="/checks.js"></script>';
+echo '<script src="/fixture.js"></script><script src="/course-history.js"></script><script src="/player.js"></script><script src="/learning.js"></script><script src="/layout.js"></script><script defer src="/checks.js"></script>';

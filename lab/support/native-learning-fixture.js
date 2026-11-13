@@ -2,7 +2,7 @@
 (function() {
     const copy = nativeFixtureConfig.copy;
     const fixture = window.nativeLearningFixture = {copy, calls: [], streams: [], errors: [], seeks: [], downloads: [], writes: 0,
-        failWrite: false, conflictWrite: false, denyManage: false, denyCoreReports: false, failStream: false, questions: [], conversations: [], tags: []};
+        ownerHistory: true, failWrite: false, conflictWrite: false, denyManage: false, denyCoreReports: false, failStream: false, questions: [], conversations: [], tags: []};
     window.addEventListener('error', event => fixture.errors.push(event.message));
     window.addEventListener('unhandledrejection', event => fixture.errors.push(String(event.reason)));
     window.M = {cfg: {sesskey: 'owned-moodle-sesskey'}};
@@ -15,7 +15,7 @@
             currentSrc: {get: () => location.origin + '/fixture.mp4'}, currentTime: {get: () => seconds, set: value => {seconds = value;}}});
         media.play = () => Promise.resolve(); media.pause = () => {}; media.load = () => {};
     }
-    const videos = nativeFixtureConfig.empty ? [] : [{videoId: 1, lesson: 'sync_11', title: 'Owned Moodle File'}];
+    const videos = nativeFixtureConfig.empty ? [] : [{videoId: 1, lesson: '1', title: 'Owned Moodle File'}];
     const permissions = {viewTranscript: true, viewQa: true, postQa: true, voteQa: true, deleteOwnQa: true,
         moderateQa: true, instructorQa: true, manageOwnHistory: true, manageContent: true, viewReports: true};
     let material = {videoId: 1, title: 'Owned Moodle File', description: 'Original description', transcript: '1\n00:00:00,000 --> 00:00:03,000\nOwned text\n',
@@ -25,8 +25,8 @@
     const answer = {segments: [{text: 'Owned answer <img src=x onerror="window.nativeUnsafe=true">', sourceIds: [1]}],
         sources: [{id: 1, video_id: 1, title: 'Owned Moodle File', start_time: '00:00:12'}]};
     const author = {source: 'moodle', name: 'Owned teacher', instructor: true};
-    function metadata() { return {nativeProtocol: 1, features: {transcripts: true, qa: true, conversations: true, management: true, tags: true, reports: true},
-        permissions: {...permissions, manageContent: !fixture.denyManage, viewReports: !fixture.denyCoreReports}, videos, managementVideos: fixture.denyManage ? [] : videos, order: videos.map(v => v.videoId)}; }
+    function metadata() { return {courseHistoryAvailable: fixture.ownerHistory, nativeProtocol: 1, features: {transcripts: true, qa: true, conversations: true, management: false, tags: false, reports: false},
+        permissions: {...permissions, manageContent: false, viewReports: false}, videos, managementVideos: [], order: videos.map(v => v.videoId)}; }
     function forumData(input) {
         if (input.action === 'ask') { const question = {id: crypto.randomUUID(), title: input.title, body: input.body, videoId: input.videoId,
             videoTitle: videos[0]?.title, author, updatedAt: new Date().toISOString(), votes: 0, voted: false, featured: false, canEdit: true, canDelete: true, replyCount: 0}; fixture.questions.push(question); return {id: question.id}; }
@@ -40,7 +40,10 @@
         return {items: fixture.questions, total: fixture.questions.length, canPost: true, canVote: true, canModerate: true};
     }
     function handle(operation, input) {
+        if (operation === 'playback') return {kind: 'file', url: 'https://media.example/fixture.mp4', title: 'Owned VideoQ video', description: 'Linked course description'};
         if (operation === 'materials') return metadata();
+        if (operation === 'course-history') return {count: 1, results: [{id:1, created_at:new Date().toISOString(), question:'Owned course question',
+            asked_by:{username:'Learner',email:'learner@example.com'}, answer, feedback:'good'}]};
         if (operation === 'history') return {turns: []};
         if (operation === 'transcript') return {videoId: 1, cues: [{startTime: '00:00:12', text: 'Owned transcript'}], nextCursor: null};
         if (operation === 'feedback') return {feedback: input.feedback};
@@ -78,6 +81,7 @@
             const input = JSON.parse(request.args.payload); fixture.calls.push({method: request.methodname, args: request.args, input});
             if (request.methodname !== 'local_videoq_request_learning' || request.args.courseid !== 42) throw new Error('Unexpected Moodle authority input');
             if (request.args.operation === 'reports' && fixture.denyCoreReports) throw {errorcode: 'nativeaccessdenied'};
+            if (request.args.operation === 'course-history' && input.action === 'csv') return {status:200,contenttype:'text/csv',body:'created_at,asked_by_email,question,answer\r\n2026-11-13,learner@example.com,Question,Answer\r\n'};
             try {return {status: 200, body: JSON.stringify(handle(request.args.operation, input)), contenttype: 'application/json'};}
             catch (error) { if (error.status) return {status: error.status, body: '{"error":{}}', contenttype: 'application/json'}; throw error; }
         })});

@@ -29,7 +29,7 @@ $browser = null;
 try {
     $browser = new Browser();
     $browser->cdp('Network.enable');
-    $browser->cdp('Network.setBlockedURLs', ['urls' => ['*://*.youtube.com/*', '*://youtube.com/*', '*://*.ytimg.com/*']]);
+    $browser->cdp('Network.setBlockedURLs', ['urls' => ['*://*.youtube.com/*', '*://youtube.com/*', '*://*.ytimg.com/*', '*://www.youtube-nocookie.com/*', '*://media.example/*']]);
     $browser->cdp('Emulation.setDeviceMetricsOverride', ['width' => 390, 'height' => 844, 'deviceScaleFactor' => 1, 'mobile' => false]);
     $browser->go('http://' . $address);
     $result = $browser->wait('return window.videoqPlayerResult || null', 30);

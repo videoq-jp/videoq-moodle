@@ -66,6 +66,7 @@
                     return new Response(JSON.stringify({ error: { code: 'MOODLE_REQUEST_FAILED' } }), { status: code, headers: { 'Content-Type': 'application/json' } });
                 }
             }
+            const ownerHistoryUi = createCourseHistory(workspace, payload => learningRequest('course-history', payload), source => seekSource(source), [chat], uiCopy.courseHistory, answerText);
             function syncComposer() {
                 send.disabled = question.disabled = !sessionReady || !learningEnabled || chatInFlight || personalBusy;
                 if (sessionReady && !learningEnabled && !chatInFlight) {
@@ -215,6 +216,7 @@
                 const response = await learningRequest(action === "list" ? "materials" : "transcript", payload);
                 if (!response.ok) {
                     if (action === "list" && [401, 403].includes(response.status)) {
+                        ownerHistoryUi.availability(false);
                         learningRefresh([]);
                         qaAvailability(false);
                         personalAvailability(false);
@@ -229,6 +231,7 @@
                     if (result.nativeProtocol !== 1 || !Array.isArray(result.videos) || !result.permissions)
                         throw new Error(uiCopy.connectionError);
                     features = result.features || {};
+                    ownerHistoryUi.availability(result.courseHistoryAvailable);
                     learningRefresh(result.videos);
                     materialsPanel.hidden = !features.transcripts || result.permissions.viewTranscript !== true;
                     qaAvailability(result.permissions.viewQa === true);

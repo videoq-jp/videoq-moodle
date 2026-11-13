@@ -243,6 +243,12 @@ final class ui_strings {
                 $result[$group][$name] = get_string($id, 'local_videoq');
             }
         }
+        $result['chat']['courseHistory'] = [
+            'loading' => get_string('nativepersonal_loading', 'local_videoq'),
+            'empty' => get_string('workspacehistoryempty', 'local_videoq'),
+            'error' => get_string('workspacehistoryerror', 'local_videoq'),
+            'shared' => get_string('workspacehistoryshared', 'local_videoq'),
+        ];
         $result['chat']['qa'] = $result['qa'];
         foreach (['personal', 'management', 'tags', 'reports'] as $group) {
             $result['chat'][$group] = $result[$group];

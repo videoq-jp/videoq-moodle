@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
 /**
- * Transfers video files from an asynchronous task.
+ * Cancels queued exports from the retired Moodle video-import workflow.
  *
  * @package local_videoq
  * @copyright 2026 VideoQ contributors
@@ -26,91 +26,21 @@
 namespace local_videoq\task;
 
 /**
- * Large media transfer runs outside launch/API requests. URLs never enter task logs.
+ * Old queued tasks remain loadable during upgrades, but never transfer source media.
  */
 final class export_material extends \core\task\adhoc_task {
     /**
-     * Transfers a queued source video to its signed upload destination.
+     * Invalidates a legacy upload destination without reading or transferring media.
      *
      * @return void
      */
     public function execute() {
-        global $CFG, $DB;
-        require_once($CFG->libdir . '/filelib.php');
-        $jobid = $this->get_custom_data()->jobid;
-        $lock = \core\lock\lock_config::get_lock_factory('local_videoq')->get_lock('export-job-' . $jobid, 0);
-        if (!$lock) {
-            return;
-        }
-        try {
-            $job = $DB->get_record('local_videoq_exports', ['jobid' => $jobid], '*', MUST_EXIST);
-            if (!in_array($job->status, ['queued', 'uploading'], true)) {
-                return;
-            }
-            $type = \local_videoq\service_auth::type();
-            if ((int)$type->id !== (int)$job->typeid || $job->timecreated < time() - 1800) {
-                throw new \RuntimeException('Expired export');
-            }
-            $row = $DB->get_record(
-                'local_videoq_sync',
-                ['cmid' => $job->cmid,
-                 'courseid' => $job->courseid,
-                 'typeid' => $job->typeid],
-                '*',
-                MUST_EXIST
-            );
-            $uservisibility = ($this->get_custom_data()->userVisibility ?? false) === true;
-            $manifest = \local_videoq\synchronizer::run((int)$row->id, true, $uservisibility);
-            if (!$manifest['enabled'] || $manifest['generation'] !== (int)$job->generation) {
-                $DB->update_record(
-                    'local_videoq_exports',
-                    (object)['id' => $job->id,
-                     'status' => 'stale',
-                     'uploadurl' => null,
-                    'timemodified' => time()]
-                );
-                return;
-            }
-            \local_videoq\materials_service::destination($job->uploadurl);
-            $file = \local_videoq\synchronizer::video_file((int)$job->cmid);
-            if (!$file || $file->get_contenthash() !== $manifest['file']['contentHash']) {
-                throw new \RuntimeException('Source changed');
-            }
-            $DB->set_field('local_videoq_exports', 'status', 'uploading', ['id' => $job->id]);
-            $curl = new \curl();
-            $curl->setHeader(['Content-Type: ' . $file->get_mimetype(), 'Content-Length: ' . $file->get_filesize(), 'Expect:']);
-            $temp = $file->copy_content_to_temp('local_videoq');
-            try {
-                $curl->put(
-                    $job->uploadurl,
-                    ['file' => $temp],
-                    \local_videoq\client::http_options(1800) + ['CURLOPT_USERPWD' => false]
-                );
-            } finally {
-                if (is_file($temp)) {
-                    unlink($temp);
-                }
-            }
-            $code = (int)($curl->get_info()['http_code'] ?? 0);
-            if ($curl->get_errno() || $code < 200 || $code >= 300) {
-                throw new \RuntimeException('Transfer failed');
-            }
-            $DB->update_record('local_videoq_exports', (object)['id' => $job->id, 'status' => 'uploaded', 'uploadurl' => null,
-                'bytes' => (int)$file->get_filesize(), 'timemodified' => time()]);
-        } catch (\Throwable $error) {
-            // Core logs exception messages for failed ad-hoc tasks. Keep signed URLs out.
-            if (isset($job)) {
-                $DB->update_record(
-                    'local_videoq_exports',
-                    (object)['id' => $job->id,
-                     'status' => 'failed',
-                     'uploadurl' => null,
-                    'timemodified' => time()]
-                );
-            }
-            mtrace('VideoQ media export failed; synchronization will retry.');
-        } finally {
-            $lock->release();
+        global $DB;
+        // Upgrading must also stop exports queued by the retired upload workflow.
+        $jobid = $this->get_custom_data()->jobid ?? '';
+        if ($jobid !== '') {
+            $DB->execute('UPDATE {local_videoq_exports} SET status = ?, uploadurl = NULL, timemodified = ?'
+                . ' WHERE jobid = ? AND status IN (?, ?)', ['failed', time(), $jobid, 'queued', 'uploading']);
         }
     }
 }

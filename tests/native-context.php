@@ -129,7 +129,7 @@ namespace {
         rejects(fn() => Context::resolve(42), 'Different configured tool accepted'); $config['typeid'] = 3;
         $config['apiurl'] = 'http://videoq.example';
         rejects(fn() => Context::resolve(42), 'Unverified origin accepted'); $config['apiurl'] = 'https://videoq.example';
-        foreach (['transcript', 'conversations', 'management', 'reports'] as $operation) {
+        foreach (['transcript', 'conversations', 'management', 'reports', 'teacher/connect', 'course-history'] as $operation) {
             rejects(fn() => Context::require_operation($context, $operation, []), 'Missing operation capability accepted');
         }
         Context::require_operation($context, 'materials', []);
@@ -141,7 +141,9 @@ namespace {
             rejects(fn() => Context::require_operation($context, 'qa', ['action' => $action]), 'Missing Q&A capability accepted');
         }
         $context['scope']['resources'] = [['learning' => false]];
-        rejects(fn() => Context::require_operation($context, 'messages/stream', []), 'Processing-only source accepted for learning');
+        // Local Moodle files do not determine linked VideoQ course availability.
+        Context::require_operation($context, 'messages/stream', []);
+        Context::require_operation($context, 'playback', []);
         echo "Native Moodle actor, current anchor availability, registration and operation capabilities passed.\n";
     } finally {
         unlink($directory . '/mod/lti/locallib.php'); rmdir($directory . '/mod/lti'); rmdir($directory . '/mod'); rmdir($directory);

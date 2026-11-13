@@ -112,7 +112,7 @@ $string['connectbutton'] = '接続';
 $string['connectionsuccess'] = 'VideoQとの接続が完了しました。';
 $string['connectionready'] = 'VideoQに接続されています。';
 $string['connectionunavailable'] = '接続を確認できませんでした。VideoQの稼働状況と接続設定を確認してください。既存の設定は保持されています。';
-$string['connectionnext'] = '講座に動画をファイル教材として追加し、教材の「VideoQの質問機能」を有効にすると質問できます。';
+$string['connectionnext'] = '各先生がMoodleの担当コースから自分のVideoQアカウントを接続し、既存の講座を選択してください。動画の追加・編集はVideoQで行います。';
 $string['connectioninstructions'] = 'VideoQの「設定 → Moodleと連携」で、このMoodleのURLを指定して発行した接続コードを貼り付けてください。LTIと同期設定を自動で登録します。';
 $string['connectionfailed'] = '接続できませんでした。両方のVideoQプラグイン、接続先URL、VideoQの稼働状況を確認してください。再試行ボタンがない場合は、Moodleから接続をやり直してください。既存の教材は保持されています。';
 $string['cancelconnection'] = '未完了の設定を中止してやり直す';
@@ -384,3 +384,27 @@ $string['transcriptionlanguage'] = '文字起こし言語';
 $string['transcriptionlanguageauto'] = '自動判定';
 $string['invalidtranscriptionlanguage'] = '対応している言語を選択してください。';
 $string['transcriptionlanguageuploadonly'] = '言語は新しい動画のアップロード時に指定してください。';
+
+$string['teacherconnect'] = '自分のVideoQアカウントを接続';
+
+$string['workspacevideos'] = '動画一覧';
+$string['workspaceai'] = 'AIアシスタント';
+$string['workspaceoverview'] = '概要';
+$string['workspaceqa'] = '質問・回答';
+$string['workspacehistory'] = '質問履歴';
+$string['workspacenew'] = '新しい会話';
+$string['workspaceempty'] = '動画を選んで学習を始めましょう。';
+
+$string['workspacechat'] = 'チャット';
+$string['workspacecoursehistory'] = '講座の質問履歴';
+$string['workspacehistoryerror'] = '質問履歴を読み込めません。再度お試しください。';
+
+$string['workspacehistoryempty'] = '履歴はありません';
+$string['workspacehistoryshared'] = '共有リンク利用者';
+
+$string['workspaceback'] = 'コースに戻る';
+$string['workspacehide'] = '動画を隠す';
+$string['workspaceshow'] = '動画を表示';
+$string['workspacedetails'] = '詳細';
+
+$string['privacy:metadata:questionauthor'] = 'Moodleが確認した質問者の識別子・氏名・メールアドレス。AI回答とともに保存され、接続した講座の所有者の質問履歴とCSVに含まれます。';

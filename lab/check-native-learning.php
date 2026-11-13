@@ -11,7 +11,7 @@ mkdir($work, 0700);
 $support = __DIR__ . '/support';
 $plugin = dirname(__DIR__) . '/plugins/local/videoq';
 $routes = ['/fixture.js' => $support . '/native-learning-fixture.js', '/checks.js' => $support . '/native-learning-checks.js',
-    '/learning.js' => $plugin . '/learning.js', '/player.js' => $plugin . '/player.js', '/styles.css' => $plugin . '/styles.css'];
+    '/course-history.js' => $plugin . '/course-history.js', '/layout.js' => $plugin . '/layout.js', '/learning.js' => $plugin . '/learning.js', '/player.js' => $plugin . '/player.js', '/styles.css' => $plugin . '/styles.css'];
 $router = $work . '/router.php';
 file_put_contents($router, '<?php $routes=' . var_export($routes, true) . ';$path=parse_url($_SERVER["REQUEST_URI"],PHP_URL_PATH);'
     . 'if($path==="/"){require ' . var_export($support . '/native-learning-render.php', true) . ';return;}'

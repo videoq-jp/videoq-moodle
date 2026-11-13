@@ -24,7 +24,5 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+// VideoQ courses are linked, never imported from Moodle activity events.
 $observers = [];
-foreach (['course_module_updated', 'course_module_deleted', 'course_updated', 'course_deleted'] as $name) {
-    $observers[] = ['eventname' => '\\core\\event\\' . $name, 'callback' => '\local_videoq\observer::changed'];
-}

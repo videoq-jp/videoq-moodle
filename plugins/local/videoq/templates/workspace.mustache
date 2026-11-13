@@ -2,59 +2,67 @@
     @template local_videoq/workspace
     @copyright 2026 VideoQ contributors
     @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-    Moodle owns the player, learning panels and session-authenticated requests.
-
-    Example context (json):
-    {"hasplayer": false, "connected": false, "catalog": "[]", "config": "{}"}
+    Moodle themed course workspace for an existing VideoQ course.
+    Example context (json): {"connected":true,"catalog":"[]","config":"{}"}
 }}
-<div class="local-videoq-workspace {{^hasplayer}}local-videoq-empty{{/hasplayer}}"
-    {{#connected}}data-videoq-native="1"{{/connected}} data-videoq-config="{{config}}"
-    data-videoq-lessons="{{catalog}}" data-videoq-lesson="{{lesson}}"
-    data-videoq-youtube-error="{{#str}}youtubeplaybackerror, local_videoq{{/str}}"
-    data-videoq-youtube-autoplay="{{#str}}youtubeautoplay, local_videoq{{/str}}"
-    data-videoq-source-updated="{{#str}}sourceupdated, local_videoq{{/str}}">
-    {{#hasplayer}}
-    <section class="local-videoq-panel local-videoq-video card" aria-label="{{#str}}video, local_videoq{{/str}}">
-        <div class="card-body py-3">
-            <label for="videoq-lesson" class="form-label">{{#str}}video, local_videoq{{/str}}</label>
-            <select id="videoq-lesson" class="form-select">
-                {{#videos}}<option value="{{lesson}}" {{#selected}}selected{{/selected}}>{{title}}</option>{{/videos}}
-            </select>
-        </div>
-        <div class="local-videoq-media mediaplugin mediaplugin_videojs" data-videoq-file {{#youtube}}hidden{{/youtube}}>
-            <video id="videoq-player" class="{{videoclass}}" controls playsinline preload="metadata"
-                data-setup-lazy="{{videosetup}}" aria-label="{{#str}}video, local_videoq{{/str}}">
-                {{#videourl}}<source src="{{videourl}}" type="{{videomime}}">{{/videourl}}
-            </video>
+<div class="local-videoq-viewer">
+    <header class="local-videoq-viewer-header">
+        <a href="{{backurl}}" class="local-videoq-wordmark" aria-label="{{#str}}workspaceback, local_videoq{{/str}}">VideoQ</a>
+        <span class="local-videoq-header-divider" aria-hidden="true"></span>
+        <h1 title="{{coursetitle}}">{{coursetitle}}</h1>
+        {{#canconnect}}<a href="{{connectionurl}}" class="btn btn-outline-secondary btn-sm">{{#str}}teacherconnect, local_videoq{{/str}}</a>{{/canconnect}}
+    </header>
+<div class="local-videoq-workspace" {{#connected}}data-videoq-native="1"{{/connected}}
+    data-videoq-config="{{config}}" data-videoq-lessons="{{catalog}}" data-videoq-lesson="{{lesson}}">
+    <section class="local-videoq-main">
+        <div id="videoq-media" data-videoq-media>
+        <div class="local-videoq-media" data-videoq-file>
+            <video id="videoq-player" controls playsinline preload="metadata" aria-label="{{#str}}video, local_videoq{{/str}}"></video>
         </div>
         <div class="local-videoq-youtube" data-videoq-youtube hidden></div>
+        </div>
         <p data-videoq-player-status role="status" class="text-muted px-3"></p>
-        <a href="{{activityurl}}" data-videoq-player-activity class="btn btn-link">{{#str}}sourceactivity, local_videoq{{/str}}</a>
-        {{#hasmanagedsources}}
-        <details class="card-body py-3">
-            <summary>{{#str}}sourcematerialactions, local_videoq{{/str}}</summary>
-            <ul class="list-unstyled mt-3">
-                {{#managedsources}}
-                <li class="mb-3"><p class="fw-semibold mb-1">{{title}}</p>
-                    {{#links}}<a class="btn btn-outline-secondary btn-sm me-2 mb-2" href="{{url}}">{{label}}</a>{{/links}}
-                </li>
-                {{/managedsources}}
-            </ul>
-        </details>
-        {{/hasmanagedsources}}
+        <div class="local-videoq-player-heading">
+            <h2 data-videoq-video-title>{{#str}}workspaceempty, local_videoq{{/str}}</h2>
+            <button type="button" class="btn btn-link btn-sm" data-videoq-player-toggle data-hide="{{#str}}workspacehide, local_videoq{{/str}}" data-show="{{#str}}workspaceshow, local_videoq{{/str}}" aria-expanded="true" aria-controls="videoq-media">{{#str}}workspacehide, local_videoq{{/str}}</button>
+        </div>
+        <div data-videoq-details>
+        <nav class="nav nav-tabs local-videoq-tabs" aria-label="{{#str}}workspaceoverview, local_videoq{{/str}}">
+            <button class="nav-link active" type="button" data-videoq-main-tab="overview" aria-pressed="true">{{#str}}workspaceoverview, local_videoq{{/str}}</button>
+            <button class="nav-link" type="button" data-videoq-main-tab="qa" aria-pressed="false">{{#str}}workspaceqa, local_videoq{{/str}}</button>
+        </nav>
+        <section class="local-videoq-overview" data-videoq-main-pane="overview"><h3 class="h6">{{#str}}workspaceoverview, local_videoq{{/str}}</h3><p data-videoq-description></p></section>
+        <section data-videoq-main-pane="qa" hidden>{{> local_videoq/qa }}</section>
+        </div>
     </section>
-    {{/hasplayer}}
     {{#connected}}
-    <section class="local-videoq-panel local-videoq-questions card" aria-label="{{#str}}questions, local_videoq{{/str}}">
-        {{> local_videoq/chat }}
-    </section>
-    <section class="local-videoq-panel local-videoq-tools card" aria-label="{{#str}}courseassistant, local_videoq{{/str}}">
-        {{> local_videoq/transcript }}
+    <aside class="local-videoq-sidebar">
+        <nav class="nav nav-tabs local-videoq-tabs" aria-label="{{#str}}courseassistant, local_videoq{{/str}}">
+            <button type="button" class="nav-link" data-videoq-side-tab="videos" aria-pressed="false">{{#str}}workspacevideos, local_videoq{{/str}}</button>
+            <button type="button" class="nav-link active" data-videoq-side-tab="ai" aria-pressed="true">{{#str}}workspaceai, local_videoq{{/str}}</button>
+            <button type="button" class="nav-link" data-videoq-side-tab="details" aria-pressed="false" hidden>{{#str}}workspacedetails, local_videoq{{/str}}</button>
+        </nav>
+        <section data-videoq-side-pane="details" hidden></section>
+        <section class="p-3" data-videoq-side-pane="videos" hidden><div class="list-group" data-videoq-playlist></div></section>
+        <section data-videoq-side-pane="ai" class="local-videoq-ai">
+            <div data-course-history-tabs class="nav nav-tabs p-2" hidden>
+                <button type="button" class="nav-link active" data-course-chat-tab aria-pressed="true">{{#str}}workspacechat, local_videoq{{/str}}</button>
+                <button type="button" class="nav-link" data-course-history-tab aria-pressed="false">{{#str}}workspacecoursehistory, local_videoq{{/str}}</button>
+            </div>
+            <section data-course-history-panel class="course-owner-history p-3" hidden>
+                <button type="button" data-course-history-csv class="btn btn-outline-secondary btn-sm">CSV</button>
+                <p data-course-history-status role="status"></p><div data-course-history-content></div>
+            </section>
+            {{> local_videoq/chat }}
+        </section>
+    </aside>
+    <div hidden aria-hidden="true">
         {{> local_videoq/personal_history }}
-        {{> local_videoq/qa }}
+        {{> local_videoq/transcript }}
         {{> local_videoq/management }}
         {{> local_videoq/tags }}
         {{> local_videoq/reports }}
-    </section>
+    </div>
     {{/connected}}
+</div>
 </div>

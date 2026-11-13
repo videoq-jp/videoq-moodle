@@ -1,5 +1,23 @@
 # Connect Moodle and VideoQ
 
+## Current 0.25.1 behavior
+
+Use the teacher-owned existing-course connection described at the end of this
+guide. Course/video authoring happens in VideoQ. The Moodle viewer matches native
+VideoQ functions: automatic continuing AI chat, video list/playback, overview,
+course Q&A, citations and Good/Bad feedback. There are no learner new-conversation
+or private-history controls.
+
+Only the connected teacher/VideoQ owner can open **Chat / Course question history**
+and export native question/answer CSV. Latest 100 logs appear in the viewer; CSV
+exports all logs. The API freshly verifies teaching permission and the exact
+connected teacher identity. Co-teachers do not gain owner data access automatically.
+The matching VideoQ backend is required; no additional database migration beyond
+0063/0064 is needed for 0.25.1. Older transcript, private-history, upload/import,
+editing/tag and aggregate-report instructions below are historical development
+notes and do not describe the current viewer.
+
+
 ## Requirements
 
 - Moodle 5.1 with HTTPS, normal cron and ad-hoc task execution. The local trial
@@ -8,7 +26,7 @@
   `/api/lms/pairing/*`, the LTI materials service, signed S3 uploads, processing
   workers and a maintenance scheduler. An older unmodified VideoQ release does
   not gain backend features by installing a Moodle plugin.
-- An administrator on Moodle and the owning account on VideoQ.
+- A Moodle administrator to authorize installation, and an independent VideoQ account for each course teacher.
 
 Moodle runs PHP and serves the browser JavaScript directly. No Node.js runtime,
 JavaScript package manager or JavaScript compilation step is needed for these
@@ -167,14 +185,15 @@ installer is an alternative when release archives are available; it is not requi
    → Connect to VideoQ** (or `/local/videoq/connect.php`). Enter your **VideoQ
    HTTPS URL**: use `https://videoq.jp` for the compatible cloud release or your
    own on-premises URL, including its custom HTTPS port if needed.
-2. Choose **Connect to VideoQ**. Sign in to the owning VideoQ account, confirm
-   the displayed Moodle URL and account quota permissions, then allow the
-   connection. You return to Moodle automatically. Complete the flow within ten
+2. Choose **Connect to VideoQ**. Sign in to approve school-level communication.
+   This account is the installation contact, not the default course or quota owner.
+   Confirm the displayed Moodle URL and allow the connection. You return to Moodle automatically. Complete the flow within ten
    minutes; no code copying or manual LTI/key registration is needed. The current cloud service at `https://videoq.jp` supports
    this flow. For an on-premises deployment, use a release containing
    [VideoQ PR #1319](https://github.com/videoq-jp/videoq/pull/1319).
    No setup form or connection-code generation in VideoQ settings is needed.
-3. Add a video through Moodle's ordinary **File** activity. Enable **VideoQ
+3. In each course, choose **Connect my VideoQ account**, independently sign in
+   to VideoQ and confirm the teacher account. Then add a video through Moodle's ordinary **File** activity. Enable **VideoQ
    questions** in its settings. Wait for background processing to finish.
 4. Open the course-wide VideoQ assistant. Moodle plays the selected video and
    renders the chat using its native messaging templates. VideoQ generates
@@ -218,11 +237,12 @@ video selection and timestamp seeking.
 
 ## Disconnect
 
-In the owning VideoQ account, open its connection settings, select the Moodle
+In the teacher's VideoQ account, open **Teaching connections**, select the individual course
 connection and choose **Disconnect**. Confirm the displayed connection. Subsequent
 launches, questions and synchronization are denied. Existing learning data is
 retained. Removing local Moodle settings alone does not revoke server access.
-Repeat **Connect to VideoQ** to reconnect through the supported workflow.
+Repeat **Connect my VideoQ account** from that course to reconnect. Other teachers
+cannot take over the reserved connection. The school installation remains active.
 For platform-side trust revocation as well, disable/remove the registered VideoQ
 external tool in Moodle through its standard tool administration. The remote
 VideoQ disconnect does not delete Moodle's tool registration.
@@ -462,3 +482,24 @@ Cleanup removes expired material/tag operation receipts and clears expired LTI
 moderation actor keys. It retains minimal operation-ID hashes so retrying an old
 request cannot repeat a write. Normal core-approved personal data requests do
 not depend on this optional cleanup setting. See [data handling](privacy.md).
+
+
+## Teacher-owned linked courses (0.25)
+
+The site administrator authorizes installation and communication only. Installing
+VideoQ no longer assigns that administrator's account or quota to every course.
+After the administrator connects the service, each course teacher chooses
+**Connect my VideoQ account** in the course navigation, signs in independently to
+VideoQ and selects an existing course owned by that account. Moodle files are not
+imported; add/edit course videos in VideoQ. Learning remains unavailable until the
+connection exists.
+The teacher's storage, video processing and AI allowance apply. Students do not
+need VideoQ accounts. Co-teachers cannot replace the linked owner or access the
+owner's other courses/account/billing merely through Moodle's teacher role.
+
+Deploy the matching VideoQ API/web and migrations 0063/0064 together with this plugin;
+reapply the database security profile. Old site-wide ownership is not retained as
+a fallback. Existing courses must be connected explicitly by their teachers.
+VideoQ settings list individual course connections for disconnection/reconnection.
+
+The 0.25 flow supersedes legacy File-activity upload/sync and source catalog instructions above. Those entry points now open teacher connection; cron only cleans expired assertions/transfer records.
