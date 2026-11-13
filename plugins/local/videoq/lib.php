@@ -86,3 +86,27 @@ function local_videoq_coursemodule_edit_post_actions(stdClass $moduleinfo, stdCl
 
     return $moduleinfo;
 }
+
+/**
+ * Opens generated VideoQ activities through the native Moodle viewer after login.
+ *
+ * @param mixed $courseorid Moodle course or course ID.
+ * @param bool $autologinguest Whether core permits automatic guest login.
+ * @param object|null $cm Current course module, if any.
+ * @param bool $setwantsurltome Whether core remembers the current URL.
+ * @param bool $preventredirect Whether the caller forbids redirects.
+ * @return void
+ */
+function local_videoq_after_require_login($courseorid, $autologinguest, $cm, $setwantsurltome, $preventredirect): void {
+    global $SCRIPT;
+    if (
+        !$cm || (defined('CLI_SCRIPT') && CLI_SCRIPT) || (defined('AJAX_SCRIPT') && AJAX_SCRIPT)
+            || (defined('WS_SERVER') && WS_SERVER)
+    ) {
+        return;
+    }
+    $target = \local_videoq\native_navigation::target($cm, (string)$SCRIPT, (bool)$preventredirect);
+    if ($target) {
+        redirect($target);
+    }
+}
