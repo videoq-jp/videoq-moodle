@@ -21,18 +21,6 @@
  */
 
 /* The Moodle theme supplies fonts, colours, controls and message templates. */
-.local-videoq-workspace {
-    display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(350px, 1fr);
-    gap: 24px;
-    align-items: start;
-    margin-top: 8px;
-}
-.local-videoq-panel { min-width: 0; overflow: hidden; border-radius: .5rem; }
-.local-videoq-media { margin: 0; width: 100%; max-width: none; }
-.local-videoq-questions { display: flex; flex-direction: column; box-sizing: border-box; min-height: 480px; max-height: 85dvh; }
-.local-videoq-tools { grid-column: 1 / -1; }
-.local-videoq-empty { grid-template-columns: minmax(0, 1fr); }
 #page-local-videoq-view .page-header-headings { min-width: 0; max-width: 100%; }
 #page-local-videoq-view .page-header-headings h1 { white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
 #videoq-native-chat { display: flex; flex-direction: column; flex: 1; min-height: 0; }
@@ -72,10 +60,40 @@
 .local-videoq-workspace .course-tag-chip[data-color="magenta"] { color: #ab296a; }
 .local-videoq-workspace [data-videoq-player-status]:empty { display: none; }
 .local-videoq-youtube iframe { width: 100%; height: auto; min-height: 200px; aspect-ratio: 16 / 9; border: 0; }
-@media (max-width: 1100px) {
-    .local-videoq-workspace { grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr); gap: 16px; }
-}
-@media (max-width: 900px) {
-    .local-videoq-workspace { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-    .local-videoq-questions { height: 640px; max-height: 85dvh; min-height: 480px; }
+/* Native VideoQ composition; Moodle supplies the control and message styling. */
+#page-local-videoq-view, #page-local-videoq-view #page, #page-local-videoq-view .embedded-main { margin: 0; padding: 0; max-width: none; }
+#page-local-videoq-view { overflow: hidden; }
+.local-videoq-viewer { display: flex; flex-direction: column; height: var(--videoq-viewer-height,100dvh); min-height: 0; overflow: hidden; background: var(--bs-body-bg,#fff); }
+.local-videoq-viewer-header { display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 24px; flex-shrink: 0; border-bottom: 1px solid var(--bs-border-color,#dee2e6); }
+.local-videoq-wordmark { font-size: 20px; font-weight: 700; text-decoration: none; flex-shrink: 0; }
+.local-videoq-header-divider { height: 24px; width: 1px; background: var(--bs-border-color,#dee2e6); }
+.local-videoq-viewer-header h1 { font-size: 17px; font-weight: 400; line-height: 1.7; margin: 0; min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.local-videoq-workspace { display: grid; grid-template-columns: minmax(0,7fr) minmax(22rem,3fr); min-height: 0; flex: 1; overflow: hidden; gap: 0; }
+.local-videoq-main { min-width: 0; min-height: 0; overflow-y: auto; }
+.local-videoq-sidebar { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-left: 1px solid var(--bs-border-color,#dee2e6); padding-bottom: env(safe-area-inset-bottom); }
+.local-videoq-sidebar > section { flex: 1; min-height: 0; overflow-y: auto; }
+.local-videoq-ai { display: flex; flex-direction: column; }
+.local-videoq-ai #videoq-native-chat { flex: 1; min-height: 0; overflow: hidden; height: auto; }
+.local-videoq-media, .local-videoq-youtube { width: 100%; margin: 0; }
+.local-videoq-media video { display: block; width: 100%; aspect-ratio: 16/9; background: #000; }
+.local-videoq-player-heading { display: flex; align-items: center; gap: 8px; padding: 16px 32px; }
+.local-videoq-player-heading h2 { min-width: 0; flex: 1; font-size: 20px; font-weight: 700; margin: 0; line-height: 1.5; }
+.local-videoq-player-heading button { display: none; flex-shrink: 0; }
+.local-videoq-tabs { flex-shrink: 0; flex-wrap: nowrap; padding: 0 8px; gap: 4px; overflow-x: auto; }
+.local-videoq-tabs .nav-link { min-height: 48px; white-space: nowrap; font-size: 16px; }
+.local-videoq-overview { padding: 24px; }
+.local-videoq-overview p { white-space: pre-wrap; overflow-wrap: anywhere; margin-bottom: 0; }
+.local-videoq-workspace #videoq-course-qa > summary, .local-videoq-workspace #videoq-personal-history > summary { display: none; }
+.local-videoq-workspace [data-videoq-playlist] { gap: .25rem; }
+.local-videoq-workspace .course-owner-history { flex: 1; min-height: 0; overflow: auto; }
+@media (max-width: 1023px) {
+    .local-videoq-viewer-header { padding: 0 16px; gap: 8px; }
+    .local-videoq-header-divider { display: none; }
+    .local-videoq-workspace { display: flex; flex-direction: column; }
+    .local-videoq-main { flex-shrink: 0; overflow: visible; }
+    .local-videoq-sidebar { flex: 1; border-left: 0; border-top: 1px solid var(--bs-border-color,#dee2e6); }
+    .local-videoq-player-heading { padding: 4px 16px; }
+    .local-videoq-player-heading h2 { font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .local-videoq-player-heading button { display: block; min-height: 44px; }
+    .local-videoq-overview { padding: 16px; }
 }

@@ -34,6 +34,10 @@ final class workspace implements \renderable, \templatable {
     private array $managedsources;
     /** @var bool Whether the course has a current learning anchor. */
     private bool $connected;
+    /** @var string Current linked VideoQ course title. */
+    private string $title;
+    /** @var bool Whether the current teacher can manage the connection. */
+    private bool $canconnect;
     /**
      * Stores server-checked presentation data only.
      *
@@ -42,19 +46,25 @@ final class workspace implements \renderable, \templatable {
      * @param string $lesson Selected lesson identifier.
      * @param array $managedsources Moodle source action links.
      * @param bool $connected Whether a current learning anchor exists.
+     * @param string $title Current course title.
+     * @param bool $canconnect Whether connection settings are available.
      */
     public function __construct(
         int $courseid,
         array $catalog,
         string $lesson,
         array $managedsources,
-        bool $connected
+        bool $connected,
+        string $title = '',
+        bool $canconnect = false
     ) {
         $this->courseid = $courseid;
         $this->catalog = $catalog;
         $this->lesson = $lesson;
         $this->managedsources = $managedsources;
         $this->connected = $connected;
+        $this->title = $title;
+        $this->canconnect = $canconnect;
     }
 
     /**
@@ -75,6 +85,10 @@ final class workspace implements \renderable, \templatable {
         }
         $message = ['id' => '', 'text' => '', 'formattedtime' => userdate(time(), get_string('strftimetime', 'langconfig'))];
         return [
+            'coursetitle' => $this->title ?: get_string('courseassistant', 'local_videoq'),
+            'backurl' => (new \moodle_url('/course/view.php', ['id' => $this->courseid]))->out(false),
+            'connectionurl' => (new \moodle_url('/local/videoq/teacherconnect.php', ['course' => $this->courseid]))->out(false),
+            'canconnect' => $this->canconnect,
             'connected' => $this->connected,
             'hasplayer' => $selected !== null,
             'youtube' => ($selected['kind'] ?? '') === 'youtube',
@@ -105,7 +119,7 @@ final class workspace implements \renderable, \templatable {
             'questionmessage' => $message + ['fromloggedinuser' => true],
             'answermessage' => $message + ['fromloggedinuser' => false, 'userfrom' => [
                 'fullname' => get_string('assistant', 'local_videoq'),
-                'profileimageurl' => $output->image_url('i/course', 'core')->out(false),
+                'profileimageurl' => $output->image_url('u/f2', 'core')->out(false),
             ]],
         ];
     }

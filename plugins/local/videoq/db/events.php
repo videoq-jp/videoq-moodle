@@ -16,7 +16,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later.
 
 /**
- * Registers activity-change observers for video synchronization.
+ * Registers deletion cleanup for historical upload metadata.
  *
  * @package local_videoq
  * @copyright 2026 VideoQ contributors
@@ -24,7 +24,8 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+// VideoQ courses are linked, never imported from Moodle activity events.
 $observers = [];
-foreach (['course_module_updated', 'course_module_deleted', 'course_updated', 'course_deleted'] as $name) {
-    $observers[] = ['eventname' => '\\core\\event\\' . $name, 'callback' => '\local_videoq\observer::changed'];
+foreach (['course_module_deleted', 'course_deleted'] as $name) {
+    $observers[] = ['eventname' => '\\core\\event\\' . $name, 'callback' => '\\local_videoq\\observer::cleanup'];
 }

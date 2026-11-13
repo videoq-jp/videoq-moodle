@@ -175,7 +175,7 @@ try {
     contract_check($denied, 'Hidden source cannot be used by learner');
     $task = new \local_videoq\task\export_material(); $task->set_custom_data(['jobid' => $job['jobId']]); $task->execute();
     $receipt = \local_videoq\materials_service::status($fixture['courseid'], $fixture['typeid'], $job['jobId']);
-    contract_check($receipt['status'] === 'stale', 'Changed visibility cancels queued transfer before network access');
+    contract_check($receipt['status'] === 'failed' && (int)$receipt['bytes'] === 0, 'Retired import cancels queued transfer before network access');
     $stored = $DB->get_record('local_videoq_exports', ['jobid' => $job['jobId']], '*', MUST_EXIST);
     contract_check($stored->uploadurl === null, 'Terminal export clears signed destination');
 } finally {

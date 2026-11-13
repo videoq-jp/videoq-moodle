@@ -29,8 +29,8 @@ namespace local_videoq;
  */
 final class native_api {
     /** @var array Ordinary operations available through core/ajax. */
-    public const OPERATIONS = ['materials', 'transcript', 'history', 'messages', 'feedback',
-        'conversations', 'qa', 'management', 'tags', 'reports'];
+    public const OPERATIONS = ['course-history', 'playback', 'materials', 'transcript', 'history', 'messages', 'feedback',
+        'conversations', 'qa', 'management', 'tags', 'reports', 'teacher/connect'];
 
     /**
      * Returns fresh Moodle authority to the PHP page renderer without credentials.
@@ -175,7 +175,7 @@ final class native_api {
      * @return array Private HTTP request; never expose to the browser.
      */
     private static function prepare(int $courseid, string $lessonid, string $operation, array $input): array {
-        global $CFG;
+        global $CFG, $USER;
         $context = native_context::resolve($courseid, $lessonid);
         native_context::require_operation($context, $operation, $input);
         $body = json_encode((object)$input, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
@@ -193,6 +193,8 @@ final class native_api {
             . '-' . substr($nonce, 16, 4) . '-' . substr($nonce, 20);
         $claims = ['iss' => $context['issuer'], 'sub' => $context['clientId'], 'aud' => $endpoint,
             'deploymentId' => $context['deploymentId'], 'subject' => $context['subject'],
+            'author' => ['name' => \core_text::substr(fullname($USER), 0, 255),
+                'email' => \core_text::substr((string)$USER->email, 0, 320)],
             'contextId' => $context['contextId'], 'resourceLinkId' => $context['resourceLinkId'],
             'bodySha256' => hash('sha256', $body), 'iat' => $now, 'exp' => min($now + 60, $window['expires']),
             'jti' => $nonce, 'version' => 1, 'locale' => str_starts_with(current_language(), 'ja') ? 'ja' : 'en',

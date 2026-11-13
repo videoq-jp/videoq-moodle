@@ -44,6 +44,8 @@ namespace {
         public function __construct(public string $errorcode, string $component) { parent::__construct($errorcode); }
     }
     function current_language(): string { return 'ja'; }
+    function fullname(object $user): string { return $user->firstname . ' ' . $user->lastname; }
+    final class core_text { public static function substr(string $value, int $start, int $length): string { return mb_substr($value, $start, $length); } }
     function check(bool $valid, string $label): void { if (!$valid) throw new RuntimeException($label); }
     function rejects(callable $action, string $label): void {
         try { $action(); } catch (moodle_exception $error) {
@@ -79,6 +81,7 @@ namespace {
     file_put_contents($directory . '/filelib.php', '<?php');
     $CFG = (object)['libdir' => $directory];
     $SESSION = new stdClass();
+    $USER = (object)['firstname' => '検証', 'lastname' => '生徒', 'email' => 'learner@example.test'];
     require dirname(__DIR__) . '/plugins/local/videoq/classes/client.php';
     require dirname(__DIR__) . '/plugins/local/videoq/classes/native_api.php';
     use local_videoq\native_api as Api;
@@ -87,6 +90,7 @@ namespace {
         foreach (['[]', 'null', '"text"', '{broken', str_repeat(' ', 131073)] as $input) {
             rejects(fn() => Api::input('materials', $input), 'Invalid JSON accepted');
         }
+        check(Api::input('teacher/connect', '{}') === [], 'Teacher connection bootstrap not allowlisted');
         rejects(fn() => Api::input('https://attacker.example', '{}'), 'Caller-selected URL accepted');
         $input = Api::input('messages', '{"message":"日本語/動画","nested":{},"array":[]}');
         $response = Api::request(42, '', 'messages', $input);
@@ -94,6 +98,7 @@ namespace {
         $first = JWT::$signed[0]; $claims = $first['claims']; $request = curl::$requests[0];
         check($first['header'] === ['typ' => 'videoq-native+jwt'] && $claims['version'] === 1, 'Native protocol isolation');
         check($request['url'] === $claims['aud'] && $request['url'] === 'https://videoq.example/api/lms/native/messages', 'Exact operation audience');
+        check($claims['author'] === ['name' => '検証 生徒', 'email' => 'learner@example.test'], 'Server-derived learner attribution');
         check($claims['bodySha256'] === hash('sha256', $request['body']), 'Exact UTF-8 body binding');
         check(str_contains($request['body'], '日本語/動画') && str_contains($request['body'], '"nested":{}') &&
             str_contains($request['body'], '"array":[]'), 'JSON semantics changed');

@@ -45,6 +45,7 @@ final class provider implements
     public static function get_metadata(collection $collection): collection {
         $collection->add_external_location_link('videoq', [
             'conversation' => 'privacy:metadata:conversation',
+            'questionauthor' => 'privacy:metadata:questionauthor',
             'feedback' => 'privacy:metadata:feedback',
             'transcript' => 'privacy:metadata:transcript',
             'courseqa' => 'privacy:metadata:courseqa',

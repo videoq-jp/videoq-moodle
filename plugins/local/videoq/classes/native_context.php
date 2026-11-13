@@ -116,7 +116,7 @@ final class native_context {
         $required = match ($operation) {
             'transcript' => ['viewTranscript'],
             'conversations' => ['manageOwnHistory'],
-            'management' => ['manageContent'],
+            'management', 'teacher/connect', 'course-history' => ['manageContent'],
             'reports' => ['viewReports'],
             'tags' => $action === 'list' ? [] : ['manageContent'],
             'qa' => ['viewQa'],
@@ -136,12 +136,6 @@ final class native_context {
                 default => true,
             };
             if (!$allowed) {
-                throw new \moodle_exception('nativeaccessdenied', 'local_videoq');
-            }
-        }
-        if (in_array($operation, ['messages', 'messages/stream'], true)) {
-            $learning = array_filter($context['scope']['resources'], static fn($item) => ($item['learning'] ?? true) === true);
-            if (!$learning) {
                 throw new \moodle_exception('nativeaccessdenied', 'local_videoq');
             }
         }

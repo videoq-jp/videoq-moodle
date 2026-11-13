@@ -25,6 +25,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 $tasks = [[
-    'classname' => '\local_videoq\task\synchronize', 'blocking' => 0,
+    'classname' => '\\local_videoq\\task\\synchronize', 'blocking' => 0,
     'minute' => '*', 'hour' => '*', 'day' => '*', 'month' => '*', 'dayofweek' => '*',
 ]];

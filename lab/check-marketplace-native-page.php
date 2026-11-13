@@ -27,12 +27,26 @@ if (($argv[2] ?? '') !== '--render') {
             throw new RuntimeException('Native page child did not complete cleanly');
         }
         $html = file_get_contents($output);
-        if (!str_contains($html, 'data-videoq-native="1"') || !str_contains($html, 'id="videoq-native-form"')
-                || str_contains($html, '<iframe') || matrix_has_diagnostics($html)
-                || str_contains($html, 'Cannot modify header information')) {
-            throw new RuntimeException('Actual Moodle native page did not render its authenticated workspace cleanly');
+        // This lifecycle fixture has no configured VideoQ API. The linked-course viewer
+        // must render its unavailable state rather than fabricate a live chat.
+        $string = [];
+        require dirname(__DIR__) . '/plugins/local/videoq/lang/en/local_videoq.php';
+        if (!str_contains($html, 'class="local-videoq-viewer"')) {
+            throw new RuntimeException('Actual Moodle viewer is missing');
         }
-        echo json_encode(['passed' => true, 'nativePageRendered' => true,
+        if (str_contains($html, 'data-videoq-native="1"') || str_contains($html, 'id="videoq-native-form"')) {
+            throw new RuntimeException('Unavailable backend enabled a live chat');
+        }
+        if (!str_contains($html, $string['nativeunavailable'])) {
+            throw new RuntimeException('Unavailable backend did not show its status');
+        }
+        if (str_contains($html, '<iframe')) {
+            throw new RuntimeException('Native page unexpectedly contains an iframe');
+        }
+        if (matrix_has_diagnostics($html) || str_contains($html, 'Cannot modify header information')) {
+            throw new RuntimeException('Native page contains developer diagnostics: ' . matrix_diagnostic_locations($html));
+        }
+        echo json_encode(['passed' => true, 'nativePageRendered' => true, 'unavailableBackendRefused' => true,
             'limits' => ['Actual PHP page and HTML renderer; synthetic media bytes, no browser/API/model execution.']],
             JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
     } finally {
@@ -93,7 +107,9 @@ foreach (['typeid', 'apiurl'] as $name) $saved[$name] = get_config('local_videoq
 $file = null;
 try {
     set_config('typeid', $binding->typeid, 'local_videoq');
-    set_config('apiurl', 'https://videoq.example.invalid', 'local_videoq');
+    // Leave the service unconfigured: an unresolved hostname makes Moodle's
+    // own SSRF guard emit a developer event rather than model this state.
+    set_config('apiurl', '', 'local_videoq');
     $file = get_file_storage()->create_file_from_string((object)[
         'contextid' => context_module::instance($sourceid)->id, 'component' => 'mod_resource',
         'filearea' => 'content', 'itemid' => 0, 'filepath' => '/', 'filename' => 'native-render.mp4',

@@ -169,7 +169,13 @@ try {
     $check(!$old['enabled'] && !$old['deleted'], 'old caller retains global visibility suppression');
     $hidden = \local_videoq\synchronizer::run((int)$row->id, true, true);
     $task = new \local_videoq\task\export_material(); $task->set_custom_data($taskdata); $task->execute();
-    $check(\local_videoq\materials_service::status($courseid, $typeid, $job['jobId'])['status'] === 'stale', 'visibility change cancels old queued export before network');
+    $cancelled = $DB->get_record('local_videoq_exports', ['jobid' => $job['jobId']], '*', MUST_EXIST);
+    $check(\local_videoq\materials_service::status($courseid, $typeid, $job['jobId'])['status'] === 'failed'
+        && $cancelled->uploadurl === null && (int)$cancelled->bytes === 0,
+        'retired import cancels queued export and clears destination without transferring bytes');
+    $task->execute();
+    $check($DB->get_record('local_videoq_exports', ['id' => $cancelled->id], '*', MUST_EXIST) == $cancelled,
+        'retired export cancellation is idempotent');
     update_course((object)['id' => $courseid, 'visible' => 0]);
     $coursehidden = \local_videoq\synchronizer::run((int)$row->id, true, true);
     $check($coursehidden['enabled'] && !$coursehidden['deleted'], 'hidden course is not a global disable for new backend');

@@ -1,6 +1,6 @@
 # VideoQ for Moodle
 
-Watch Moodle course videos and ask VideoQ questions across the course.
+Watch linked VideoQ course videos and ask VideoQ questions across the course.
 
 Requires Moodle 5.1 and a compatible VideoQ deployment. Development preview,
 tested with the Boost theme.
@@ -26,7 +26,13 @@ is installation from the official listing once review and publication complete.
    VideoQ** and enter your cloud or on-premises VideoQ HTTPS URL.
 3. Sign in to VideoQ and allow the connection to return to Moodle automatically
    (the current `https://videoq.jp` service supports this flow).
-4. Add videos as **File** activities and enable **VideoQ questions**.
+4. As a course teacher, choose **Connect my VideoQ account**, sign in to VideoQ and select an existing course.
+5. Add/edit videos in VideoQ. Learners open the course assistant in Moodle; no VideoQ student account is needed.
+
+Version 0.25.1 removes Moodle upload/import controls. The workspace follows the VideoQ/Classroom arrangement with Moodle theme styles: video and Overview/Q&A at left, Videos/AI tabs at right.
+Apply the matching VideoQ API/web changes and migrations 0063/0064 before upgrading.
 
 See the [setup guide](docs/setup.md) for details and the
 [development guide](lab/README.md) for building and testing.
+
+The viewer matches VideoQ: learner chats continue automatically, without new-conversation or private-history controls. The connected owner teacher has course question/answer history and CSV; other teachers and learners cannot read the owner logs.
