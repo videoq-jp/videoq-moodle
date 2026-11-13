@@ -27,12 +27,18 @@ if (($argv[2] ?? '') !== '--render') {
             throw new RuntimeException('Native page child did not complete cleanly');
         }
         $html = file_get_contents($output);
-        if (!str_contains($html, 'data-videoq-native="1"') || !str_contains($html, 'id="videoq-native-form"')
+        // This lifecycle fixture has no VideoQ API. The linked-course viewer
+        // must render its unavailable state rather than fabricate a live chat.
+        $string = [];
+        require dirname(__DIR__) . '/plugins/local/videoq/lang/en/local_videoq.php';
+        if (!str_contains($html, 'class="local-videoq-viewer"')
+                || str_contains($html, 'data-videoq-native="1"') || str_contains($html, 'id="videoq-native-form"')
+                || !str_contains($html, $string['nativeunavailable'])
                 || str_contains($html, '<iframe') || matrix_has_diagnostics($html)
                 || str_contains($html, 'Cannot modify header information')) {
             throw new RuntimeException('Actual Moodle native page did not render its authenticated workspace cleanly');
         }
-        echo json_encode(['passed' => true, 'nativePageRendered' => true,
+        echo json_encode(['passed' => true, 'nativePageRendered' => true, 'unavailableBackendRefused' => true,
             'limits' => ['Actual PHP page and HTML renderer; synthetic media bytes, no browser/API/model execution.']],
             JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
     } finally {
