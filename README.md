@@ -15,7 +15,7 @@ Upload and edit videos in VideoQ. Moodle provides its native learning screen wit
 
 ## Upgrade from 0.25.3 or earlier
 
-Upgrade `local_videoq` in place; do not uninstall it. Version 0.25.4 removes the setup dependency on the retired `ltisource_videoq` helper and ships only the local plugin. An already installed helper does not block this update. After checking the new course connection, uninstall **only `ltisource_videoq`** from Moodle's plugin overview, then remove its code if Moodle cannot do that automatically. Do not delete Moodle courses, videos, or the local plugin.
+Upgrade `local_videoq` in place; do not uninstall it. Version 0.25.4 removes the setup dependency on the retired `ltisource_videoq` helper and ships only the local plugin. An already installed helper does not block this update. Generated VideoQ activity links open the native course assistant automatically. After checking the new course connection, uninstall **only `ltisource_videoq`** from Moodle's plugin overview, then remove its code if Moodle cannot do that automatically. Do not delete Moodle courses, videos, or the local plugin.
 
 The service must include the teacher-owned connection API and DB migrations 0062–0064. Legacy installation-wide ownership/import is retired; teachers reconnect their accounts and select existing VideoQ courses. Moodle source files are not imported or moved by this update.
 

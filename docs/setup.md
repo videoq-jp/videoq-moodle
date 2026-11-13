@@ -35,7 +35,7 @@ Manage videos, processing and native course contents in VideoQ. The Moodle scree
 4. Open the course assistant and confirm the teacher/learner flow.
 5. If `ltisource_videoq` was previously installed, uninstall **only that helper** from **Site administration → Plugins → Plugins overview**. If Moodle leaves its source directory behind, an operator removes `public/mod/lti/source/videoq` (or `mod/lti/source/videoq` in a non-public-root layout) and completes the notifications screen. The local plugin is not dependent on it, and learner screens do not use its launch callback.
 
-Leaving an installed old helper temporarily does not prevent updating or connecting the local plugin. Retire it after switching old LTI launch links to the Moodle course assistant. Source videos, native VideoQ courses and shared Moodle courses must not be deleted as part of this cleanup.
+Leaving an installed old helper temporarily does not prevent updating or connecting the local plugin. Generated VideoQ activity links now open the native course assistant automatically. Source videos, native VideoQ courses and shared Moodle courses must not be deleted as part of this cleanup.
 
 ## Optional Git deployment
 

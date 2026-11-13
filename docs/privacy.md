@@ -164,7 +164,7 @@ explicitly configured and scheduled.
 `tests/privacy.php <Moodle-source>` uses real pinned Moodle interfaces and metadata
 classes without a DB; normal CI runs it with networking disabled. The dedicated
 `lab/check-marketplace-privacy.php /site` fixture also executes all six request
-methods for both components with system/course/module contexts and nonempty
+methods for the local plugin with system/course/module contexts and nonempty
 approved requests. It compares shared course, file, synchronization and settings
 records before and after. This does not test external VideoQ data requests.
 

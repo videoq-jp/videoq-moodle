@@ -1,0 +1,49 @@
+{
+  "pluginVersion": "0.25.4",
+  "moodleVersion": "5.1.8+",
+  "theme": "Boost",
+  "runtime": {
+    "localVersion": 2026111305,
+    "helperInstalled": false,
+    "helperDirectory": false
+  },
+  "schoolAuthorizationCompleted": true,
+  "newTeacherCourseConnected": true,
+  "newMoodleCourseId": 3,
+  "generatedActivityViewAndLaunchOpenNativeViewer": true,
+  "nativeViewerIframes": 0,
+  "visibleGeneratedLtiLinks": 0,
+  "visibleNativeAssistantLinks": 1,
+  "studentPlayback": {
+    "timeAdvanced": true,
+    "decodedFramesObserved": 33
+  },
+  "realLocalAiAnswer": true,
+  "sourceButtonsObserved": 4,
+  "chatAndFeedbackRestored": true,
+  "studentOwnerHistoryVisible": false,
+  "authority": {
+    "linkedteacher": {
+      "materialsStatus": 200,
+      "videoCount": 2,
+      "csvStatus": 200,
+      "studentProfileInCsv": true,
+      "newQuestionInCsv": true
+    },
+    "linkedstudent": {
+      "materialsStatus": 200,
+      "videoCount": 2,
+      "csvStatus": 403
+    },
+    "linkedcoteacher": {
+      "materialsStatus": 200,
+      "videoCount": 2,
+      "csvStatus": 403
+    }
+  },
+  "limits": [
+    "Isolated local Moodle/API/storage with real local AI, not an external production Moodle site.",
+    "Reuses existing processed VideoQ videos; no fresh transcription or indexing claim.",
+    "Classroom real Google environment and iPhone hardware were not tested."
+  ]
+}

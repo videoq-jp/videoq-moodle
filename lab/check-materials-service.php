@@ -29,16 +29,11 @@ try {
     contract_check($rejected && $DB->count_records('lti_types') === $typesbefore &&
         (int)get_config('local_videoq', 'typeid') === $fixture['typeid'] && !get_config('local_videoq', 'pendingconnection'),
         'Legacy code cannot replace the configured materials connection');
-    $DB->set_field('config_plugins', 'name', 'acceptance_version', ['plugin' => 'ltisource_videoq', 'name' => 'version']);
-    try {
-        $rejected = false;
-        try { \local_videoq\lti_connection_setup::connect('VIDEOQ2.' . $codepayload); }
-        catch (\Throwable $error) { $rejected = true; }
-        contract_check($rejected && $DB->count_records('lti_types') === $typesbefore && !get_config('local_videoq', 'pendinglticonnection'),
-            'Missing launch plugin is rejected before creating or changing a connection');
-    } finally {
-        $DB->set_field('config_plugins', 'name', 'version', ['plugin' => 'ltisource_videoq', 'name' => 'acceptance_version']);
-    }
+    $rejected = false;
+    try { \local_videoq\lti_connection_setup::connect('VIDEOQ2.invalid'); }
+    catch (\InvalidArgumentException $error) { $rejected = $error->getMessage() === 'Invalid connection code'; }
+    contract_check($rejected && $DB->count_records('lti_types') === $typesbefore && !get_config('local_videoq', 'pendinglticonnection'),
+        'Invalid code is rejected before network or configuration changes, without a helper dependency');
     \local_videoq\synchronizer::enable($fixture['cmid']);
     $rejected = false;
     try { \local_videoq\connection_setup::cancel_pending(); } catch (\Throwable $error) { $rejected = true; }
