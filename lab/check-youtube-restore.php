@@ -71,7 +71,10 @@ try {
     get_file_storage()->create_file_from_string(['contextid' => context_module::instance($upload->coursemodule)->id,
         'component' => 'mod_resource', 'filearea' => 'content', 'itemid' => 0, 'filepath' => '/',
         'filename' => 'language.mp4', 'mimetype' => 'video/mp4'], 'Synthetic upload language bytes');
-    $check(\local_videoq\transcription_language::get((int)$upload->coursemodule) === 'ja', 'Module save persists upload language before opt-in');
+    $check(\local_videoq\transcription_language::get((int)$upload->coursemodule) === '',
+        'Retired import field cannot configure a new Moodle upload');
+    // Model metadata saved by the old plugin, not a supported upload workflow.
+    \local_videoq\transcription_language::save((int)$upload->coursemodule, 'ja');
     $enabled = $url('Owned enabled provider', 'https://youtu.be/abcDEF123_-');
     $disabled = $url('Owned disabled provider', 'https://youtu.be/xyzUVW987_-');
     $unrelated = $url('Owned ordinary reference', 'https://example.invalid/ordinary');
@@ -318,6 +321,9 @@ try {
             'files' => 0, 'display' => 0, 'printintro' => 0, 'showsize' => 0, 'showtype' => 0, 'showdate' => 0,
             'local_videoq_transcriptionlanguage' => 'ja'], $languagecourse);
         $deletionmodules[$case] = (int)$activity->coursemodule;
+        $check(\local_videoq\transcription_language::get($deletionmodules[$case]) === '',
+            $case . ': retired upload field stays inactive');
+        \local_videoq\transcription_language::save($deletionmodules[$case], 'ja');
     }
     course_delete_module($deletionmodules['individual']);
     $check(\local_videoq\transcription_language::get($deletionmodules['individual']) === ''
