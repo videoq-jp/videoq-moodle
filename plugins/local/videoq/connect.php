@@ -64,8 +64,7 @@ if (data_submitted()) {
             \local_videoq\browser_connection::retry();
             redirect(new moodle_url('/local/videoq/connect.php'), get_string('connectionsuccess', 'local_videoq'));
         }
-        \local_videoq\connection_setup::connect(required_param('connectioncode', PARAM_RAW_TRIMMED));
-        redirect(new moodle_url('/local/videoq/connect.php'), get_string('connectionsuccess', 'local_videoq'));
+        throw new \InvalidArgumentException('Unsupported connection action');
     } catch (\Throwable $e) {
         // Never render exception details: database/HTTP errors can contain credentials.
         $error = true;
@@ -138,29 +137,6 @@ echo html_writer::empty_tag(
 );
 echo html_writer::tag('button', get_string('browserconnect', 'local_videoq'), ['type' => 'submit', 'class' => 'btn btn-primary']);
 echo html_writer::end_tag('form');
-echo html_writer::start_tag('details', ['class' => 'mt-3']);
-echo html_writer::tag('summary', get_string('manualconnection', 'local_videoq'));
-echo html_writer::tag('p', get_string('connectioninstructions', 'local_videoq'));
-echo html_writer::start_tag('form', ['method' => 'post', 'action' => new moodle_url('/local/videoq/connect.php')]);
-echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-echo html_writer::tag(
-    'label',
-    get_string(
-        'connectioncode',
-        'local_videoq'
-    ),
-    ['for' => 'videoq-connectioncode',
-    'class' => 'form-label']
-);
-echo html_writer::tag('textarea', '', ['id' => 'videoq-connectioncode', 'name' => 'connectioncode', 'rows' => 5,
-    'maxlength' => 8192,
-         'required' => 'required',
-         'autocomplete' => 'off',
-         'spellcheck' => 'false',
-         'class' => 'form-control mb-3']);
-echo html_writer::tag('button', get_string('connectbutton', 'local_videoq'), ['type' => 'submit', 'class' => 'btn btn-primary']);
-echo html_writer::end_tag('form');
-echo html_writer::end_tag('details');
 if (
     (get_config('local_videoq', 'pendingconnection') ||
     get_config('local_videoq', 'pendinglticonnection')) &&

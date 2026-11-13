@@ -119,7 +119,7 @@ $string['cancelconnection'] = 'Cancel incomplete setup and start again';
 $string['cancelconnectionhint'] = 'Cancel removes an unused local setup. If the connection already appears in VideoQ, disconnect it there as well.';
 $string['advancedsettings'] = 'VideoQ advanced settings (manual connection)';
 
-$string['connectionconfigured'] = 'LTI connection is configured. Check the connection status in your VideoQ account settings.';
+$string['connectionconfigured'] = 'School communication with VideoQ is configured. Each teacher connects an owned course separately.';
 
 $string['updateconnection'] = 'Update or reconnect VideoQ';
 $string['videoqurl'] = 'VideoQ URL';
@@ -145,8 +145,8 @@ $string['materialmanagementunavailable'] = 'Material management is unavailable. 
 $string['personalconversations'] = 'My AI conversations';
 $string['personalconversationsunavailable'] = 'Saved personal conversations are unavailable. Relaunch from the course or contact the administrator.';
 
-$string['accountmanagement'] = 'Manage the connected VideoQ account';
-$string['accountmanagementhelp'] = 'VideoQ account settings, billing and system administration require a separate VideoQ sign-in and the corresponding account permissions.';
+$string['accountmanagement'] = 'Manage the school connection';
+$string['accountmanagementhelp'] = 'This manages communication with the school. Each teacher connects their own VideoQ account from the Moodle course.';
 $string['accountunavailable'] = 'The VideoQ account management page is unavailable. Check the connection and update the VideoQ server if needed.';
 
 $string['coursetags'] = 'Course tags and materials';
