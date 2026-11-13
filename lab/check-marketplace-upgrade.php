@@ -123,7 +123,6 @@ foreach ($state['rows'] as $table => $expected) {
         if (($actual['sourcekind'] ?? null) !== 'file' || ($actual['youtubeid'] ?? null) !== '') {
             throw new RuntimeException('Existing File source acquired an invalid provider identity');
         }
-        unset($actual['sourcekind'], $actual['youtubeid']);
     }
     if ($actual !== $expected) {
         throw new RuntimeException('Synchronization record changed during upgrade: ' . $table);
