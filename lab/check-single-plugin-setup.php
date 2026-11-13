@@ -11,7 +11,7 @@ if (get_config('ltisource_videoq', 'version') || is_dir($CFG->dirroot . '/mod/lt
 }
 \core\session\manager::set_user(get_admin());
 $plugin = core_plugin_manager::instance()->get_plugin_info('local_videoq');
-if (!$plugin || !empty($plugin->dependencies)) throw new RuntimeException('Unexpected plugin dependency');
+if (!$plugin || !empty($plugin->get_other_required_plugins())) throw new RuntimeException('Unexpected plugin dependency');
 // The real setup must reach code validation with no helper. This malformed code
 // must fail before networking, and must not be replaced by a missing-plugin error.
 try {

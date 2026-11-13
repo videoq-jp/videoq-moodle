@@ -16,8 +16,8 @@ if ((int)$CFG->debug !== DEBUG_DEVELOPER || !$CFG->debugdisplay) {
 $phase = $argv[2] ?? '';
 $statefile = $CFG->dataroot . '/videoq-upgrade-state.json';
 if ($phase === 'seed') {
-    if ((int)get_config('local_videoq', 'version') !== 2026110501 || file_exists($statefile)) {
-        throw new RuntimeException('Expected an unseeded 0.11.0 baseline installation');
+    if ((int)get_config('local_videoq', 'version') !== 2026111304 || file_exists($statefile)) {
+        throw new RuntimeException('Expected an unseeded 0.25.3 two-plugin baseline installation');
     }
     require_once $CFG->dirroot . '/course/lib.php';
     require_once $CFG->dirroot . '/course/modlib.php';
@@ -61,7 +61,7 @@ if ($phase === 'seed') {
     file_put_contents($statefile, json_encode($state, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
     chmod($statefile, 0600);
     echo json_encode(['passed' => true, 'phase' => 'seed', 'database' => $CFG->dbtype,
-        'baselineVersion' => 2026110501, 'courseCreated' => true, 'sourceVideoCreated' => true,
+        'baselineVersion' => 2026111304, 'courseCreated' => true, 'sourceVideoCreated' => true,
         'synchronizationTablesSeeded' => 3]) . "\n";
     exit;
 }
@@ -69,7 +69,7 @@ if (!in_array($phase, ['verify', 'verify-uninstalled', 'verify-reinstalled'], tr
     throw new RuntimeException('Expected seed or verify phase with a saved baseline');
 }
 $state = json_decode(file_get_contents($statefile), true, 16, JSON_THROW_ON_ERROR);
-if ($phase !== 'verify-uninstalled' && (int)get_config('local_videoq', 'version') < 2026110503) {
+if ($phase !== 'verify-uninstalled' && (int)get_config('local_videoq', 'version') < 2026111305) {
     throw new RuntimeException('The candidate plugin upgrade has not been applied');
 }
 $course = $DB->get_record('course', ['id' => $state['courseId']], '*', MUST_EXIST);
