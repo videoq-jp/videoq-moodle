@@ -24,7 +24,7 @@ cross-window learning bridge is part of this transport.
 | --- | --- |
 | `php tests/packages.php` | Standard Moodle ZIP boundaries, required assets, reproducibility and checksums |
 | `php tests/native-api.php` | Request/body binding, immutable PHP session windows, status/error bounds and releasing the session lock before upstream streaming; signer/cURL substitutes |
-| `php tests/native-context.php` | Server-derived actor/course/activity scope and operation capabilities; controlled Moodle state |
+| `php tests/native-context.php` | Server-derived actor/course/activity scope, same-actor enrolment suspension/removal/restoration and teacher CSV capability revocation; controlled Moodle state |
 | `php lab/check-browser.php` | Current browser assets compile in native Chrome through PHP WebDriver |
 | `php lab/check-native-learning.php MOODLE_SOURCE` | Real pinned Moodle templates with controlled session/API/model data: chat, feedback, history, Q&A, material/tag drafts, reports, permission refusal and empty-course panels |
 | `php lab/check-youtube-player.php` | File playback, current-grant YouTube behavior, local playback/citation events and malformed provider input; controlled media/provider SDK |
@@ -38,6 +38,12 @@ standard, the remaining PHP contracts, Compose validation and installer/AMOS
 builds. The aggregate requires both actual database lifecycles. Browser contract
 responses are substitutes; a green companion run does not establish actual
 VideoQ signature interoperability, incremental network relay or AI/erasure.
+
+The native API contract also checks that disconnected history, conversations and
+CSV requests preserve the upstream 403 without retrying or replacing the live
+session. These offline regressions run in the existing tooling CI with no AI
+requests or production credentials. They supplement the actual installed Moodle
+checks; substituted enrolment state is not an end-to-end Moodle enrolment test.
 
 The paired VideoQ repository owns the **Moodle installed acceptance** workflow.
 Its pinned Moodle image includes this companion and runs against actual VideoQ,

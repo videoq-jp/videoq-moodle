@@ -109,15 +109,23 @@ namespace {
         curl::$status = 403; curl::$body = '{"error":"revoked"}';
         check(Api::request(42, '', 'materials', [])['status'] === 403, 'Refusal status lost');
         check($cache === $SESSION->local_videoq_native, 'Revocation silently rotated the unexpired session');
+        foreach (['history', 'conversations', 'course-history'] as $operation) {
+            $requests = count(curl::$requests);
+            $denial = Api::request(42, '', $operation, $operation === 'course-history' ? ['action' => 'csv'] : []);
+            check($denial['status'] === 403 && $denial['body'] === curl::$body && $denial['contenttype'] === 'application/json',
+                'Disconnected history or CSV did not preserve denial');
+            check(count(curl::$requests) === $requests + 1 && $cache === $SESSION->local_videoq_native,
+                'Disconnected operation retried or replaced the session');
+        }
         check(JWT::$signed[1]['claims']['sessionId'] === $claims['sessionId'] &&
             JWT::$signed[1]['claims']['sessionExpiresAt'] === $claims['sessionExpiresAt'] &&
             JWT::$signed[1]['claims']['jti'] !== $claims['jti'], 'Stable window and fresh request nonce');
         curl::$status = 200; curl::$body = '{}';
         Api::request(43, '', 'materials', []);
-        check(JWT::$signed[2]['claims']['sessionId'] !== $claims['sessionId'], 'Cross-course session reuse');
+        check(end(JWT::$signed)['claims']['sessionId'] !== $claims['sessionId'], 'Cross-course session reuse');
         local_videoq\native_context::$subject = '8';
         Api::request(42, '', 'materials', []);
-        check(JWT::$signed[3]['claims']['sessionId'] !== $claims['sessionId'], 'Cross-user session reuse');
+        check(end(JWT::$signed)['claims']['sessionId'] !== $claims['sessionId'], 'Cross-user session reuse');
         local_videoq\native_context::$allowed = false;
         $count = count(curl::$requests);
         rejects(fn() => Api::request(42, '', 'materials', []), 'Denied authority signed a request');

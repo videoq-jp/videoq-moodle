@@ -49,12 +49,17 @@ namespace {
     $config = ['apiurl' => 'https://videoq.example', 'typeid' => 3];
     $capabilities = [];
     $guest = false;
+    $enrolment = 'active';
     function get_config(string $component, string $name): mixed { global $config; return $config[$name] ?? false; }
     function get_course(int $course): object {
         if ($course !== 42) throw new RuntimeException('Unexpected course');
         return (object)['id' => $course];
     }
-    function require_login(object $course): void { check($course->id === 42, 'Current course login required'); }
+    function require_login(object $course): void {
+        global $enrolment;
+        check($course->id === 42, 'Current course login required');
+        if ($enrolment !== 'active') throw new moodle_exception('requireloginerror', 'error');
+    }
     function isguestuser(): bool { global $guest; return $guest; }
     function get_fast_modinfo(object $course, int $userid): object {
         global $info, $USER;
@@ -113,6 +118,19 @@ namespace {
         $info->cms[101]->uservisible = true;
         $USER->id = 8;
         check(Context::resolve(42)['subject'] === '8' && end(local_videoq\course_access::$calls) === [501, 8], 'Stale actor reused');
+        foreach (['suspended', 'unenrolled'] as $state) {
+            $enrolment = $state;
+            $launches = count(local_videoq\course_access::$calls);
+            rejects(fn() => Context::resolve(42), 'Revoked enrolment reused previous authority');
+            check(count(local_videoq\course_access::$calls) === $launches, 'Revoked enrolment issued an access proof');
+            $enrolment = 'active';
+            check(Context::resolve(42)['subject'] === '8', 'Restored enrolment did not recover for the same actor');
+        }
+        local_videoq\course_access::$permissions = ['manageContent' => true];
+        Context::require_operation(Context::resolve(42), 'course-history', ['action' => 'csv']);
+        local_videoq\course_access::$permissions = ['manageContent' => false];
+        rejects(fn() => Context::require_operation(Context::resolve(42), 'course-history', ['action' => 'csv']),
+            'CSV reused revoked teacher authority');
         foreach (['deleted', 'suspended'] as $property) {
             $USER->$property = true;
             rejects(fn() => Context::resolve(42), 'Inactive actor accepted');
