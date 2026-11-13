@@ -1,5 +1,5 @@
 // Owned Moodle AJAX substitute; no real media or provider request is needed.
-window.playerFixture = {calls: [], pending: [], delayed: false, errors: []};
+window.playerFixture = {calls: [], pending: [], delayed: false, errors: [], readyState: 2, rejectPlay: false};
 const fixture = window.playerFixture;
 window.addEventListener('error', event => fixture.errors.push(event.message));
 const sources = [{videoId: 1, lesson: '1', title: 'Owned VideoQ file'}, {videoId: 2, lesson: '2', title: 'Owned YouTube'},
@@ -12,10 +12,15 @@ const root = fixture.root = document.querySelector('.local-videoq-workspace');
 root.dataset.videoqConfig = JSON.stringify({courseid: 42, copy: {connecting: 'Loading', connectionError: 'Unavailable'}});
 root.dataset.videoqLessons = JSON.stringify(sources);
 const media = root.querySelector('video');
-let position = 0;
-Object.defineProperties(media, {duration: {get: () => 120}, readyState: {get: () => 2},
+let position = 0, paused = true;
+Object.defineProperties(media, {duration: {get: () => 120}, readyState: {get: () => fixture.readyState}, paused: {get: () => paused},
     currentTime: {get: () => position, set: value => {position = value;}}});
-media.pause = () => {}; media.load = () => {};
+media.pause = () => {paused = true;}; media.load = () => {paused = true;};
+media.play = () => {
+    if (fixture.rejectPlay) return Promise.reject(new DOMException('Denied', 'NotAllowedError'));
+    paused = false; return Promise.resolve();
+};
+window.addEventListener('unhandledrejection', event => fixture.errors.push(event.reason?.message || 'Unhandled rejection'));
 window.require = (dependencies, callback) => callback({call: requests => requests.map(request => {
     fixture.calls.push(request);
     const id = JSON.parse(request.args.payload).videoId;

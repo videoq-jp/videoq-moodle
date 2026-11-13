@@ -16,7 +16,7 @@
                 const file = root.querySelector('[data-videoq-file]');
                 const playlist = root.querySelector('[data-videoq-playlist]');
                 const status = root.querySelector('[data-videoq-player-status]');
-                let videos = [], selected = null, epoch = 0, youtubeUrl = null, pending = false, pendingSeconds;
+                let videos = [], selected = null, epoch = 0, youtubeUrl = null, pending = false, pendingSeconds, seekSequence = 0;
                 function highlight() {
                     playlist.querySelectorAll('button').forEach(button => {
                         const active = Number(button.dataset.videoId) === selected;
@@ -26,12 +26,22 @@
                 }
                 function seek(seconds) {
                     if (!Number.isFinite(seconds) || seconds < 0) return;
+                    const sequence = ++seekSequence, seekEpoch = epoch;
                     if (youtubeUrl) {
                         const url = new URL(youtubeUrl);
                         url.searchParams.set('start', String(Math.floor(seconds)));
+                        url.searchParams.set('autoplay', '1');
                         youtube.querySelector('iframe').src = url.href;
-                    } else if (player.readyState) player.currentTime = seconds;
-                    else { const seekEpoch = epoch; player.addEventListener('loadedmetadata', () => { if (epoch === seekEpoch) player.currentTime = Math.min(seconds, player.duration || seconds); }, {once: true}); }
+                    } else {
+                        const resume = () => {
+                            if (epoch !== seekEpoch || sequence !== seekSequence || pending) return;
+                            player.currentTime = Math.min(seconds, player.duration || seconds);
+                            // Match VideoQ: a citation seeks and plays; denied autoplay leaves native controls available.
+                            void player.play().catch(() => {});
+                        };
+                        if (player.readyState) resume();
+                        else player.addEventListener('loadedmetadata', resume, {once: true});
+                    }
                 }
                 async function select(id, seconds) {
                     if (!videos.some(video => video.videoId === id)) return;
@@ -70,7 +80,7 @@
                             const frame = document.createElement('iframe');
                             frame.src = youtubeUrl = url.href;
                             frame.title = media.title;
-                            frame.allow = 'fullscreen; encrypted-media; picture-in-picture';
+                            frame.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
                             frame.allowFullscreen = true;
                             youtube.append(frame); youtube.hidden = false;
                         } else if (media.kind === 'file') { player.src = url.href; file.hidden = false; }
