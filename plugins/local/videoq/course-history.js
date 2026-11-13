@@ -3,7 +3,7 @@
  * @copyright 2026 VideoQ contributors
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-function createCourseHistory(root, request, seek, chatElements, copy, renderText) {
+function createCourseHistory(root, request, chatElements, copy, renderText, renderCitation) {
     const tabs = root.querySelector('[data-course-history-tabs]');
     const chat = root.querySelector('[data-course-chat-tab]');
     const history = root.querySelector('[data-course-history-tab]');
@@ -45,14 +45,16 @@ function createCourseHistory(root, request, seek, chatElements, copy, renderText
                 const card = node('article', '', 'qa-card');
                 card.append(node('p', new Date(item.created_at).toLocaleString() + ' · ' + (item.asked_by?.username || copy.shared) + (item.asked_by?.email ? ' · ' + item.asked_by.email : ''), 'qa-meta'));
                 card.append(node('p', item.question, 'qa-body'));
+                const sources = new Map((item.answer.sources || []).map(source => [source.id, source]));
                 for (const segment of item.answer.segments) {
                     const body = node('div', '', 'qa-body');
                     if (renderText) renderText(body, segment.text); else body.textContent = segment.text;
+                    const target = body.lastElementChild || body;
+                    for (const id of new Set(segment.sourceIds || [])) {
+                        const source = sources.get(id);
+                        if (source && renderCitation) target.append(document.createTextNode(' '), renderCitation(source));
+                    }
                     card.append(body);
-                }
-                for (const source of item.answer.sources || []) {
-                    const button = node('button', source.title + ' ' + source.start_time, 'btn btn-outline-secondary btn-sm');
-                    button.type = 'button'; button.addEventListener('click', () => seek(source)); card.append(button);
                 }
                 if (item.feedback) card.append(node('small', item.feedback === 'good' ? 'Good' : 'Bad'));
                 content.append(card);

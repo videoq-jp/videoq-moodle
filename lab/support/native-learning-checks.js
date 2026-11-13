@@ -53,6 +53,15 @@
             document.querySelector('[data-course-history-tab]').click();
             await wait(() => document.querySelector('[data-course-history-content]').textContent.includes('learner@example.com'));
             check(byId('native-chat').hidden, 'Owner course history replaces chat as in the native viewer');
+            const historyContent = document.querySelector('[data-course-history-content]');
+            const historyCitation = historyContent.querySelector('.qa-body .citation');
+            check(historyCitation?.textContent === '(0:12)' && historyContent.querySelectorAll('.citation').length === 1,
+                'Owner history places one compact citation beside its referenced answer segment');
+            check(!historyContent.textContent.includes('Unreferenced source') && !historyContent.textContent.includes('00:00:12,345'),
+                'Owner history does not append raw subtitle timestamps or unused sources');
+            historyCitation.click();
+            check(f.seeks.at(-1)?.videoId === 1 && f.seeks.at(-1)?.seconds === 12.345,
+                'Compact history timestamps preserve the precise seek position');
             document.querySelector('[data-course-history-csv]').click();
             await wait(() => f.downloads.some(item => item.name.endsWith('.csv')));
             const archive = f.downloads.find(item => item.name.endsWith('.csv'));

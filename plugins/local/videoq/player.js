@@ -16,7 +16,7 @@
                 const file = root.querySelector('[data-videoq-file]');
                 const playlist = root.querySelector('[data-videoq-playlist]');
                 const status = root.querySelector('[data-videoq-player-status]');
-                let videos = [], selected = null, epoch = 0, youtubeUrl = null;
+                let videos = [], selected = null, epoch = 0, youtubeUrl = null, pending = false, pendingSeconds;
                 function highlight() {
                     playlist.querySelectorAll('button').forEach(button => {
                         const active = Number(button.dataset.videoId) === selected;
@@ -36,12 +36,21 @@
                 async function select(id, seconds) {
                     if (!videos.some(video => video.videoId === id)) return;
                     root.dispatchEvent(new CustomEvent('videoq:reveal-player'));
-                    if (selected === id) { seek(seconds); return; }
+                    if (selected === id) {
+                        if (pending) { if (Number.isFinite(seconds)) pendingSeconds = seconds; }
+                        else seek(seconds);
+                        return;
+                    }
                     const request = ++epoch;
+                    const hasMedia = !!youtubeUrl || player.hasAttribute('src');
                     selected = id; highlight();
-                    player.pause(); player.removeAttribute('src'); player.load(); youtube.replaceChildren(); youtubeUrl = null;
-                    file.hidden = youtube.hidden = true;
-                    status.textContent = config.copy.connecting || '…';
+                    pending = true; pendingSeconds = seconds;
+                    player.pause();
+                    // A provider frame cannot be paused through the native file API.
+                    // Stop it while the next video's fresh authorization is pending.
+                    if (youtubeUrl) { youtube.replaceChildren(); youtubeUrl = null; youtube.hidden = true; }
+                    root.querySelector('.local-videoq-main').setAttribute('aria-busy', 'true');
+                    status.textContent = hasMedia ? '' : config.copy.connecting || '…';
                     root.dispatchEvent(new CustomEvent('videoq:selection', {detail: {videoId: id}}));
                     try {
                         const result = await Ajax.call([{methodname: 'local_videoq_request_learning', args: {
@@ -51,6 +60,9 @@
                         if (result.status !== 200) throw new Error();
                         const media = JSON.parse(result.body), url = new URL(media.url);
                         if (url.protocol !== 'https:') throw new Error();
+                        if (!['youtube', 'file'].includes(media.kind)) throw new Error();
+                        player.removeAttribute('src'); player.load(); youtube.replaceChildren(); youtubeUrl = null;
+                        file.hidden = youtube.hidden = true;
                         root.querySelector('[data-videoq-video-title]').textContent = media.title || '';
                         root.querySelector('[data-videoq-description]').textContent = media.description || '';
                         if (media.kind === 'youtube') {
@@ -63,10 +75,16 @@
                             youtube.append(frame); youtube.hidden = false;
                         } else if (media.kind === 'file') { player.src = url.href; file.hidden = false; }
                         else throw new Error();
-                        status.textContent = ''; seek(seconds);
+                        pending = false;
+                        root.querySelector('.local-videoq-main').removeAttribute('aria-busy');
+                        status.textContent = ''; seek(pendingSeconds); pendingSeconds = undefined;
                     } catch {
                         if (request !== epoch) return;
                         selected = null; highlight();
+                        pending = false; pendingSeconds = undefined;
+                        player.removeAttribute('src'); player.load(); youtube.replaceChildren(); youtubeUrl = null;
+                        file.hidden = youtube.hidden = true;
+                        root.querySelector('.local-videoq-main').removeAttribute('aria-busy');
                         status.textContent = config.copy.connectionError || 'Video unavailable';
                     }
                 }
@@ -82,7 +100,9 @@
                         playlist.append(button);
                     });
                     if (!videos.some(video => video.videoId === selected)) {
-                        ++epoch; selected = null; player.pause(); player.removeAttribute('src'); player.load();
+                        ++epoch; selected = null; pending = false; pendingSeconds = undefined;
+                        root.querySelector('.local-videoq-main').removeAttribute('aria-busy');
+                        player.pause(); player.removeAttribute('src'); player.load();
                         youtube.replaceChildren(); youtubeUrl = null; file.hidden = youtube.hidden = true;
                         if (videos.length) void select(videos[0].videoId);
                     }
@@ -95,7 +115,7 @@
                     root.querySelector('.local-videoq-main').scrollIntoView({block: 'nearest', behavior: 'smooth'});
                 });
                 root.addEventListener('videoq:read-playback', event => {
-                    event.detail.playback = selected && !youtubeUrl && player.readyState ? {videoId: selected, seconds: player.currentTime, duration: player.duration} : null;
+                    event.detail.playback = !pending && selected && !youtubeUrl && player.readyState ? {videoId: selected, seconds: player.currentTime, duration: player.duration} : null;
                 });
                 update(JSON.parse(root.dataset.videoqLessons));
             });

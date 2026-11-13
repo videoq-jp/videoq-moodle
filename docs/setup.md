@@ -1,6 +1,6 @@
 # Install and connect VideoQ for Moodle
 
-Version 0.25.4 has one installable component, **local_videoq**. The `ltisource_videoq` helper distributed through 0.25.3 is retired. There is no second installer to choose or install.
+Version 0.25.5 has one installable component, **local_videoq**. The `ltisource_videoq` helper distributed through 0.25.3 is retired. There is no second installer to choose or install.
 
 ## Requirements
 

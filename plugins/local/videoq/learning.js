@@ -66,7 +66,7 @@
                     return new Response(JSON.stringify({ error: { code: 'MOODLE_REQUEST_FAILED' } }), { status: code, headers: { 'Content-Type': 'application/json' } });
                 }
             }
-            const ownerHistoryUi = createCourseHistory(workspace, payload => learningRequest('course-history', payload), source => seekSource(source), [chat], uiCopy.courseHistory, answerText);
+            const ownerHistoryUi = createCourseHistory(workspace, payload => learningRequest('course-history', payload), [chat], uiCopy.courseHistory, answerText, citation);
             function syncComposer() {
                 send.disabled = question.disabled = !sessionReady || !learningEnabled || chatInFlight || personalBusy;
                 if (sessionReady && !learningEnabled && !chatInFlight) {
